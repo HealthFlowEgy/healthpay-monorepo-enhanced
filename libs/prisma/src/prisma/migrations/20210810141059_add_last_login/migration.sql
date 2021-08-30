@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Admin` ADD COLUMN `last_login` DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3);

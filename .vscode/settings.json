@@ -1,0 +1,18 @@
+{
+  "search.exclude": {
+    "***/dist": true
+  },
+  "files.exclude": {
+    "**/dist": true
+  },
+  "files.watcherExclude": {
+    "**/dist": true
+  },
+  "cSpell.words": [
+    "Onelink",
+    "Upsert",
+    "nestjs",
+    "prebuild",
+    "topup"
+  ]
+}

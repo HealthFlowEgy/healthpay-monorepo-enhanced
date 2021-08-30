@@ -1,0 +1,298 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    Int                    @id @default(autoincrement())
+  uid                   String                 @unique
+  nationalId            String?
+  nationalDoc           String?
+  avatar                String?
+  isNationalVerified    Boolean                @default(false)
+  email                 String?                @unique
+  firstName             String?
+  lastName              String?
+  mobile                String                 @unique
+  password              String?
+  loginFrom             String?                @default("HEALTH_PAY")
+  lastLogin             DateTime?              @default(now())
+  isVerified            Boolean                @default(false)
+  createdFrom           String?                @default("HEALTH_PAY")
+  prefLang              String?                @default("en")
+  otp                   OTP[]
+  notifyTokens          UserNotifyTokens[]
+  notifications         Notification[]
+  wallet                Wallet?
+  merchants             Merchant[]
+  usersAuthMerchant     UserAuthMerchant[]
+  providersAuthMerchant ProviderAuthMerchant[]
+  transactions          Transaction[]
+  cashOutRequest        CashOutRequest[]
+  cashOutSettings       CashOutSettings[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime?              @default(now())
+}
+
+model UserNotifyTokens {
+  id        Int       @id @default(autoincrement())
+  token     String
+  userId    Int?
+  user      User?     @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now())
+  
+  @@unique([token, userId], name: "token_to_user_unique")
+}
+
+model Notification {
+  id                    Int       @id @default(autoincrement())
+  msg                   String
+  userId                Int?
+  delivered             Boolean   @default(false)
+  user                  User?     @relation(fields: [userId], references: [id])
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime? @default(now())
+}
+
+
+
+model Merchant {
+  id                Int                    @id @default(autoincrement())
+  uid               String                 @unique
+  name              String
+  img               String?
+  owner             User                   @relation(fields: [ownerId], references: [id])
+  ownerId           Int
+  users             UserAuthMerchant[]
+  providers         ProviderAuthMerchant[]
+  apiKey            String                 @unique
+  apiHeader         String                 @unique
+  returnUrl         String
+  total             Float                  @default(0)
+  isHp              MerchantType?          @default(REGULAR)
+  receivableBalance Balance[]              @relation("ReceivableMerchantBalance")
+  payableBalance    Balance[]              @relation("PayableMerchantBalance")
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime?              @default(now())
+
+  Transaction Transaction[]
+  @@unique([name, ownerId], name: "name_ownerId_unique")
+}
+
+enum MerchantType {
+  CASHOUT
+  PROFIT
+  CASHIN
+  REGULAR
+}
+
+model UserAuthMerchant {
+  id         Int       @id @default(autoincrement())
+  uid        String    @unique
+  token      String
+  user       User      @relation(fields: [userId], references: [id])
+  userId     Int
+  merchant   Merchant  @relation(fields: [merchantId], references: [id])
+  merchantId Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @default(now())
+
+  @@unique([merchantId, userId], name: "merchantId_userId_unique")
+}
+
+model ProviderAuthMerchant {
+  id         Int       @id @default(autoincrement())
+  uid        String    @unique
+  token      String
+  user       User      @relation(fields: [userId], references: [id])
+  userId     Int
+  merchant   Merchant  @relation(fields: [merchantId], references: [id])
+  merchantId Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @default(now())
+
+  @@unique([merchantId, userId], name: "merchantId_providerId_unique")
+}
+
+model Wallet {
+  id                Int       @id @default(autoincrement())
+  userId            Int       @unique
+  total             Float
+  user              User      @relation(fields: [userId], references: [id])
+  payableBalance    Balance[] @relation("PayableBalance")
+  receivableBalance Balance[] @relation("ReceivableBalance")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime? @default(now())
+}
+
+model Balance {
+  id                   Int          @id @default(autoincrement())
+  uid                  String       @unique
+  payableMerchant      Merchant?    @relation("PayableMerchantBalance", fields: [payableMerchantId], references: [id])
+  payableMerchantId    Int?
+  receivableMerchant   Merchant?    @relation("ReceivableMerchantBalance", fields: [receivableMerchantId], references: [id])
+  receivableMerchantId Int?
+  payableWalletId      Int?
+  payableWallet        Wallet?      @relation(fields: [payableWalletId], references: [id], name: "PayableBalance")
+  receivableWalletId   Int?
+  receivableWallet     Wallet?      @relation(fields: [receivableWalletId], references: [id], name: "ReceivableBalance")
+  type                 BALANCE_TYPE @default(U2U)
+  amount               Float
+  notes                String?
+  createdAt            DateTime?    @default(now())
+  updatedAt            DateTime?
+}
+
+model Transaction {
+  id                   Int          @id @default(autoincrement())
+  uid                  String       @unique
+  iframeUrl            String
+  amount               Float
+  user                 User         @relation(fields: [userId], references: [id])
+  userId               Int
+  status               TRANS_STATUS @default(PENDING)
+  chargeFromMerchant   Merchant?    @relation(fields: [chargeFromMerchantId], references: [id])
+  chargeFromMerchantId Int?
+  expiredAt            DateTime?
+  createdAt            DateTime?    @default(now())
+  updatedAt            DateTime?
+
+}
+
+model CashOutRequest {
+  id              Int              @id @default(autoincrement())
+  uid             String           @unique
+  amount          Float
+  user            User             @relation(fields: [userId], references: [id])
+  userId          Int
+  cashOutMethod   CashOutSettings? @relation(fields: [cashOutMethodId], references: [id])
+  cashOutMethodId Int?
+  status          CASHOUT_STATUS   @default(PENDING)
+  createdAt       DateTime?        @default(now())
+  updatedAt       DateTime?
+}
+
+model CashOutSettings {
+  id              Int              @id @default(autoincrement())
+  uid             String           @unique
+  user            User?            @relation(fields: [userId], references: [id])
+  userId          Int?
+  type            CashOutTypes?    @relation(fields: [typeId], references: [id])
+  typeId          Int?
+  cashOutRequests CashOutRequest[]
+  creditorNo      String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime?        @default(now())
+
+}
+
+model CashOutTypes {
+  id              Int                 @id @default(autoincrement())
+  name            String              @unique
+  abbreviation    String?
+  bic             String?
+  length          CashOutTypeLength[]
+  notes           String?
+  cashOutSettings CashOutSettings[]
+  createdAt       DateTime?           @default(now())
+  updatedAt       DateTime?
+
+
+}
+
+model CashOutTypeLength {
+  id          Int            @id @default(autoincrement())
+  length      Int
+  cashOutType CashOutTypes[]
+  createdAt   DateTime?      @default(now())
+  updatedAt   DateTime?
+}
+
+model OTP {
+  id        Int       @id @default(autoincrement())
+  otp       String
+  userId    Int?
+  isUsed    Boolean   @default(false)
+  user      User?     @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now())
+}
+
+model Admin {
+  id                        Int       @id @default(autoincrement())
+  name                      String
+  mobile                    String?
+  email                     String    @unique
+  email_verified_at         DateTime? @default(now())
+  password                  String
+  remember_token            String?
+  profile_phone_path        String?
+  two_factor_secret         String?   @db.Text
+  two_factor_recovery_codes String?   @db.Text
+  last_login                DateTime? @default(now())
+  created_at                DateTime  @default(now())
+  updated_at                DateTime? @default(now())
+}
+
+model Password_resets {
+  id         Int       @id @default(autoincrement())
+  email      String
+  token      String?
+  created_at DateTime? @default(now())
+}
+
+model personal_access_tokens {
+  id             Int       @id @default(autoincrement())
+  tokenable_id   String?
+  tokenable_type String?
+  name           String?
+  token          String    @unique
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @default(now())
+  created_at     DateTime  @default(now())
+  updated_at     DateTime? @default(now())
+
+}
+
+model Sessions {
+  id            String  @unique
+  user_id       Int?
+  ip_address    String? @db.Text
+  user_agent    String? @db.Text
+  payload       String  @db.Text
+  last_activity Int
+
+}
+
+enum TRANS_STATUS {
+  PENDING
+  CANCELLED
+  COMPLETED
+  DECLINED
+}
+
+enum CASHOUT_STATUS {
+  PENDING
+  CANCELLED
+  APPROVED
+  DECLINED
+}
+
+enum BALANCE_TYPE {
+  M2M // merchant to merchant
+  M2P // merchant to provider
+  P2M // provider to merchant
+  U2M // user to merchant
+  P2U // provider to user
+  M2U // merchant to user
+  U2U // user to user
+  CASH_IN
+  CASH_OUT
+  REFUND
+  CASH_OUT_FAILED
+}

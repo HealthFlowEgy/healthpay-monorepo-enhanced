@@ -3,6 +3,7 @@
     "***/dist": true
   },
   "files.exclude": {
+    "***/dist": true
   },
   "files.watcherExclude": {
     "**/dist": true

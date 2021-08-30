@@ -18,6 +18,7 @@ import { HelpersModule } from '@app/helpers';
       autoSchemaFile: true,
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
       debug: false,
+      introspection: true,
       context: ({ req, connection }) =>
         connection ? { req: connection.context } : { req },
     }),

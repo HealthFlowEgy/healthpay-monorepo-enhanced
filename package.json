@@ -10,7 +10,7 @@
     "prestart": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma",
     "postinstall": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-    "start": "cd dist/apps/hp-sword/ && ls -al",
+    "start": "cd dist/apps && ls -al",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/hp-sword/main.js",

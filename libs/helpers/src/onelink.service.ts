@@ -51,6 +51,7 @@ export class OnelinkService {
       console.log('[createTransaction]', transactionRes.data);
       return transactionRes.data;
     } catch (e) {
+      console.log('[createTransactionError]', JSON.stringify(e));
       throw new UnprocessableEntityException('6001', e.message);
     }
   }

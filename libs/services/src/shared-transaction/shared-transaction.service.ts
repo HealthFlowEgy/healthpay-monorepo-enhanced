@@ -2,7 +2,7 @@ import { HelpersService } from '@app/helpers';
 import { OnelinkService } from '@app/helpers/onelink.service';
 import { PrismaService } from '@app/prisma';
 import { Inject, Injectable } from '@nestjs/common';
-import { Transaction, User } from '@prisma/client';
+import { Merchant, Transaction, User } from '@prisma/client';
 
 @Injectable()
 export class SharedTransactionService {
@@ -14,6 +14,7 @@ export class SharedTransactionService {
   public async doCreateTransaction(
     user: User,
     amount: number,
+    merchant: Merchant,
   ): Promise<Transaction> {
     const trans = await this.onelink.createTransaction(user, amount);
     return this.prisma.transaction.create({
@@ -26,6 +27,11 @@ export class SharedTransactionService {
         ...this.helpers.generateDates(),
         uid: trans.transaction_id,
         iframeUrl: trans.iframe,
+        chargeFromMerchant: {
+          connect: {
+            id: merchant.id,
+          },
+        },
         amount,
       },
     });

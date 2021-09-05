@@ -97,7 +97,11 @@ export class SwordMerchantUserApisResolver {
       merchant,
       userToken,
     );
-    return this.services.sharedTransaction.doCreateTransaction(user, amount);
+    return this.services.sharedTransaction.doCreateTransaction(
+      user,
+      amount,
+      merchant,
+    );
   }
 
   @Mutation(() => Success, { nullable: true })

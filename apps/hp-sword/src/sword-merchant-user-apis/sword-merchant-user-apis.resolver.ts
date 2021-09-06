@@ -35,6 +35,7 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     // @CurrentMerchant() merchant: Merchant,
   ) {
+    console.log('[loginUser]', mobile, firstName, lastName, email);
     return this.services.sharedUser.doUpsertUser({
       mobile,
       firstName,
@@ -61,6 +62,8 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
+    console.log('[authUser]', mobile, otp, isProvider);
+
     const user = await this.services.sharedUser.doVerifyMobileWithOtp(
       mobile,
       otp,
@@ -93,6 +96,8 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
+    console.log('[topupWalletUser]', userToken, amount);
+
     const user = await this.services.sharedMerchant.getUserFromLink(
       merchant,
       userToken,

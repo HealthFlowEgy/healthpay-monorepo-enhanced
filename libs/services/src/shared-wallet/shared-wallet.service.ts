@@ -70,7 +70,6 @@ export class SharedWalletService {
       data: { total: pWallet.total - amount },
     });
     // TODO: add healthpay commission
-    // TODO: send balance update notifications
     if (notify) {
       const pUser = await this.prisma.wallet
         .findFirst({ where: { id: pWallet.id } })

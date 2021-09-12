@@ -24,7 +24,6 @@ export class SharedTransactionService {
             id: user.id,
           },
         },
-        ...this.helpers.generateDates(),
         uid: trans.transaction_id,
         iframeUrl: trans.iframe,
         chargeFromMerchant: {

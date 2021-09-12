@@ -28,6 +28,7 @@ model User {
   notifyTokens          UserNotifyTokens[]
   notifications         Notification[]
   wallet                Wallet?
+  paymentRequests       PaymentRequest[]
   merchants             Merchant[]
   usersAuthMerchant     UserAuthMerchant[]
   providersAuthMerchant ProviderAuthMerchant[]
@@ -35,7 +36,7 @@ model User {
   cashOutRequest        CashOutRequest[]
   cashOutSettings       CashOutSettings[]
   createdAt             DateTime               @default(now())
-  updatedAt             DateTime?              @default(now())
+  updatedAt             DateTime?              @default(now()) @updatedAt
 }
 
 model UserNotifyTokens {
@@ -44,7 +45,7 @@ model UserNotifyTokens {
   userId    Int?
   user      User?     @relation(fields: [userId], references: [id])
   createdAt DateTime  @default(now())
-  updatedAt DateTime? @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
   
   @@unique([token, userId], name: "token_to_user_unique")
 }
@@ -56,7 +57,7 @@ model Notification {
   delivered             Boolean   @default(false)
   user                  User?     @relation(fields: [userId], references: [id])
   createdAt             DateTime  @default(now())
-  updatedAt             DateTime? @default(now())
+  updatedAt             DateTime? @default(now()) @updatedAt
 }
 
 
@@ -70,6 +71,7 @@ model Merchant {
   ownerId           Int
   users             UserAuthMerchant[]
   providers         ProviderAuthMerchant[]
+  paymentRequests   PaymentRequest[]
   apiKey            String                 @unique
   apiHeader         String                 @unique
   returnUrl         String
@@ -78,7 +80,7 @@ model Merchant {
   receivableBalance Balance[]              @relation("ReceivableMerchantBalance")
   payableBalance    Balance[]              @relation("PayableMerchantBalance")
   createdAt         DateTime               @default(now())
-  updatedAt         DateTime?              @default(now())
+  updatedAt         DateTime?              @default(now()) @updatedAt
 
   Transaction Transaction[]
   @@unique([name, ownerId], name: "name_ownerId_unique")
@@ -100,7 +102,7 @@ model UserAuthMerchant {
   merchant   Merchant  @relation(fields: [merchantId], references: [id])
   merchantId Int
   createdAt  DateTime  @default(now())
-  updatedAt  DateTime? @default(now())
+  updatedAt  DateTime? @default(now()) @updatedAt
 
   @@unique([merchantId, userId], name: "merchantId_userId_unique")
 }
@@ -114,7 +116,7 @@ model ProviderAuthMerchant {
   merchant   Merchant  @relation(fields: [merchantId], references: [id])
   merchantId Int
   createdAt  DateTime  @default(now())
-  updatedAt  DateTime? @default(now())
+  updatedAt  DateTime? @default(now()) @updatedAt
 
   @@unique([merchantId, userId], name: "merchantId_providerId_unique")
 }
@@ -127,7 +129,7 @@ model Wallet {
   payableBalance    Balance[] @relation("PayableBalance")
   receivableBalance Balance[] @relation("ReceivableBalance")
   createdAt         DateTime  @default(now())
-  updatedAt         DateTime? @default(now())
+  updatedAt         DateTime? @default(now()) @updatedAt
 }
 
 model Balance {
@@ -145,7 +147,7 @@ model Balance {
   amount               Float
   notes                String?
   createdAt            DateTime?    @default(now())
-  updatedAt            DateTime?
+  updatedAt            DateTime? @updatedAt
 }
 
 model Transaction {
@@ -158,9 +160,10 @@ model Transaction {
   status               TRANS_STATUS @default(PENDING)
   chargeFromMerchant   Merchant?    @relation(fields: [chargeFromMerchantId], references: [id])
   chargeFromMerchantId Int?
+  dueToRequest         PaymentRequest?
   expiredAt            DateTime?
   createdAt            DateTime?    @default(now())
-  updatedAt            DateTime?
+  updatedAt            DateTime? @updatedAt
 
 }
 
@@ -174,7 +177,7 @@ model CashOutRequest {
   cashOutMethodId Int?
   status          CASHOUT_STATUS   @default(PENDING)
   createdAt       DateTime?        @default(now())
-  updatedAt       DateTime?
+  updatedAt       DateTime? @updatedAt
 }
 
 model CashOutSettings {
@@ -200,7 +203,7 @@ model CashOutTypes {
   notes           String?
   cashOutSettings CashOutSettings[]
   createdAt       DateTime?           @default(now())
-  updatedAt       DateTime?
+  updatedAt       DateTime? @updatedAt
 
 
 }
@@ -210,7 +213,7 @@ model CashOutTypeLength {
   length      Int
   cashOutType CashOutTypes[]
   createdAt   DateTime?      @default(now())
-  updatedAt   DateTime?
+  updatedAt   DateTime? @updatedAt
 }
 
 model OTP {
@@ -220,7 +223,7 @@ model OTP {
   isUsed    Boolean   @default(false)
   user      User?     @relation(fields: [userId], references: [id])
   createdAt DateTime  @default(now())
-  updatedAt DateTime? @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
 }
 
 model Admin {
@@ -236,7 +239,7 @@ model Admin {
   two_factor_recovery_codes String?   @db.Text
   last_login                DateTime? @default(now())
   created_at                DateTime  @default(now())
-  updated_at                DateTime? @default(now())
+  updated_at                DateTime? @default(now()) @updatedAt
 }
 
 model Password_resets {
@@ -255,7 +258,7 @@ model personal_access_tokens {
   abilities      String?   @db.Text
   last_used_at   DateTime? @default(now())
   created_at     DateTime  @default(now())
-  updated_at     DateTime? @default(now())
+  updated_at     DateTime? @default(now()) @updatedAt
 
 }
 
@@ -266,6 +269,23 @@ model Sessions {
   user_agent    String? @db.Text
   payload       String  @db.Text
   last_activity Int
+}
+
+model PaymentRequest {
+  id        Int @id @default(autoincrement())
+  uid       String  @unique
+  amount    Float
+  status    CASHOUT_STATUS @default(PENDING)
+  userId    Int     
+  user      User    @relation(fields: [userId], references: [id])
+  merchantId Int
+  merchant Merchant  @relation(fields: [merchantId], references: [id])
+
+  transactionId Int?
+  transaction Transaction?  @relation(fields: [transactionId], references: [id])
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime? @default(now()) @updatedAt
 
 }
 

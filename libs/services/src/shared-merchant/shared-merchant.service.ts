@@ -51,7 +51,6 @@ export class SharedMerchantService {
         token,
         userId,
         merchantId,
-        ...this.helpers.generateDates(),
       },
     });
   }
@@ -74,7 +73,6 @@ export class SharedMerchantService {
         token,
         userId,
         merchantId,
-        ...this.helpers.generateDates(),
       },
     });
   }

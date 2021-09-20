@@ -59,7 +59,6 @@ export class SharedUserService {
       data: {
         uid: this.helpers.doCreateUUID('user'),
         ...user,
-        ...this.helpers.generateDates(),
       },
     });
     // user initialization
@@ -96,7 +95,7 @@ export class SharedUserService {
       data: {
         otp,
         isUsed: false,
-        ...this.helpers.generateDates(),
+
         user: {
           connect: {
             id: userId,

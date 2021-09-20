@@ -38,8 +38,8 @@ export class OnelinkService {
       }
       const data = {
         token: this.access_token,
-        first_name: user.firstName,
-        last_name: user.lastName,
+        first_name: ' ' + user.firstName + ' ',
+        last_name: ' ' + user.firstName + user.lastName + ' ',
         mobile: user.mobile.replace('+2', ''),
         email: user.email || 'info@cloudx9.io',
         amount,
@@ -51,7 +51,8 @@ export class OnelinkService {
       console.log('[createTransaction]', transactionRes.data);
       return transactionRes.data;
     } catch (e) {
-      throw new UnprocessableEntityException('6001', e.message);
+      console.log('[createTransactionError]', e.response.data);
+      throw new UnprocessableEntityException('6002', e.response.data);
     }
   }
 }

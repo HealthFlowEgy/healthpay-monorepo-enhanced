@@ -18,6 +18,7 @@ import { SwordUserWalletResolver } from './sword-user-wallet/sword-user-wallet.r
       introspection: true,
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
       debug: false,
+      introspection: true,
       context: ({ req, connection }) =>
         connection ? { req: connection.context } : { req },
     }),

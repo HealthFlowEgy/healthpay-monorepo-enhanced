@@ -8,7 +8,17 @@ export class PrismaService
 {
   async onModuleInit() {
     await this.$connect();
-    // TODO: remove otps older than one day
+
+    this.$use(async (params, next) => {
+      if (params.action == 'createMany' || params.action == 'create') {
+        params.args['data'] = {
+          ...params.args['data'],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return next(params);
+    });
   }
 
   async onModuleDestroy() {

@@ -60,7 +60,6 @@ export class SharedBalanceService {
         },
         type: 'M2U',
         notes,
-        ...this.helpers.generateDates(),
       },
     });
   }
@@ -105,7 +104,6 @@ export class SharedBalanceService {
         },
         type: 'M2M',
         notes,
-        ...this.helpers.generateDates(),
       },
     });
   }
@@ -140,7 +138,6 @@ export class SharedBalanceService {
         },
         type: 'U2U',
         notes,
-        ...this.helpers.generateDates(),
       },
     });
   }
@@ -181,7 +178,6 @@ export class SharedBalanceService {
         },
         type: 'U2M',
         notes,
-        ...this.helpers.generateDates(),
       },
     });
   }

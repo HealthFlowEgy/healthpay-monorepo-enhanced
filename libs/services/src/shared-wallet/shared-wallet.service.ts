@@ -20,6 +20,16 @@ export class SharedWalletService {
     });
   }
 
+  async getWalletByUserUID(userUID: string): Promise<Wallet> {
+    return this.prisma.user
+      .findFirst({
+        where: {
+          uid: userUID,
+        },
+      })
+      .wallet();
+  }
+
   async getWalletByMerchantId(merchantId: number): Promise<Wallet> {
     return this.prisma.merchant
       .findFirst({

@@ -2,7 +2,9 @@ import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import { Inject, Injectable } from '@nestjs/common';
 import { Balance } from '@prisma/client';
+import moment from 'moment';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
+import { SortedBalance } from './shared-balance.types';
 
 @Injectable()
 export class SharedBalanceService {
@@ -182,5 +184,70 @@ export class SharedBalanceService {
         ...this.helpers.generateDates(),
       },
     });
+  }
+
+  async getUserWalletWithBalanceWithMerchantsUsers(
+    walletId: number,
+  ): Promise<SortedBalance[]> {
+    const balanceWithWallets = await this.prisma.wallet.findFirst({
+      where: {
+        id: walletId,
+      },
+      include: {
+        payableBalance: {
+          include: {
+            receivableMerchant: true,
+            receivableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        receivableBalance: {
+          include: {
+            payableMerchant: true,
+            payableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return this.sortBalance(balanceWithWallets);
+  }
+
+  private sortBalance(walletBalanceLog: any): SortedBalance[] {
+    const creditBalances: SortedBalance[] = [];
+    const debitBalances: SortedBalance[] = [];
+    walletBalanceLog?.receivableBalance.map((balance) => {
+      const { uid, amount, createdAt, payableMerchant, payableWallet } =
+        balance;
+      creditBalances.push({
+        uid,
+        amount,
+        createdAt,
+        merchant: payableMerchant,
+        user: payableWallet?.user,
+        type: 'CREDIT',
+      });
+    });
+    walletBalanceLog?.payableBalance.map((balance) => {
+      const { uid, amount, createdAt, receivableMerchant, receivableWallet } =
+        balance;
+      debitBalances.push({
+        uid,
+        amount,
+        createdAt,
+        merchant: receivableMerchant,
+        user: receivableWallet?.user,
+        type: 'DEBIT',
+      });
+    });
+    return [...debitBalances, ...creditBalances].sort((a, b) =>
+      a.createdAt < b.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0,
+    );
   }
 }

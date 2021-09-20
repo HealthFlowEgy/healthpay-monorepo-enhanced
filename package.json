@@ -7,9 +7,9 @@
   "license": "PRIVATE",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "npx prisma migrate deploy && npm run generate:nexus && nest build",
+    "postinstall": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-sword",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-    "start": "production=true pm2 start dist/apps/hp-sword/main.js",
+    "start": "DEBUG=false node dist/apps/hp-sword/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/hp-sword/main.js",

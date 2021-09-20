@@ -1,17 +1,26 @@
 {
   "search.exclude": {
-    "***/dist": true
+    "**/dist": true,
+    "**/apps/healthpay": true,
+    "**/apps/hp-sword": true,
   },
   "files.exclude": {
+    "**/dist": true,
+    "**/apps/healthpay": true,
+    "**/apps/hp-sword": true,
   },
   "files.watcherExclude": {
-    "**/dist": true
+    "**/dist": true,
+    "**/apps/healthpay": true,
+    "**/apps/hp-sword": true,
   },
   "cSpell.words": [
-    "Onelink",
-    "Upsert",
+    "CASHIN",
+    "cashout",
     "nestjs",
+    "otps",
     "prebuild",
-    "topup"
+    "topup",
+    "Upsert"
   ]
 }

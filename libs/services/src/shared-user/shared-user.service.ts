@@ -67,10 +67,27 @@ export class SharedUserService {
     this.sharedWallet.doCreateWallet(createdUser.id);
     return createdUser;
   }
-
+  public async doUpdateUser(
+    user: Pick<
+      Prisma.UserUpdateInput,
+      | 'firstName'
+      | 'lastName'
+      | 'email'
+      | 'avatar'
+      | 'nationalId'
+      | 'nationalDoc'
+      | 'uid'
+    >,
+  ): Promise<User> {
+    return this.prisma.user.update({
+      where: { uid: user.uid as string },
+      data: { ...user },
+    });
+  }
   public async doCreateOtp(userId: number): Promise<string> {
     if ((await this.getOTPSentCountInDuration(userId, 1, 'hour')) >= 4) {
       // TODO: raise an abuse flag for this merchant
+      // TODO: handle test user custom otps
       throw new BadRequestException('5001', 'too many otp requests');
     }
 

@@ -45,21 +45,19 @@ model UserNotifyTokens {
   user      User?     @relation(fields: [userId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime? @default(now())
-  
+
   @@unique([token, userId], name: "token_to_user_unique")
 }
 
 model Notification {
-  id                    Int       @id @default(autoincrement())
-  msg                   String
-  userId                Int?
-  delivered             Boolean   @default(false)
-  user                  User?     @relation(fields: [userId], references: [id])
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime? @default(now())
+  id        Int       @id @default(autoincrement())
+  msg       String
+  userId    Int?
+  delivered Boolean   @default(false)
+  user      User?     @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now())
 }
-
-
 
 model Merchant {
   id                Int                    @id @default(autoincrement())

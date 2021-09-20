@@ -1,5 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { SharedBalanceService } from './shared-balance/shared-balance.service';
+import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
+import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings/shared-cashout-user-settings.service';
 import { SharedMerchantService } from './shared-merchant/shared-merchant.service';
 import { SharedNotifyService } from './shared-notify/shared-notify.service';
 import { SharedTransactionService } from './shared-transaction/shared-transaction.service';
@@ -14,6 +16,10 @@ export class ServicesService {
     @Inject(SharedMerchantService) public sharedMerchant: SharedMerchantService,
     @Inject(SharedNotifyService) public shaerdNotify: SharedNotifyService,
     @Inject(SharedBalanceService) public sharedBalance: SharedBalanceService,
+    @Inject(SharedCashOutUserSettingsService)
+    public sharedCashOutSettingsService: SharedCashOutUserSettingsService,
+    @Inject(SharedCashoutMethodService)
+    public sharedCashoutMethod: SharedCashoutMethodService,
     @Inject(SharedTransactionService)
     public sharedTransaction: SharedTransactionService,
   ) {}

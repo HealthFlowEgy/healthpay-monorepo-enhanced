@@ -6,7 +6,9 @@
   "compilerOptions": {
     "webpack": true,
     "tsConfigPath": "apps/healthpay/tsconfig.app.json",
-    "assets": ["i18n/**/*"]
+    "assets": [
+      "i18n/**/*"
+    ]
   },
   "projects": {
     "healthpay": {
@@ -63,7 +65,6 @@
         "tsConfigPath": "libs/errors/tsconfig.lib.json"
       }
     },
-
     "services": {
       "type": "library",
       "root": "libs/services",
@@ -71,6 +72,15 @@
       "sourceRoot": "libs/services/src",
       "compilerOptions": {
         "tsConfigPath": "libs/services/tsconfig.lib.json"
+      }
+    },
+    "hp-fence": {
+      "type": "application",
+      "root": "apps/hp-fence",
+      "entryFile": "main",
+      "sourceRoot": "apps/hp-fence/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/hp-fence/tsconfig.app.json"
       }
     }
   }

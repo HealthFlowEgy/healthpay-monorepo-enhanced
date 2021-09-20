@@ -8,6 +8,7 @@ export class PrismaService
 {
   async onModuleInit() {
     await this.$connect();
+    // TODO: remove otps older than one day
   }
 
   async onModuleDestroy() {

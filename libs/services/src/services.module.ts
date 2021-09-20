@@ -10,6 +10,8 @@ import { SharedUserService } from './shared-user/shared-user.service';
 import { SharedWalletService } from './shared-wallet/shared-wallet.service';
 import { SharedBalanceService } from './shared-balance/shared-balance.service';
 import { SharedTransactionService } from './shared-transaction/shared-transaction.service';
+import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings/shared-cashout-user-settings.service';
+import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { SharedTransactionService } from './shared-transaction/shared-transactio
     SharedNotifyService,
     SharedBalanceService,
     SharedTransactionService,
+    SharedCashOutUserSettingsService,
+    SharedCashoutMethodService,
   ],
   exports: [ServicesService],
 })

@@ -32,6 +32,13 @@ export class SharedMerchantService {
   async getMerchantByApiHeader(apiHeader: string): Promise<Merchant | null> {
     return this.prisma.merchant.findFirst({ where: { apiHeader } });
   }
+  async getMerchantList(): Promise<Merchant[]> {
+    return this.prisma.merchant.findMany();
+  }
+
+  async getMerchantByUID(uid: string): Promise<Merchant | null> {
+    return this.prisma.merchant.findFirst({ where: { uid } });
+  }
 
   async doCreateLinkToProvider(
     token: string,

@@ -12,6 +12,6 @@ export class Balance {
   @Field(() => String)
   type: string;
 
-  @Field(() => String)
+  @Field(() => Date)
   createdAt: Date;
 }

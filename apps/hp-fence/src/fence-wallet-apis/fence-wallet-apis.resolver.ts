@@ -1,0 +1,21 @@
+import { ServicesService } from '@app/services';
+import { Inject, UseGuards } from '@nestjs/common';
+import { Query, Resolver } from '@nestjs/graphql';
+import { AuthService } from '../auth/auth.service';
+import { CurrentUser } from '../decorators/user.decorator';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { User } from '../models/fence-user.model';
+import { Wallet } from '../models/fence-wallet.model';
+
+@Resolver()
+export class FenceWalletApisResolver {
+  constructor(
+    @Inject(ServicesService) private services: ServicesService,
+    @Inject(AuthService) private authService: AuthService,
+  ) {}
+  @Query(() => Wallet)
+  @UseGuards(JwtAuthGuard)
+  async userWallet(@CurrentUser() user: User) {
+    return await this.services.sharedWallet.getWalletByUserUID(user.uid);
+  }
+}

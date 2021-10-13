@@ -5,8 +5,8 @@ import { HpFenceService } from './hp-fence.service';
 export class HpFenceController {
   constructor(private readonly hpFenceService: HpFenceService) {}
 
-  @Get()
-  getHello(): string {
-    return this.hpFenceService.getHello();
+  @Get('/hello')
+  async hello() {
+    return await this.hpFenceService.getHello();
   }
 }

@@ -5,7 +5,9 @@
     "**/apps/hp-sword": true,
   },
   "files.exclude": {
-    "***/dist": true
+    "***/dist": true,
+    "**/apps/hp-sword": true,
+    "**/apps/healthpay": true,
   },
   "files.watcherExclude": {
     "**/dist": true,

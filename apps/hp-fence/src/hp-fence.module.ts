@@ -39,9 +39,9 @@ import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout
     HelpersModule,
     AuthModule,
   ],
-  // controllers: [HpFenceController],
-  // providers: [HpFenceService, FenceUserApisResolver],
+  controllers: [HpFenceController],
   providers: [
+    HpFenceService,
     FenceUserApisResolver,
     FenceUserResolver,
     FenceWalletResolver,

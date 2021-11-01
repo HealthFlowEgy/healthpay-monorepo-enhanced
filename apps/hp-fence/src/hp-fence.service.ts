@@ -20,6 +20,5 @@ export class HpFenceService {
       ],
     };
     return this.valuService.enquiry(enquiryParams);
-    return this.valuService.generateToken();
   }
 }

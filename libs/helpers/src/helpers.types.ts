@@ -9,7 +9,7 @@ export interface OnelinkTransactionResponse {
 // valu types
 export interface ValuEnquiryParams {
   mobileNumber: string;
-  productList: Array<ValuProduct>;
+  productList: ValuProduct[];
 }
 
 export interface ValuProduct {

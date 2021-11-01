@@ -58,7 +58,7 @@ export class ValuService {
         },
       },
     );
-    console.log('[ValuService.enquiry]', response.data);
-    return String(response.data);
+    console.log('[ValuService.enquiry]', response);
+    return String(response);
   }
 }

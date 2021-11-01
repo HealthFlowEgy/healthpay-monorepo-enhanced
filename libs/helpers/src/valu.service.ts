@@ -46,9 +46,9 @@ export class ValuService {
     const response = await this.instance.post(
       'ECommerce/Inquiry',
       {
-        aggregatorId: 'Jumia',
-        vendorId: 'VDR2610212937',
-        storeId: '121311661',
+        aggregatorId: this.configService.get<string>('VALU_AGGREGATOR_ID'),
+        vendorId: this.configService.get<string>('VALU_VENDOR_ID'),
+        storeId: this.configService.get<string>('VALU_STORE_ID'),
         mobileNumber: '00009981337',
         productList: [
           {

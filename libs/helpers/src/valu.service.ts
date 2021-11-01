@@ -36,13 +36,13 @@ export class ValuService {
         },
       },
     );
-    // console.log('[ValuService.generateToken]', response);
+    console.log('[ValuService.generateToken]', response);
     this.accessToken = response.data.accessToken;
     return this.accessToken;
   }
   async enquiry(params: ValuEnquiryParams): Promise<string> {
-    this.generateToken();
-    const token = 'Bearer ' + this.accessToken;
+    const access_token = await this.generateToken();
+    const token = 'Bearer ' + access_token;
     const response = await this.instance.post(
       'ECommerce/Inquiry',
       {

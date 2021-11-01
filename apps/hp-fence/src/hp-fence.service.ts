@@ -24,7 +24,7 @@ export class HpFenceService {
         },
       ],
     };
-    this.valuService.enquiry(enquiryParams);
+    // this.valuService.enquiry(enquiryParams);
     // enquiry
 
     // verify Customer
@@ -32,7 +32,7 @@ export class HpFenceService {
       mobileNumber: '00009981337',
       orderId: '8232569b800742fa8d01410e7ac79b45',
     };
-    this.valuService.verifyCustomer(verifyParams);
+    // this.valuService.verifyCustomer(verifyParams);
     // verify Customer
 
     // purchase

@@ -6,7 +6,7 @@ export class HpFenceController {
   constructor(private readonly hpFenceService: HpFenceService) {}
 
   @Get('/hello')
-  hello() {
-    return this.hpFenceService.getHello();
+  async hello() {
+    return await this.hpFenceService.getHello();
   }
 }

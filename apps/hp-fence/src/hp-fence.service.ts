@@ -9,7 +9,7 @@ import { Inject, Injectable } from '@nestjs/common';
 @Injectable()
 export class HpFenceService {
   constructor(@Inject(ValuService) private valuService: ValuService) {}
-  getHello() {
+  async getHello() {
     // enquiry
     const enquiryParams: ValuEnquiryParams = {
       mobileNumber: '00009981337',
@@ -24,14 +24,14 @@ export class HpFenceService {
         },
       ],
     };
-    this.valuService.enquiry(enquiryParams);
+    await this.valuService.enquiry(enquiryParams);
 
     // verify Customer
     const verifyParams: ValuVerifyCustomerParams = {
       mobileNumber: '00009981337',
       orderId: '8232569b800742fa8d01410e7ac79b45',
     };
-    this.valuService.verifyCustomer(verifyParams);
+    await this.valuService.verifyCustomer(verifyParams);
 
     // purchase
     const purchaseParams: ValuPurchaseParams = {
@@ -49,6 +49,6 @@ export class HpFenceService {
         },
       ],
     };
-    this.valuService.purchase(purchaseParams);
+    await this.valuService.purchase(purchaseParams);
   }
 }

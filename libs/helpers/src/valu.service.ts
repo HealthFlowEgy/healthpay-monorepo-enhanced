@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
-import { ValuEnquiryParams } from './helpers.types';
+import { AuthHeaders, ValuEnquiryParams } from './helpers.types';
 @Injectable()
 export class ValuService {
   private instance: AxiosInstance | null = null;
-  private accessToken: string | null = null;
   private appId: string = this.configService.get<string>('VALU_APP_ID');
   private aggregatorId: string =
     this.configService.get<string>('VALU_AGGREGATOR_ID');
@@ -22,7 +21,7 @@ export class ValuService {
       },
     });
   }
-  async generateToken(): Promise<string> {
+  private async generateToken(): Promise<string> {
     const response = await this.instance.post(
       'Auth/GenerateToken',
       {
@@ -37,25 +36,27 @@ export class ValuService {
       },
     );
     console.log('[ValuService.generateToken]', response);
-    this.accessToken = response.data.accessToken;
-    return this.accessToken;
+    return response.data.accessToken;
+  }
+  async generateAuthHeaders(): Promise<AuthHeaders> {
+    const accessToken = await this.generateToken();
+    return {
+      Authorization: 'Bearer ' + accessToken,
+    };
   }
   async enquiry(params: ValuEnquiryParams): Promise<string> {
-    const access_token = await this.generateToken();
-    const token = 'Bearer ' + access_token;
+    const authHeaders = await this.generateAuthHeaders();
     const response = await this.instance.post(
       'ECommerce/Inquiry',
       {
-        aggregatorId: this.configService.get<string>('VALU_AGGREGATOR_ID'),
-        vendorId: this.configService.get<string>('VALU_VENDOR_ID'),
-        storeId: this.configService.get<string>('VALU_STORE_ID'),
+        aggregatorId: this.aggregatorId,
+        vendorId: this.vendorId,
+        storeId: this.storeId,
         mobileNumber: params.mobileNumber,
         productList: params.productList,
       },
       {
-        headers: {
-          Authorization: token,
-        },
+        headers: authHeaders,
       },
     );
     console.log('[ValuService.enquiry]', response.data);

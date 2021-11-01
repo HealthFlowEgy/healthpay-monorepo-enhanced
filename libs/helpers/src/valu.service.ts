@@ -36,7 +36,7 @@ export class ValuService {
         },
       },
     );
-    console.log('[ValuService.generateToken]', response);
+    // console.log('[ValuService.generateToken]', response);
     this.accessToken = response.data.accessToken;
     return this.accessToken;
   }
@@ -58,7 +58,7 @@ export class ValuService {
         },
       },
     );
-    console.log('[ValuService.enquiry]', response);
-    return String(response);
+    console.log('[ValuService.enquiry]', response.data);
+    return String(response.data);
   }
 }

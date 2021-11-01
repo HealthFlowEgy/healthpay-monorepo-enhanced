@@ -41,24 +41,29 @@ export class ValuService {
     return this.accessToken;
   }
   async enquiry(params: ValuEnquiryParams): Promise<string> {
-    if (!this.accessToken) this.generateToken();
-    const response = await this.instance.post(
-      'ECommerce/Inquiry',
-      {
-        aggregatorId: this.aggregatorId,
-        vendorId: this.vendorId,
-        storeId: this.storeId,
-        mobileNumber: params.mobileNumber,
-        productList: params.productList,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          'Transfer-Encoding': 'chunked',
+    this.generateToken();
+    const token = 'Bearer ' + this.accessToken;
+    try {
+      const response = await this.instance.post(
+        'ECommerce/Inquiry',
+        {
+          aggregatorId: this.aggregatorId,
+          vendorId: this.vendorId,
+          storeId: this.storeId,
+          mobileNumber: params.mobileNumber,
+          productList: params.productList,
         },
-      },
-    );
-    console.log('[ValuService.enquiry]', response);
-    return String(response);
+        {
+          headers: {
+            Authorization: token,
+            'Transfer-Encoding': 'chunked',
+          },
+        },
+      );
+      console.log('[ValuService.enquiry]', response.data);
+      return String(response.data);
+    } catch (e) {
+      return String(e.message + ' ' + e.code);
+    }
   }
 }

@@ -32,7 +32,7 @@ export class HpFenceService {
       mobileNumber: '00009981337',
       orderId: '8232569b800742fa8d01410e7ac79b45',
     };
-    // this.valuService.verifyCustomer(verifyParams);
+    this.valuService.verifyCustomer(verifyParams);
     // verify Customer
 
     // purchase
@@ -47,7 +47,7 @@ export class HpFenceService {
           downPayment: 0,
           ToUAmount: 0,
           CashbackAmount: 0,
-          tenure: 8,
+          tenure: 9,
         },
       ],
     };

@@ -104,7 +104,7 @@ export class ValuService {
         },
       )
       .then((res) => console.log('[ValuService.purchase]', res))
-      .catch((err) => console.log(err));
+      .catch((err) => console.log('ERR', err));
 
     return String('response.data');
   }

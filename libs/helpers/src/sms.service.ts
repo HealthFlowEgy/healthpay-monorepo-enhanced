@@ -10,7 +10,7 @@ export class SmsService {
   constructor(private configService: ConfigService) {
     this.instance = axios.create({
       baseURL: this.configService.get<string>('SMS_BASEURL'),
-      timeout: 10000,
+      timeout: 20000,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -36,6 +36,7 @@ export class SmsService {
     if (!this.access_token) {
       await this.getAccessToken();
     }
+
     const messageResponse = await this.instance.post(
       '/messaging?access_token=' + this.access_token,
       msgObject,

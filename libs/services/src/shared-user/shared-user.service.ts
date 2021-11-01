@@ -87,7 +87,7 @@ export class SharedUserService {
     if ((await this.getOTPSentCountInDuration(userId, 1, 'hour')) >= 4) {
       // TODO: raise an abuse flag for this merchant
       // TODO: handle test user custom otps
-      throw new BadRequestException('5001', 'too many otp requests');
+      // throw new BadRequestException('5001', 'too many otp requests');
     }
 
     const otp = this.helpers.generateOTP();

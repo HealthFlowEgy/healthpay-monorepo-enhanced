@@ -41,29 +41,33 @@ export class ValuService {
     return this.accessToken;
   }
   async enquiry(params: ValuEnquiryParams): Promise<string> {
-    await this.generateToken();
+    this.generateToken();
     const token = 'Bearer ' + this.accessToken;
-    try {
-      const response = await this.instance.post(
-        'ECommerce/Inquiry',
-        {
-          aggregatorId: this.aggregatorId,
-          vendorId: this.vendorId,
-          storeId: this.storeId,
-          mobileNumber: params.mobileNumber,
-          productList: params.productList,
-        },
-        {
-          headers: {
-            Authorization: token,
-            'Transfer-Encoding': 'chunked',
+    const response = await this.instance.post(
+      'ECommerce/Inquiry',
+      {
+        aggregatorId: 'Jumia',
+        vendorId: 'VDR2610212937',
+        storeId: '121311661',
+        mobileNumber: '00009981337',
+        productList: [
+          {
+            productId: 'EGMHOC23DP5',
+            productPrice: 500,
+            orderId: '8232569b800742fa8d01410e7ac79b45',
+            downPayment: 0,
+            ToUAmount: 0,
+            CashbackAmount: 0,
           },
+        ],
+      },
+      {
+        headers: {
+          Authorization: token,
         },
-      );
-      console.log('[ValuService.enquiry]', response.data);
-      return String(response.data);
-    } catch (e) {
-      return String(e.message);
-    }
+      },
+    );
+    console.log('[ValuService.enquiry]', response.data);
+    return String(response.data);
   }
 }

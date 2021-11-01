@@ -60,7 +60,7 @@ export class ValuService {
         headers: authHeaders,
       },
     );
-    console.log('[ValuService.enquiry]', response.data);
+    console.log('[ValuService.enquiry]', response.data.tenureList);
     return String(response.data);
   }
 

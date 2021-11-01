@@ -9,7 +9,7 @@ import { Inject, Injectable } from '@nestjs/common';
 @Injectable()
 export class HpFenceService {
   constructor(@Inject(ValuService) private valuService: ValuService) {}
-  async getHello() {
+  getHello() {
     // enquiry
     const enquiryParams: ValuEnquiryParams = {
       mobileNumber: '00009981337',

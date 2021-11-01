@@ -4,6 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 import {
   AuthHeaders,
   ValuEnquiryParams,
+  ValuPurchaseParams,
   ValuVerifyCustomerParams,
 } from './helpers.types';
 @Injectable()
@@ -79,6 +80,26 @@ export class ValuService {
       },
     );
     console.log('[ValuService.verifyCustomer]', response.data);
+    return String(response.data);
+  }
+
+  async purchase(params: ValuPurchaseParams): Promise<string> {
+    const authHeaders = await this.generateAuthHeaders();
+    const response = await this.instance.post(
+      'ECommerce/Purchase',
+      {
+        aggregatorId: this.aggregatorId,
+        otp: params.otp,
+        vendorId: this.vendorId,
+        storeId: this.storeId,
+        mobileNumber: params.mobileNumber,
+        productList: params.productList,
+      },
+      {
+        headers: authHeaders,
+      },
+    );
+    console.log('[ValuService.purchase]', response.data);
     return String(response.data);
   }
 }

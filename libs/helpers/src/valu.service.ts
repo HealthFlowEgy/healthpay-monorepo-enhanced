@@ -42,7 +42,7 @@ export class ValuService {
   }
   async enquiry(params: ValuEnquiryParams): Promise<string> {
     // this.generateToken();
-    // const token = 'Bearer ' + this.accessToken;
+    const token = 'Bearer ' + (await this.generateToken());
     try {
       const response = this.instance
         .post(
@@ -65,8 +65,7 @@ export class ValuService {
           },
           {
             headers: {
-              Authorization:
-                'Bearer eyJraWQiOiJzc29zIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJlYmFjMTNiZi1iYjQ0LTQ1MTEtYjYzMi1jZWY2YzI0ODNkMDciLCJhdWQiOiJlYmFjMTNiZi1iYjQ0LTQ1MTEtYjYzMi1jZWY2YzI0ODNkMDciLCJpc3MiOiJBUElHV1Rva2VuSXNzdWVyIiwiQXBwbGljYXRpb25JZCI6IjYzZDU3NDhjLWNiNDEtNDBiMS1iMmI4LWE2MTg4ZTA5ZmExNyIsImV4cCI6MTYzNTc3MTA4NSwiaWF0IjoxNjM1NzcwMTg1fQ.OwdL6-DwtBt6QV67xj4Pufrwo1frTYCPx5h9Ciy-EWMmV8LFAOrjdRE5fgTPkDbmgo8Q0XHix7EoUx0gIMUXO1_lQ-yCPFMCLKcvLmKbHzlbKL9MCxGIgUGnyxuo_6aMQWWBux2FHiBXKABOaB3VZFOy8p-i89EIBJW-11RO0WRuQoLZZBDm5KjCF4xxrQctIb2Xsek7KVzAPsIDNaL60xhq-QhCKsX5MsFMpfRm22un99xh84c1JykooiWPw5efuQfbDgVP8QIzAzahuur65pPX-i3QoaRyo_XMxGwhShsx7ICSA1vMg6a-ZF8zoznDuWJUhRb5ribFtj45T0NblA',
+              Authorization: token,
             },
           },
         )

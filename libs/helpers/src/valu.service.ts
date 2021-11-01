@@ -29,7 +29,8 @@ export class ValuService {
         },
       },
     );
-    this.accessToken = response.data.data.accessToken;
+    console.log('[ValuService.generateToken]', response);
+    this.accessToken = response.data.accessToken;
     return this.accessToken;
   }
 }

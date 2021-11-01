@@ -50,16 +50,7 @@ export class ValuService {
         vendorId: this.configService.get<string>('VALU_VENDOR_ID'),
         storeId: this.configService.get<string>('VALU_STORE_ID'),
         mobileNumber: params.mobileNumber,
-        productList: [
-          {
-            productId: 'EGMHOC23DP5',
-            productPrice: 500,
-            orderId: '8232569b800742fa8d01410e7ac79b45',
-            downPayment: 0,
-            ToUAmount: 0,
-            CashbackAmount: 0,
-          },
-        ],
+        productList: params.productList,
       },
       {
         headers: {

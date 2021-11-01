@@ -47,11 +47,20 @@ export class ValuService {
       const response = await this.instance.post(
         'ECommerce/Inquiry',
         {
-          aggregatorId: this.aggregatorId,
-          vendorId: this.vendorId,
-          storeId: this.storeId,
-          mobileNumber: params.mobileNumber,
-          productList: [{ ...params.productList[0] }],
+          aggregatorId: 'Jumia',
+          vendorId: 'VDR2610212937',
+          storeId: '121311661',
+          mobileNumber: '00009981337',
+          productList: [
+            {
+              productId: 'EGMHOC23DP5',
+              productPrice: 500,
+              orderId: '8232569b800742fa8d01410e7ac79b45',
+              downPayment: 0,
+              ToUAmount: 0,
+              CashbackAmount: 0,
+            },
+          ],
         },
         {
           headers: {

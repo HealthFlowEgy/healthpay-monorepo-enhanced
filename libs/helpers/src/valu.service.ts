@@ -51,7 +51,7 @@ export class ValuService {
           vendorId: this.vendorId,
           storeId: this.storeId,
           mobileNumber: params.mobileNumber,
-          productList: params.productList,
+          productList: [{ ...params.productList[0] }],
         },
         {
           headers: {

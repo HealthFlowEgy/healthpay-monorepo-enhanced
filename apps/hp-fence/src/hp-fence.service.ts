@@ -24,14 +24,16 @@ export class HpFenceService {
         },
       ],
     };
-    await this.valuService.enquiry(enquiryParams);
+    this.valuService.enquiry(enquiryParams);
+    // enquiry
 
     // verify Customer
     const verifyParams: ValuVerifyCustomerParams = {
       mobileNumber: '00009981337',
       orderId: '8232569b800742fa8d01410e7ac79b45',
     };
-    await this.valuService.verifyCustomer(verifyParams);
+    this.valuService.verifyCustomer(verifyParams);
+    // verify Customer
 
     // purchase
     const purchaseParams: ValuPurchaseParams = {
@@ -49,6 +51,7 @@ export class HpFenceService {
         },
       ],
     };
-    await this.valuService.purchase(purchaseParams);
+    this.valuService.purchase(purchaseParams);
+    // purchase
   }
 }

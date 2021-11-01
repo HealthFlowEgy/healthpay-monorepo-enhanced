@@ -49,7 +49,7 @@ export class ValuService {
         aggregatorId: this.configService.get<string>('VALU_AGGREGATOR_ID'),
         vendorId: this.configService.get<string>('VALU_VENDOR_ID'),
         storeId: this.configService.get<string>('VALU_STORE_ID'),
-        mobileNumber: '00009981337',
+        mobileNumber: params.mobileNumber,
         productList: [
           {
             productId: 'EGMHOC23DP5',

@@ -47,7 +47,7 @@ export class HpFenceService {
           downPayment: 0,
           ToUAmount: 0,
           CashbackAmount: 0,
-          tenure: 6,
+          tenure: 8,
         },
       ],
     };

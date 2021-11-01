@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
-import { AuthHeaders, ValuEnquiryParams } from './helpers.types';
+import {
+  AuthHeaders,
+  ValuEnquiryParams,
+  ValuVerifyCustomerParams,
+} from './helpers.types';
 @Injectable()
 export class ValuService {
   private instance: AxiosInstance | null = null;
@@ -21,7 +25,7 @@ export class ValuService {
       },
     });
   }
-  private async generateToken(): Promise<string> {
+  private async generateAuthHeaders(): Promise<AuthHeaders> {
     const response = await this.instance.post(
       'Auth/GenerateToken',
       {
@@ -36,12 +40,8 @@ export class ValuService {
       },
     );
     console.log('[ValuService.generateToken]', response);
-    return response.data.accessToken;
-  }
-  async generateAuthHeaders(): Promise<AuthHeaders> {
-    const accessToken = await this.generateToken();
     return {
-      Authorization: 'Bearer ' + accessToken,
+      Authorization: 'Bearer ' + response.data.accessToken,
     };
   }
   async enquiry(params: ValuEnquiryParams): Promise<string> {
@@ -60,6 +60,25 @@ export class ValuService {
       },
     );
     console.log('[ValuService.enquiry]', response.data);
+    return String(response.data);
+  }
+
+  async verifyCustomer(params: ValuVerifyCustomerParams): Promise<string> {
+    const authHeaders = await this.generateAuthHeaders();
+    const response = await this.instance.post(
+      'Customer/verifyCustomer',
+      {
+        aggregatorId: this.aggregatorId,
+        vendorId: this.vendorId,
+        storeId: this.storeId,
+        mobileNumber: params.mobileNumber,
+        orderId: params.orderId,
+      },
+      {
+        headers: authHeaders,
+      },
+    );
+    console.log('[ValuService.verifyCustomer]', response.data);
     return String(response.data);
   }
 }

@@ -1,5 +1,7 @@
+import { HelpersService } from '@app/helpers';
 import { ValuService } from '@app/helpers/valu.service';
 import { ValuEnquiryParams } from '@app/helpers/valu.types';
+import { ServicesService } from '@app/services';
 import {
   Body,
   Controller,
@@ -17,9 +19,32 @@ import { ConfigService } from '@nestjs/config';
 @Controller('valu')
 export class ValuController {
   constructor(
+    @Inject(ServicesService) private services: ServicesService,
     @Inject(ValuService) private valuService: ValuService,
     @Inject(ConfigService) private configService: ConfigService,
+    @Inject(HelpersService) private helpers: HelpersService,
   ) {}
+  @Get('/hmac')
+  async hmac(): Promise<any> {
+    return await this.services.sharedUser.createValuHmac(3);
+  }
+
+  @Post('/customerStatus/:id')
+  async customerStatus(
+    @Param('id') id: string,
+    @Body('mobileNumber') mobileNumber: string,
+    @Headers('x-api-key') apiKey: string,
+  ): Promise<any> {
+    if (!this.valuService.validateHeaders(apiKey))
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    if (!mobileNumber)
+      throw new HttpException(
+        'Mobile Number Is Missing',
+        HttpStatus.BAD_REQUEST,
+      );
+    return await this.valuService.customerStatus(mobileNumber);
+  }
+
   @Get('/enquiry')
   async valu(): Promise<any> {
     const enquiryParams: ValuEnquiryParams = {
@@ -35,22 +60,6 @@ export class ValuController {
         },
       ],
     };
-    return { data: [] };
     return await this.valuService.enquiry(enquiryParams);
-  }
-  @Post('/customerStatus/:id')
-  async customerStatus(
-    @Param('id') id: string,
-    @Body('mobileNumber') mobileNumber: string,
-    @Headers('x-api-key') apiKey: string,
-  ): Promise<any> {
-    if (!this.valuService.validateHeaders(apiKey))
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    if (!mobileNumber)
-      throw new HttpException(
-        'Mobile Number Is Missing',
-        HttpStatus.BAD_REQUEST,
-      );
-    return await this.valuService.customerStatus(mobileNumber);
   }
 }

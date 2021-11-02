@@ -35,8 +35,21 @@ model User {
   transactions          Transaction[]
   cashOutRequest        CashOutRequest[]
   cashOutSettings       CashOutSettings[]
+  valuHmac              ValuHmac[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime?              @default(now()) @updatedAt
+
+}
+
+model ValuHmac {
+  id        Int       @id @default(autoincrement())
+  uid       String    @unique
+  hmac      String
+  userId    Int?
+  user      User?     @relation(fields: [userId], references: [id])
+  isValid   Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
 }
 
 model UserNotifyTokens {
@@ -53,6 +66,7 @@ model UserNotifyTokens {
 model Notification {
   id        Int       @id @default(autoincrement())
   msg       String
+  msg_ar    String?
   userId    Int?
   delivered Boolean   @default(false)
   user      User?     @relation(fields: [userId], references: [id])
@@ -279,7 +293,7 @@ model PaymentRequest {
   merchantId Int
   merchant   Merchant       @relation(fields: [merchantId], references: [id])
 
-  transactionId Int?
+  transactionId Int?         @unique
   transaction   Transaction? @relation(fields: [transactionId], references: [id])
 
   createdAt DateTime  @default(now())

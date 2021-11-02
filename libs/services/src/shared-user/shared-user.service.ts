@@ -154,4 +154,18 @@ export class SharedUserService {
     // TODO: mark old otps as used after 1 day
     return user;
   }
+  public async createValuHmac(userId: number): Promise<string> {
+    const user = await this.getUserById(userId);
+    const txt = user.id + '-' + user.uid + '-' + user.mobile;
+    const hmac = await this.helpers.encryptTxt(txt);
+    await this.prisma.valuHmac.create({
+      data: {
+        uid: this.helpers.doCreateUUID('valuHmac'),
+        user: { connect: { id: user.id } },
+        hmac: hmac,
+        ...this.helpers.generateDates(),
+      },
+    });
+    return hmac;
+  }
 }

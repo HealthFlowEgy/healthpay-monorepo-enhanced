@@ -8,6 +8,7 @@ import {
   Inject,
   Param,
   Post,
+  Headers,
 } from '@nestjs/common';
 
 @Controller('valu')
@@ -42,7 +43,11 @@ export class ValuController {
   async customerStatus(
     @Param('id') id: string,
     @Body('mobileNumber') mobileNumber: string,
+    @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
-    return await this.valuService.customerStatus('00009981337');
+    return {
+      apiKey: apiKey,
+      customerStatus: await this.valuService.customerStatus('00009981337'),
+    };
   }
 }

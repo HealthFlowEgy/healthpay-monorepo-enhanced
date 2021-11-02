@@ -46,6 +46,11 @@ export class ValuController {
   ): Promise<any> {
     if (!this.valuService.validateHeaders(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    if (!mobileNumber)
+      throw new HttpException(
+        'Mobile Number Is Missing',
+        HttpStatus.BAD_REQUEST,
+      );
     return await this.valuService.customerStatus(mobileNumber);
   }
 }

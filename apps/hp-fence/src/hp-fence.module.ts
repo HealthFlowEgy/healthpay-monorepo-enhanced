@@ -18,6 +18,7 @@ import { FenceCashoutUserSettingsResolver } from './fence-cashout-user-settings/
 import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout-method.resolver';
 import { ValuController } from './valu/valu.controller';
 import { ConfigModule } from '@nestjs/config';
+import { ValidationsModule } from '@app/validations';
 
 @Module({
   imports: [

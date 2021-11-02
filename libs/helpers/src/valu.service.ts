@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
+import { AuthHeaders } from './helpers.types';
 import {
-  AuthHeaders,
   ValuEnquiryParams,
   ValuPurchaseParams,
   ValuVerifyCustomerParams,
-} from './helpers.types';
+} from './valu.types';
 @Injectable()
 export class ValuService {
   private instance: AxiosInstance | null = null;

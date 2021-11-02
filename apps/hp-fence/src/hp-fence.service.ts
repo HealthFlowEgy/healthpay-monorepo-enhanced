@@ -3,7 +3,7 @@ import {
   ValuEnquiryParams,
   ValuPurchaseParams,
   ValuVerifyCustomerParams,
-} from '@app/helpers/helpers.types';
+} from '@app/helpers/valu.types';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()

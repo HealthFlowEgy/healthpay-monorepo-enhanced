@@ -16,6 +16,8 @@ import { FenceMerchantApisResolver } from './fence-merchant-apis/fence-merchant-
 import { FenceCashOutApisResolver } from './fence-cashout-apis/fence-cashout-apis.resolver';
 import { FenceCashoutUserSettingsResolver } from './fence-cashout-user-settings/fence-cashout-user-settings.resolver';
 import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout-method.resolver';
+import { ValuController } from './valu/valu.controller';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -38,8 +40,9 @@ import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout
     ServicesModule,
     HelpersModule,
     AuthModule,
+    ConfigModule,
   ],
-  controllers: [HpFenceController],
+  controllers: [HpFenceController, ValuController],
   providers: [
     HpFenceService,
     FenceUserApisResolver,

@@ -10,6 +10,10 @@ import { Inject, Injectable } from '@nestjs/common';
 export class HpFenceService {
   constructor(@Inject(ValuService) private valuService: ValuService) {}
   getHello() {
+    // customer status
+    this.valuService.customerStatus('00009981337');
+    // customer status
+
     // enquiry
     const enquiryParams: ValuEnquiryParams = {
       mobileNumber: '00009981337',
@@ -24,7 +28,7 @@ export class HpFenceService {
         },
       ],
     };
-    // this.valuService.enquiry(enquiryParams);
+    this.valuService.enquiry(enquiryParams);
     // enquiry
 
     // verify Customer

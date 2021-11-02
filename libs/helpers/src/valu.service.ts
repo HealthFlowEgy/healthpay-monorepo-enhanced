@@ -45,7 +45,22 @@ export class ValuService {
       Authorization: 'Bearer ' + response.data.accessToken,
     };
   }
-  async enquiry(params: ValuEnquiryParams): Promise<string> {
+  async customerStatus(mobile: string): Promise<any> {
+    const authHeaders = await this.generateAuthHeaders();
+    const response = await this.instance.post(
+      'Customer/getCustomerStatus',
+      {
+        aggregatorId: this.aggregatorId,
+        mobileNumber: mobile,
+      },
+      {
+        headers: authHeaders,
+      },
+    );
+    console.log('[ValuService.customerStatus]', response.data);
+    return response.data;
+  }
+  async enquiry(params: ValuEnquiryParams): Promise<any> {
     const authHeaders = await this.generateAuthHeaders();
     const response = await this.instance.post(
       'ECommerce/Inquiry',
@@ -64,10 +79,10 @@ export class ValuService {
       '[ValuService.enquiry]',
       response.data.productList[0].tenureList,
     );
-    return String(response.data);
+    return response.data;
   }
 
-  async verifyCustomer(params: ValuVerifyCustomerParams): Promise<string> {
+  async verifyCustomer(params: ValuVerifyCustomerParams): Promise<any> {
     const authHeaders = await this.generateAuthHeaders();
     const response = await this.instance.post(
       'Customer/verifyCustomer',
@@ -83,10 +98,10 @@ export class ValuService {
       },
     );
     console.log('[ValuService.verifyCustomer]', response.data);
-    return String(response.data);
+    return response.data;
   }
 
-  async purchase(params: ValuPurchaseParams): Promise<string> {
+  async purchase(params: ValuPurchaseParams): Promise<any> {
     const authHeaders = await this.generateAuthHeaders();
     const response = this.instance
       .post(
@@ -106,6 +121,6 @@ export class ValuService {
       .then((res) => console.log('[ValuService.purchase]', res))
       .catch((err) => console.log('ERR', err));
 
-    return String('response.data');
+    return response;
   }
 }

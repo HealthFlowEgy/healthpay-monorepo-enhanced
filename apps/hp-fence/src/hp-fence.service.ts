@@ -10,11 +10,6 @@ import { Inject, Injectable } from '@nestjs/common';
 export class HpFenceService {
   constructor(@Inject(ValuService) private valuService: ValuService) {}
   getHello() {
-    // customer status
-    this.valuService.customerStatus('00009981337');
-    // customer status
-
-    // enquiry
     const enquiryParams: ValuEnquiryParams = {
       mobileNumber: '00009981337',
       productList: [
@@ -28,18 +23,12 @@ export class HpFenceService {
         },
       ],
     };
-    this.valuService.enquiry(enquiryParams);
-    // enquiry
 
-    // verify Customer
     const verifyParams: ValuVerifyCustomerParams = {
       mobileNumber: '00009981337',
       orderId: '8232569b800742fa8d01410e7ac79b45',
     };
-    this.valuService.verifyCustomer(verifyParams);
-    // verify Customer
 
-    // purchase
     const purchaseParams: ValuPurchaseParams = {
       otp: '123456',
       mobileNumber: '00009981337',
@@ -55,7 +44,12 @@ export class HpFenceService {
         },
       ],
     };
-    this.valuService.purchase(purchaseParams);
-    // purchase
+
+    return {
+      customerStatusRes: this.valuService.customerStatus('00009981337'),
+      enquiry: this.valuService.enquiry(enquiryParams),
+      verifyCustomer: this.valuService.verifyCustomer(verifyParams),
+      purchase: this.valuService.purchase(purchaseParams),
+    };
   }
 }

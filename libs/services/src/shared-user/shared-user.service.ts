@@ -1,6 +1,7 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma, User } from '@prisma/client';
 import moment from 'moment';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
@@ -14,6 +15,8 @@ export class SharedUserService {
     @Inject(HelpersService) private helpers: HelpersService,
     @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
+
+    @Inject(ConfigService) private configService: ConfigService,
   ) {}
 
   public getUserById(id: number): Promise<User> {
@@ -156,8 +159,7 @@ export class SharedUserService {
   }
   public async createValuHmac(userId: number): Promise<string> {
     const user = await this.getUserById(userId);
-    const txt = user.id + '-' + user.uid + '-' + user.mobile;
-    const hmac = await this.helpers.encryptTxt(txt);
+    const hmac = await this.helpers.encryptTxt();
     await this.prisma.valuHmac.create({
       data: {
         uid: this.helpers.doCreateUUID('valuHmac'),
@@ -167,5 +169,13 @@ export class SharedUserService {
       },
     });
     return hmac;
+  }
+  public async checkValuHmac(hmac: string): Promise<boolean> {
+    const valuHmac = await this.prisma.valuHmac.findFirst({
+      where: {
+        hmac: hmac,
+      },
+    });
+    return valuHmac && valuHmac.isValid ? true : false;
   }
 }

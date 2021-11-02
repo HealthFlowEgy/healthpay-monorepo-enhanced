@@ -26,7 +26,7 @@ export class ValuService {
       },
     });
   }
-  validateHeaders(apiKey: string): boolean {
+  validateApiKey(apiKey: string): boolean {
     return this.valuHeader === apiKey ? true : false;
   }
   private async generateAuthHeaders(): Promise<AuthHeaders> {

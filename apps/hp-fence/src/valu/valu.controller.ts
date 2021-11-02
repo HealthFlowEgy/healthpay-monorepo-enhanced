@@ -35,13 +35,15 @@ export class ValuController {
     @Body('mobileNumber') mobileNumber: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
-    if (!this.valuService.validateHeaders(apiKey))
+    if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if (!mobileNumber)
       throw new HttpException(
         'Mobile Number Is Missing',
         HttpStatus.BAD_REQUEST,
       );
+    if (!(await this.services.sharedUser.checkValuHmac(id)))
+      throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
     return await this.valuService.customerStatus(mobileNumber);
   }
 

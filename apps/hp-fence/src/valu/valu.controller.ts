@@ -2,6 +2,7 @@ import { HelpersService } from '@app/helpers';
 import { ValuService } from '@app/helpers/valu.service';
 import { ValuEnquiryParams } from '@app/helpers/valu.types';
 import { ServicesService } from '@app/services';
+import { ValidationsService } from '@app/validations';
 import {
   Body,
   Controller,
@@ -23,6 +24,7 @@ export class ValuController {
     @Inject(ValuService) private valuService: ValuService,
     @Inject(ConfigService) private configService: ConfigService,
     @Inject(HelpersService) private helpers: HelpersService,
+    @Inject(ValidationsService) private validation: ValidationsService,
   ) {}
   @Get('/hmac')
   async hmac(): Promise<any> {
@@ -35,6 +37,7 @@ export class ValuController {
     @Body('mobileNumber') mobileNumber: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
+    await this.validation.isValidMobile(mobileNumber);
     if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if (!mobileNumber)

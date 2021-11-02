@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "postinstall2": "npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-sword",
-    "postinstall1": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-sword",
+    "postinstall": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-sword",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "DEBUG=false node dist/apps/hp-sword/main.js",
     "start:dev": "nest start --watch",

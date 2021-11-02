@@ -47,13 +47,29 @@ export class ValuController {
     return await this.valuService.customerStatus(mobileNumber);
   }
 
-  @Get('/enquiry')
-  async valu(): Promise<any> {
+  @Post('/enquiry/:id')
+  async enquiry(
+    @Param('id') id: string,
+    @Body('mobileNumber') mobileNumber: string,
+    @Body('productId') productId: string,
+    @Headers('x-api-key') apiKey: string,
+  ): Promise<any> {
+    if (!this.valuService.validateApiKey(apiKey))
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    if (!mobileNumber)
+      throw new HttpException(
+        'Mobile Number Is Missing',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (!productId)
+      throw new HttpException('Product ID Is Missing', HttpStatus.BAD_REQUEST);
+    if (!(await this.services.sharedUser.checkValuHmac(id)))
+      throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
     const enquiryParams: ValuEnquiryParams = {
-      mobileNumber: '00009981337',
+      mobileNumber: mobileNumber,
       productList: [
         {
-          productId: 'EGMHOC23DP5',
+          productId: productId,
           productPrice: 500,
           orderId: '8232569b800742fa8d01410e7ac79b45',
           downPayment: 0,

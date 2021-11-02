@@ -9,11 +9,17 @@ import {
   Param,
   Post,
   Headers,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('valu')
 export class ValuController {
-  constructor(@Inject(ValuService) private valuService: ValuService) {}
+  constructor(
+    @Inject(ValuService) private valuService: ValuService,
+    @Inject(ConfigService) private configService: ConfigService,
+  ) {}
   @Get('/enquiry')
   async valu(): Promise<any> {
     const enquiryParams: ValuEnquiryParams = {
@@ -32,22 +38,14 @@ export class ValuController {
     return { data: [] };
     return await this.valuService.enquiry(enquiryParams);
   }
-
-  // @Get('/customerStatus/:id')
-  // async customerStatus(@Param('id') id: string) {
-  //   return { id: id };
-  //   // await this.valuService.customerStatus('00009981337');
-  // }
   @Post('/customerStatus/:id')
-  @Header('x-api-key', '835679saw-pw89-w2c0-aw84615e09tw24')
   async customerStatus(
     @Param('id') id: string,
     @Body('mobileNumber') mobileNumber: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
-    return {
-      apiKey: apiKey,
-      customerStatus: await this.valuService.customerStatus('00009981337'),
-    };
+    if (!this.valuService.validateHeaders(apiKey))
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return await this.valuService.customerStatus(mobileNumber);
   }
 }

@@ -15,7 +15,7 @@ export class ValuService {
     this.configService.get<string>('VALU_AGGREGATOR_ID');
   private vendorId: string = this.configService.get<string>('VALU_VENDOR_ID');
   private storeId: string = this.configService.get<string>('VALU_STORE_ID');
-
+  private valuHeader: string = this.configService.get<string>('VALU_HEADER');
   constructor(private configService: ConfigService) {
     this.instance = axios.create({
       baseURL: this.configService.get<string>('VALU_BASEURL'),
@@ -25,6 +25,9 @@ export class ValuService {
         // Accept: 'application/json',
       },
     });
+  }
+  validateHeaders(apiKey: string): boolean {
+    return this.valuHeader === apiKey ? true : false;
   }
   private async generateAuthHeaders(): Promise<AuthHeaders> {
     const response = await this.instance.post(

@@ -22,7 +22,7 @@ export class ValuController {
   constructor(
     @Inject(ServicesService) private services: ServicesService,
     @Inject(ValuService) private valuService: ValuService,
-    @Inject(ConfigService) private configService: ConfigService,
+    @Inject(ValidationsService) private validation: ValidationsService,
     @Inject(HelpersService) private helpers: HelpersService,
   ) {}
   @Get('/hmac')
@@ -36,6 +36,7 @@ export class ValuController {
     @Body('mobileNumber') mobileNumber: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
+    console.log(await this.validation.isValidMobile('01154446065'), 'IS VALID');
     if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if (!mobileNumber)

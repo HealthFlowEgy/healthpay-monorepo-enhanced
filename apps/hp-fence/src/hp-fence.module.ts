@@ -42,6 +42,7 @@ import { ValidationsModule } from '@app/validations';
     HelpersModule,
     AuthModule,
     ConfigModule,
+    ValidationsModule,
   ],
   controllers: [HpFenceController, ValuController],
   providers: [

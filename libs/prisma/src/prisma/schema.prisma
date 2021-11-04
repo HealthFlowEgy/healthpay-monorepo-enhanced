@@ -36,8 +36,34 @@ model User {
   cashOutRequest        CashOutRequest[]
   cashOutSettings       CashOutSettings[]
   valuHmac              ValuHmac[]
+  cashInOps             Operation?             @relation(fields: [cashInOpsId], references: [id], name: "UserCashInOps")
+  cashInOpsId           Int?
+  cashOutOps            Operation?             @relation(fields: [cashOutOpsId], references: [id], name: "UserCashOutOps")
+  cashOutOpsId          Int?
+  transferOps           Operation?             @relation(fields: [transferOpsId], references: [id], name: "UserTransferOps")
+  transferOpsId         Int?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime?              @default(now()) @updatedAt
+
+}
+
+model Operation {
+  id                    Int                   @id @default(autoincrement())
+  uid                   String                @unique
+  name                  String?
+  img                   String?
+  isPercentage          Boolean               @default(true)
+  agreement             Float                 @default(1)
+  isAgreementPercentage Boolean               @default(true)
+  type                  OPERATION_METHOD_TYPE
+  payable               Float
+  receivable            Float                 @default(100)
+  extraFees             Float                 @default(0)
+  cashInUsers           User[]                @relation("UserCashInOps")
+  cashOutUsers          User[]                @relation("UserCashOutOps")
+  transferUsers         User[]                @relation("UserTransferOps")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime?             @default(now()) @updatedAt
 
 }
 
@@ -307,6 +333,12 @@ enum TRANS_STATUS {
   CANCELLED
   COMPLETED
   DECLINED
+}
+
+enum OPERATION_METHOD_TYPE {
+  CASH_IN
+  CASH_OUT
+  TRANSFER
 }
 
 enum CASHOUT_STATUS {

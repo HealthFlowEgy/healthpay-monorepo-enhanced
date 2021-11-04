@@ -12,6 +12,7 @@ import { SharedBalanceService } from './shared-balance/shared-balance.service';
 import { SharedTransactionService } from './shared-transaction/shared-transaction.service';
 import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings/shared-cashout-user-settings.service';
 import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
+import { SharedHpOpsService } from './shared-hp-ops/shared-hp-ops.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SharedCashoutMethodService } from './shared-cashout-method/shared-casho
     SharedTransactionService,
     SharedCashOutUserSettingsService,
     SharedCashoutMethodService,
+    SharedHpOpsService,
   ],
   exports: [ServicesService],
 })

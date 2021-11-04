@@ -7,10 +7,10 @@
   "license": "PRIVATE",
   "scripts": {
     "prebuild": "rimraf dist",
-    "postinstall": "npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-sword",
-    "postinstall2": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-sword",
+    "postinstall": "npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-fence",
+    "postinstall2": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-fence",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-    "start": "DEBUG=false node dist/apps/hp-sword/main.js",
+    "start": "DEBUG=false node dist/apps/hp-fence/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

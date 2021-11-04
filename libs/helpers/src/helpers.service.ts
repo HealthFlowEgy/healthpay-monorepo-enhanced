@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class HelpersService {
   public doCreateUUID(prefix: string): string {
@@ -14,7 +15,6 @@ export class HelpersService {
     const uid = newFirstPart + newSecondPart;
     return uid;
   }
-
   public generateOTP(): string {
     const digits = '0123456789';
     let OTP = '';

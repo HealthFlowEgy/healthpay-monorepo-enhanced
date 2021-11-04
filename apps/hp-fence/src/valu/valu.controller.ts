@@ -1,21 +1,23 @@
 import { HelpersService } from '@app/helpers';
 import { ValuService } from '@app/helpers/valu.service';
-import { ValuEnquiryParams } from '@app/helpers/valu.types';
+import {
+  ValuEnquiryParams,
+  ValuPurchaseParams,
+  ValuVerifyCustomerParams,
+} from '@app/helpers/valu.types';
 import { ServicesService } from '@app/services';
 import { ValidationsService } from '@app/validations';
 import {
   Body,
   Controller,
   Get,
-  Header,
-  Inject,
-  Param,
-  Post,
   Headers,
   HttpException,
   HttpStatus,
+  Inject,
+  Param,
+  Post,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('valu')
 export class ValuController {
@@ -36,7 +38,6 @@ export class ValuController {
     @Body('mobileNumber') mobileNumber: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
-    console.log(await this.validation.isValidMobile('01154446065'), 'IS VALID');
     if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if (!mobileNumber)
@@ -54,6 +55,7 @@ export class ValuController {
     @Param('id') id: string,
     @Body('mobileNumber') mobileNumber: string,
     @Body('productId') productId: string,
+    @Body('orderId') orderId: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
     if (!this.valuService.validateApiKey(apiKey))
@@ -82,4 +84,64 @@ export class ValuController {
     };
     return await this.valuService.enquiry(enquiryParams);
   }
+
+  @Post('/verifyCustomer/:id')
+  async verifyCustomer(
+    @Param('id') id: string,
+    @Body('mobileNumber') mobileNumber: string,
+    @Headers('x-api-key') apiKey: string,
+  ): Promise<any> {
+    if (!this.valuService.validateApiKey(apiKey))
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    if (!mobileNumber)
+      throw new HttpException(
+        'Mobile Number Is Missing',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (!(await this.services.sharedUser.checkValuHmac(id)))
+      throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
+    const verifyParams: ValuVerifyCustomerParams = {
+      mobileNumber: mobileNumber,
+      orderId: '8232569b800742fa8d01410e7ac79b45',
+    };
+    return await this.valuService.verifyCustomer(verifyParams);
+  }
+
+  @Post('/purchase/:id')
+  async purchase(
+    @Param('id') id: string,
+    @Body('mobileNumber') mobileNumber: string,
+    @Body('otp') otp: string,
+    @Body('productId') productId: string,
+    @Body('orderId') orderId: string,
+    @Headers('x-api-key') apiKey: string,
+  ): Promise<any> {
+    if (!this.valuService.validateApiKey(apiKey))
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    if (!mobileNumber)
+      throw new HttpException(
+        'Mobile Number Is Missing',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const purchaseParams: ValuPurchaseParams = {
+      otp: otp,
+      mobileNumber: mobileNumber,
+      productList: [
+        {
+          productId: productId,
+          productPrice: 500,
+          orderId: '8232569b800742fa8d01410e7ac79b45',
+          downPayment: 0,
+          ToUAmount: 0,
+          CashbackAmount: 0,
+          tenure: 9,
+        },
+      ],
+    };
+    if (!(await this.services.sharedUser.checkValuHmac(id)))
+      throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
+    return await await this.valuService.purchase(purchaseParams);
+  }
 }
+// TODO: add decorator for valu api key and hmac

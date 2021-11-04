@@ -45,6 +45,7 @@ model ValuHmac {
   id        Int       @id @default(autoincrement())
   uid       String    @unique
   hmac      String
+  orderId   String?
   userId    Int?
   user      User?     @relation(fields: [userId], references: [id])
   isValid   Boolean   @default(true)

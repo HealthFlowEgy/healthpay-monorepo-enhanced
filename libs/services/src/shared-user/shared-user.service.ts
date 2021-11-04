@@ -7,7 +7,7 @@ import moment from 'moment';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { doUpsertUserInput } from './shared-user.types';
-
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class SharedUserService {
   constructor(
@@ -157,18 +157,20 @@ export class SharedUserService {
     // TODO: mark old otps as used after 1 day
     return user;
   }
-  public async createValuHmac(userId: number): Promise<string> {
+  public async createValuHmac(userId: number): Promise<any> {
     const user = await this.getUserById(userId);
     const hmac = await this.helpers.encryptTxt();
+    const orderId = uuidv4();
     await this.prisma.valuHmac.create({
       data: {
         uid: this.helpers.doCreateUUID('valuHmac'),
+        orderId: orderId,
         user: { connect: { id: user.id } },
         hmac: hmac,
         ...this.helpers.generateDates(),
       },
     });
-    return hmac;
+    return { hmac: hmac, orderId: orderId };
   }
   public async checkValuHmac(hmac: string): Promise<boolean> {
     const valuHmac = await this.prisma.valuHmac.findFirst({

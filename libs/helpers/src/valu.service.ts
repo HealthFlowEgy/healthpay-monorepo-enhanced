@@ -7,15 +7,18 @@ import {
   ValuPurchaseParams,
   ValuVerifyCustomerParams,
 } from './valu.types';
+
+interface ValueSettings {
+  appId;
+  aggregatorId;
+  vendorId;
+  storeId;
+  valuHeader;
+}
 @Injectable()
 export class ValuService {
   private instance: AxiosInstance | null = null;
-  private appId: string = this.configService.get<string>('VALU_APP_ID');
-  private aggregatorId: string =
-    this.configService.get<string>('VALU_AGGREGATOR_ID');
-  private vendorId: string = this.configService.get<string>('VALU_VENDOR_ID');
-  private storeId: string = this.configService.get<string>('VALU_STORE_ID');
-  private valuHeader: string = this.configService.get<string>('VALU_HEADER');
+  private valuValues: ValueSettings;
   constructor(private configService: ConfigService) {
     this.instance = axios.create({
       baseURL: this.configService.get<string>('VALU_BASEURL'),
@@ -25,21 +28,27 @@ export class ValuService {
         // Accept: 'application/json',
       },
     });
+    this.valuValues.appId = this.configService.get<string>('VALU_APP_ID');
+    this.valuValues.aggregatorId =
+      this.configService.get<string>('VALU_AGGREGATOR_ID');
+    this.valuValues.vendorId = this.configService.get<string>('VALU_VENDOR_ID');
+    this.valuValues.storeId = this.configService.get<string>('VALU_STORE_ID');
+    this.valuValues.valuHeader = this.configService.get<string>('VALU_HEADER');
   }
   validateApiKey(apiKey: string): boolean {
-    return this.valuHeader === apiKey ? true : false;
+    return this.valuValues.valuHeader === apiKey ? true : false;
   }
   private async generateAuthHeaders(): Promise<AuthHeaders> {
     const response = await this.instance.post(
       'Auth/GenerateToken',
       {
         claimsSet: {
-          ApplicationId: this.appId,
+          ApplicationId: this.valuValues.appId,
         },
       },
       {
         headers: {
-          'x-Gateway-APIKey': this.appId,
+          'x-Gateway-APIKey': this.valuValues.appId,
         },
       },
     );
@@ -53,7 +62,7 @@ export class ValuService {
     const response = await this.instance.post(
       'Customer/getCustomerStatus',
       {
-        aggregatorId: this.aggregatorId,
+        aggregatorId: this.valuValues.aggregatorId,
         mobileNumber: mobile,
       },
       {
@@ -68,9 +77,9 @@ export class ValuService {
     const response = await this.instance.post(
       'ECommerce/Inquiry',
       {
-        aggregatorId: this.aggregatorId,
-        vendorId: this.vendorId,
-        storeId: this.storeId,
+        aggregatorId: this.valuValues.aggregatorId,
+        vendorId: this.valuValues.vendorId,
+        storeId: this.valuValues.storeId,
         mobileNumber: params.mobileNumber,
         productList: params.productList,
       },
@@ -90,9 +99,9 @@ export class ValuService {
     const response = await this.instance.post(
       'Customer/verifyCustomer',
       {
-        aggregatorId: this.aggregatorId,
-        vendorId: this.vendorId,
-        storeId: this.storeId,
+        aggregatorId: this.valuValues.aggregatorId,
+        vendorId: this.valuValues.vendorId,
+        storeId: this.valuValues.storeId,
         mobileNumber: params.mobileNumber,
         orderId: params.orderId,
       },
@@ -110,10 +119,11 @@ export class ValuService {
       .post(
         'ECommerce/Purchase',
         {
-          aggregatorId: this.aggregatorId,
+          aggregatorId: this.valuValues.aggregatorId,
           otp: params.otp,
-          vendorId: this.vendorId,
-          storeId: this.storeId,
+          vendorId: this.valuValues.vendorId,
+          vendorName: 'HealthPay',
+          storeId: this.valuValues.storeId,
           mobileNumber: params.mobileNumber,
           productList: params.productList,
         },
@@ -123,7 +133,6 @@ export class ValuService {
       )
       .then((res) => console.log('[ValuService.purchase]', res))
       .catch((err) => console.log('ERR', err));
-
     return response;
   }
 }

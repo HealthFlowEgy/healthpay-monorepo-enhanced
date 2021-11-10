@@ -118,7 +118,7 @@ export class ValuService {
         aggregatorId: this.aggregatorId,
         otp: params.otp,
         vendorId: this.vendorId,
-        vendorName: this.vendorName,
+        vendorName: 'HealthPay',
         storeId: this.storeId,
         mobileNumber: params.mobileNumber,
         productList: params.productList,

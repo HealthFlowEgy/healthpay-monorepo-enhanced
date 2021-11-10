@@ -174,6 +174,22 @@ export class SharedUserService {
     });
     return { hmac: hmac, orderId: orderId };
   }
+  public async updateValuHmacLoanNumber(
+    hmac: string,
+    loanNumber: string,
+  ): Promise<any> {
+    const valuHmac = await this.prisma.valuHmac.findFirst({
+      where: { hmac },
+    });
+    if (!valuHmac) {
+      throw new BadRequestException('5003', 'invalid hmac');
+    }
+    await this.prisma.valuHmac.update({
+      where: { id: valuHmac.id },
+      data: { loanNumber },
+    });
+    return valuHmac;
+  }
   public async getValuOrderIdByHmac(hmac: string): Promise<any> {
     const valuHmac = await this.prisma.valuHmac.findFirst({
       where: { hmac },
@@ -183,6 +199,7 @@ export class SharedUserService {
     }
     return valuHmac.orderId;
   }
+
   private generateOrderId(length): string {
     let result = '';
     const characters =

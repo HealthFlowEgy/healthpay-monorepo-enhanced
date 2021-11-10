@@ -14,7 +14,7 @@ export class ValuService {
   appId = this.configService.get<string>('VALU_APP_ID');
   aggregatorId = this.configService.get<string>('VALU_AGGREGATOR_ID');
   vendorId = this.configService.get<string>('VALU_VENDOR_ID');
-  vendorName = this.configService.get<string>('VALU_VENDOR_Name');
+  vendorName = this.configService.get<string>('VALU_VENDOR_NAME');
   storeId = this.configService.get<string>('VALU_STORE_ID');
   valuHeader = this.configService.get<string>('VALU_HEADER');
   constructor(private configService: ConfigService) {
@@ -118,7 +118,7 @@ export class ValuService {
         aggregatorId: this.aggregatorId,
         otp: params.otp,
         vendorId: this.vendorId,
-        vendorName: 'HealthPay',
+        vendorName: this.vendorName,
         storeId: this.storeId,
         mobileNumber: params.mobileNumber,
         productList: params.productList,
@@ -128,6 +128,7 @@ export class ValuService {
       },
     );
     console.log('[ValuService.purchase]', response.data);
+    const loanNumber = response.data.productPurchaseList[0].loanNumber;
     return response.data;
   }
 }

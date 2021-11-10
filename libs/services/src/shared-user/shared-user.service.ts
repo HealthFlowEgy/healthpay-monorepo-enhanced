@@ -162,7 +162,7 @@ export class SharedUserService {
   public async createValuHmac(userId: number): Promise<any> {
     const user = await this.getUserById(userId);
     const hmac = await this.helpers.encryptTxt();
-    const orderId = uuidv4();
+    const orderId = this.generateOrderId(32);
     await this.prisma.valuHmac.create({
       data: {
         uid: this.helpers.doCreateUUID('valuHmac'),
@@ -183,12 +183,14 @@ export class SharedUserService {
     }
     return valuHmac.orderId;
   }
-  public async checkValuHmac(hmac: string): Promise<boolean> {
-    const valuHmac = await this.prisma.valuHmac.findFirst({
-      where: {
-        hmac: hmac,
-      },
-    });
-    return valuHmac && valuHmac.isValid ? true : false;
+  private generateOrderId(length): string {
+    let result = '';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
   }
 }

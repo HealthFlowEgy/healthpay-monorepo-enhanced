@@ -38,6 +38,7 @@ export class ValuController {
     @Body('mobileNumber') mobileNumber: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
+    const orderId = await this.services.sharedUser.getValuOrderIdByHmac(id);
     if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if (!mobileNumber)
@@ -45,7 +46,7 @@ export class ValuController {
         'Mobile Number Is Missing',
         HttpStatus.BAD_REQUEST,
       );
-    if (!(await this.services.sharedUser.checkValuHmac(id)))
+    if (!orderId)
       throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
     return await this.valuService.customerStatus(mobileNumber);
   }
@@ -55,9 +56,9 @@ export class ValuController {
     @Param('id') id: string,
     @Body('mobileNumber') mobileNumber: string,
     @Body('productId') productId: string,
-    @Body('orderId') orderId: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
+    const orderId = await this.services.sharedUser.getValuOrderIdByHmac(id);
     if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if (!mobileNumber)
@@ -67,7 +68,7 @@ export class ValuController {
       );
     if (!productId)
       throw new HttpException('Product ID Is Missing', HttpStatus.BAD_REQUEST);
-    if (!(await this.services.sharedUser.checkValuHmac(id)))
+    if (!orderId)
       throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
     const enquiryParams: ValuEnquiryParams = {
       mobileNumber: mobileNumber,
@@ -75,7 +76,7 @@ export class ValuController {
         {
           productId: productId,
           productPrice: 500,
-          orderId: '8232569b800742fa8d01410e7ac79b45',
+          orderId: orderId,
           downPayment: 0,
           ToUAmount: 0,
           CashbackAmount: 0,
@@ -91,6 +92,7 @@ export class ValuController {
     @Body('mobileNumber') mobileNumber: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
+    const orderId = await this.services.sharedUser.getValuOrderIdByHmac(id);
     if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if (!mobileNumber)
@@ -98,11 +100,11 @@ export class ValuController {
         'Mobile Number Is Missing',
         HttpStatus.BAD_REQUEST,
       );
-    if (!(await this.services.sharedUser.checkValuHmac(id)))
+    if (!orderId)
       throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
     const verifyParams: ValuVerifyCustomerParams = {
       mobileNumber: mobileNumber,
-      orderId: '8232569b800742fa8d01410e7ac79b45',
+      orderId: orderId,
     };
     return await this.valuService.verifyCustomer(verifyParams);
   }
@@ -113,9 +115,9 @@ export class ValuController {
     @Body('mobileNumber') mobileNumber: string,
     @Body('otp') otp: string,
     @Body('productId') productId: string,
-    @Body('orderId') orderId: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
+    const orderId = await this.services.sharedUser.getValuOrderIdByHmac(id);
     if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if (!mobileNumber)
@@ -131,7 +133,7 @@ export class ValuController {
         {
           productId: productId,
           productPrice: 500,
-          orderId: '8232569b800742fa8d01410e7ac79b45',
+          orderId: orderId,
           downPayment: 0,
           ToUAmount: 0,
           CashbackAmount: 0,
@@ -139,7 +141,7 @@ export class ValuController {
         },
       ],
     };
-    if (!(await this.services.sharedUser.checkValuHmac(id)))
+    if (!orderId)
       throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
     return await await this.valuService.purchase(purchaseParams);
   }

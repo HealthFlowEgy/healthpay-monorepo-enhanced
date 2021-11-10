@@ -157,6 +157,8 @@ export class SharedUserService {
     // TODO: mark old otps as used after 1 day
     return user;
   }
+
+  // TODO: create shared valu service
   public async createValuHmac(userId: number): Promise<any> {
     const user = await this.getUserById(userId);
     const hmac = await this.helpers.encryptTxt();
@@ -171,6 +173,15 @@ export class SharedUserService {
       },
     });
     return { hmac: hmac, orderId: orderId };
+  }
+  public async getValuOrderIdByHmac(hmac: string): Promise<any> {
+    const valuHmac = await this.prisma.valuHmac.findFirst({
+      where: { hmac },
+    });
+    if (!valuHmac.orderId) {
+      throw new BadRequestException('5003', 'invalid order id');
+    }
+    return valuHmac.orderId;
   }
   public async checkValuHmac(hmac: string): Promise<boolean> {
     const valuHmac = await this.prisma.valuHmac.findFirst({

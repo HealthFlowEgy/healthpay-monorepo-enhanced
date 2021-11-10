@@ -8,10 +8,10 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "postinstall-sword": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-sword",
-    "postinstall-fence": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-fence",
+    "postinstall": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-fence",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-    "start-fence": "DEBUG=false node dist/apps/hp-fence/main.js",
-    "start-sword": "DEBUG=false node dist/apps/hp-fence/main.js",
+    "start": "DEBUG=false node dist/apps/hp-fence/main.js",
+    "start-sword": "DEBUG=false node dist/apps/hp-sword/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

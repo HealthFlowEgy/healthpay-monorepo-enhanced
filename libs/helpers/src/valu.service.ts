@@ -126,7 +126,7 @@ export class ValuService {
         headers: authHeaders,
       },
     );
-
-    return response;
+    console.log('[ValuService.purchase]', response.data);
+    return response.data;
   }
 }

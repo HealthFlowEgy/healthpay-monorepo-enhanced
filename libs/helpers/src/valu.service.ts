@@ -9,11 +9,11 @@ import {
 } from './valu.types';
 
 interface ValueSettings {
-  appId;
-  aggregatorId;
-  vendorId;
-  storeId;
-  valuHeader;
+  appId: string;
+  aggregatorId: string;
+  vendorId: string;
+  storeId: string;
+  valuHeader: string;
 }
 @Injectable()
 export class ValuService {

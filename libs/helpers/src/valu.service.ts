@@ -111,24 +111,21 @@ export class ValuService {
 
   async purchase(params: ValuPurchaseParams): Promise<any> {
     const authHeaders = await this.generateAuthHeaders();
-    const response = this.instance
-      .post(
-        'ECommerce/Purchase',
-        {
-          aggregatorId: this.aggregatorId,
-          otp: params.otp,
-          vendorId: this.vendorId,
-          vendorName: 'HealthPay',
-          storeId: this.storeId,
-          mobileNumber: params.mobileNumber,
-          productList: params.productList,
-        },
-        {
-          headers: authHeaders,
-        },
-      )
-      .then((res) => console.log('[ValuService.purchase]', res))
-      .catch((err) => console.log('ERR', err));
+    const response = await this.instance.post(
+      'ECommerce/Purchase',
+      {
+        aggregatorId: this.aggregatorId,
+        otp: params.otp,
+        vendorId: this.vendorId,
+        vendorName: 'HealthPay',
+        storeId: this.storeId,
+        mobileNumber: params.mobileNumber,
+        productList: params.productList,
+      },
+      {
+        headers: authHeaders,
+      },
+    );
 
     return response;
   }

@@ -31,7 +31,6 @@ export class ValuController {
   async hmac(): Promise<any> {
     return await this.services.sharedUser.createValuHmac(3);
   }
-
   @Post('/customerStatus/:id')
   async customerStatus(
     @Param('id') id: string,
@@ -50,7 +49,15 @@ export class ValuController {
       throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
     return await this.valuService.customerStatus(mobileNumber);
   }
-
+  @Post('/verifyHmac')
+  async verifyHmac(
+    @Headers('x-api-key') apiKey: string,
+    hmac: string,
+  ): Promise<any> {
+    if (!this.valuService.validateApiKey(apiKey))
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return await this.services.sharedUser.getValuOrderIdByHmac(hmac);
+  }
   @Post('/enquiry/:id')
   async enquiry(
     @Param('id') id: string,

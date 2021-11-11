@@ -23,7 +23,6 @@ export class ValuService {
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
-        // Accept: 'application/json',
       },
     });
     this.appId = this.configService.get<string>('VALU_APP_ID');
@@ -128,7 +127,6 @@ export class ValuService {
       },
     );
     console.log('[ValuService.purchase]', response.data);
-    const loanNumber = response.data.productPurchaseList[0].loanNumber;
     return response.data;
   }
 }

@@ -52,11 +52,13 @@ export class ValuController {
   @Post('/verifyHmac')
   async verifyHmac(
     @Headers('x-api-key') apiKey: string,
-    hmac: string,
+    @Body('hmac') hmac: string,
   ): Promise<any> {
     if (!this.valuService.validateApiKey(apiKey))
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    return await this.services.sharedUser.getValuOrderIdByHmac(hmac);
+    return {
+      orderId: await this.services.sharedUser.getValuOrderIdByHmac(hmac),
+    };
   }
   @Post('/enquiry/:id')
   async enquiry(

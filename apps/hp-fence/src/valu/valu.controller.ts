@@ -124,6 +124,7 @@ export class ValuController {
     @Body('mobileNumber') mobileNumber: string,
     @Body('otp') otp: string,
     @Body('productId') productId: string,
+    @Body('tenure') tenure: number,
     @Headers('x-api-key') apiKey: string,
   ): Promise<any> {
     const orderId = await this.services.sharedUser.getValuOrderIdByHmac(id);
@@ -146,7 +147,7 @@ export class ValuController {
           downPayment: 0,
           ToUAmount: 0,
           CashbackAmount: 0,
-          tenure: 9,
+          tenure: tenure,
         },
       ],
     };

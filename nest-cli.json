@@ -1,0 +1,96 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/healthpay/src",
+  "monorepo": true,
+  "root": "apps/healthpay",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/healthpay/tsconfig.app.json",
+    "assets": [
+      "i18n/**/*"
+    ]
+  },
+  "projects": {
+    "healthpay": {
+      "type": "application",
+      "root": "apps/healthpay",
+      "entryFile": "main",
+      "sourceRoot": "apps/healthpay/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/healthpay/tsconfig.app.json"
+      }
+    },
+    "hp-sword": {
+      "type": "application",
+      "root": "apps/hp-sword",
+      "entryFile": "main",
+      "sourceRoot": "apps/hp-sword/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/hp-sword/tsconfig.app.json"
+      }
+    },
+    "prisma": {
+      "type": "library",
+      "root": "libs/prisma",
+      "entryFile": "index",
+      "sourceRoot": "libs/prisma/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/prisma/tsconfig.lib.json"
+      }
+    },
+    "helpers": {
+      "type": "library",
+      "root": "libs/helpers",
+      "entryFile": "index",
+      "sourceRoot": "libs/helpers/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/helpers/tsconfig.lib.json"
+      }
+    },
+    "validations": {
+      "type": "library",
+      "root": "libs/validations",
+      "entryFile": "index",
+      "sourceRoot": "libs/validations/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/validations/tsconfig.lib.json"
+      }
+    },
+    "errors": {
+      "type": "library",
+      "root": "libs/errors",
+      "entryFile": "index",
+      "sourceRoot": "libs/errors/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/errors/tsconfig.lib.json"
+      }
+    },
+    "services": {
+      "type": "library",
+      "root": "libs/services",
+      "entryFile": "index",
+      "sourceRoot": "libs/services/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/services/tsconfig.lib.json"
+      }
+    },
+    "hp-fence": {
+      "type": "application",
+      "root": "apps/hp-fence",
+      "entryFile": "main",
+      "sourceRoot": "apps/hp-fence/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/hp-fence/tsconfig.app.json"
+      }
+    },
+    "websocket": {
+      "type": "library",
+      "root": "libs/websocket",
+      "entryFile": "index",
+      "sourceRoot": "libs/websocket/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/websocket/tsconfig.lib.json"
+      }
+    }
+  }
+}

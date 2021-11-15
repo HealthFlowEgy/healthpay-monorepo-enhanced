@@ -109,10 +109,10 @@ export class SharedWalletService {
         'insufficient funds in payer wallet',
       );
 
-    // const updatePayableWallet = await this.prisma.wallet.update({
-    //   where: { id: pWallet.id },
-    //   data: { total: pWallet.total - amount },
-    // });
+    const updatePayableWallet = await this.prisma.wallet.update({
+      where: { id: pWallet.id },
+      data: { total: pWallet.total - amount },
+    });
     // TODO: add healthpay commission
     if (notify) {
       const pUser = await this.prisma.wallet
@@ -130,10 +130,10 @@ export class SharedWalletService {
       fromPrisma(pWallet.id, rWallet.id, amount, 0, txId),
     );
 
-    // const updateReceivableWallet = await this.prisma.wallet.update({
-    //   where: { id: rWallet.id },
-    //   data: { total: rWallet.total + amount },
-    // });
+    const updateReceivableWallet = await this.prisma.wallet.update({
+      where: { id: rWallet.id },
+      data: { total: rWallet.total + amount },
+    });
     return true;
   }
 }

@@ -104,10 +104,5 @@
       "^@app/services(|/.*)$": "<rootDir>/libs/services/src/$1",
       "^@app/websocket(|/.*)$": "<rootDir>/libs/websocket/src/$1"
     }
-  },
-  "engines": {
-    "node": "12.22.7",
-    "npm": "6.14.15",
-    "yarn": "1.22.17"
   }
 }

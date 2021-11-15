@@ -154,5 +154,17 @@ export class ValuController {
       throw new HttpException('Not Valid HMac', HttpStatus.BAD_REQUEST);
     return await await this.valuService.purchase(purchaseParams);
   }
+  @Post('/orderStatus/:id')
+  async orderStatus(
+    @Param('id') id: string,
+    @Body('loanNumber') loanNumber: string,
+    @Headers('x-api-key') apiKey: string,
+  ): Promise<any> {
+    const orderId = await this.services.sharedUser.getValuOrderIdByHmac(id);
+    if (!this.valuService.validateApiKey(apiKey))
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return await this.valuService.orderStatus(orderId, loanNumber);
+  }
 }
+
 // TODO: add decorator for valu api key and hmac

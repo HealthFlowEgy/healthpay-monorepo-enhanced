@@ -129,4 +129,20 @@ export class ValuService {
     console.log('[ValuService.purchase]', response.data);
     return response.data;
   }
+  async orderStatus(orderId: string, loanNumber: string): Promise<any> {
+    const authHeaders = await this.generateAuthHeaders();
+    const response = await this.instance.post(
+      'ECommerce/orderStatus',
+      {
+        orderId: orderId,
+        loanNumber: loanNumber,
+        vendorId: this.vendorId,
+      },
+      {
+        headers: authHeaders,
+      },
+    );
+    console.log('[ValuService.orderStatus]', response.data);
+    return response.data;
+  }
 }

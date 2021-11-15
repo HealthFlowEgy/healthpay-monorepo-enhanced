@@ -21,12 +21,15 @@
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.0.1",
     "@nestjs/core": "^8.0.0",
+    "@nestjs/event-emitter": "^1.0.0",
     "@nestjs/graphql": "^8.0.2",
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.0.0",
     "@prisma/client": "^2.30.0",
     "@types/bcrypt": "^5.0.0",
+    "@types/crypto-js": "^4.0.2",
+    "@types/websocket": "^1.0.4",
     "apollo-server-core": "^3.2.0",
     "apollo-server-express": "2.25.2",
     "axios": "^0.21.1",
@@ -47,6 +50,7 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "uuid": "^8.3.2",
+    "websocket": "^1.0.34",
     "yup": "^0.32.11"
   },
   "devDependencies": {
@@ -97,7 +101,8 @@
       "^@app/helpers(|/.*)$": "<rootDir>/libs/helpers/src/$1",
       "^@app/validations(|/.*)$": "<rootDir>/libs/validations/src/$1",
       "^@app/errors(|/.*)$": "<rootDir>/libs/errors/src/$1",
-      "^@app/services(|/.*)$": "<rootDir>/libs/services/src/$1"
+      "^@app/services(|/.*)$": "<rootDir>/libs/services/src/$1",
+      "^@app/websocket(|/.*)$": "<rootDir>/libs/websocket/src/$1"
     }
   }
 }

@@ -82,6 +82,9 @@ export class SharedWalletService {
   @OnEvent(WEBSOCKET_EVENTS.UTXO_UPDATE)
   async onUTXOUpdate({ data }: any): Promise<boolean> {
     const walletId = data.publicKey === 'root' ? 923 : parseInt(data.publicKey);
+    if (!(await this.prisma.wallet.findFirst({ where: { id: walletId } })))
+      return;
+
     const updateWallet = await this.prisma.wallet.update({
       where: { id: walletId },
       data: {

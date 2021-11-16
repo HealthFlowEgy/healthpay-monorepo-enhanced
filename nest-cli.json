@@ -91,6 +91,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/websocket/tsconfig.lib.json"
       }
+    },
+    "hp-nodejs": {
+      "type": "application",
+      "root": "apps/hp-nodejs",
+      "entryFile": "main",
+      "sourceRoot": "apps/hp-nodejs/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/hp-nodejs/tsconfig.app.json"
+      }
     }
   }
 }

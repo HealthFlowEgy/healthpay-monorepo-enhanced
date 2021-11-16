@@ -40,6 +40,10 @@ export class SharedMerchantService {
     return this.prisma.merchant.findFirst({ where: { uid } });
   }
 
+  async getMerchantById(id: number): Promise<Merchant | null> {
+    return this.prisma.merchant.findFirst({ where: { id } });
+  }
+
   async doCreateLinkToProvider(
     token: string,
     merchantId: number,

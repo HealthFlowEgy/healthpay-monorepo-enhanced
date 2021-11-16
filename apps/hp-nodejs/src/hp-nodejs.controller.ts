@@ -60,7 +60,7 @@ export class HpNodejsController {
 
     await this.sharedService.sharedBalance.doTransFromMerchantToUser(
       tx.userId,
-      12,
+      6,
       tx.amount,
       'healthpayCashInMerchant',
     );

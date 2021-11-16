@@ -18,7 +18,7 @@ import { HpNodejsService } from './hp-nodejs.service';
       fallbackLanguage: 'en',
       parser: I18nJsonParser,
       parserOptions: {
-        path: path.join(__dirname, '../hp-sword/i18n/'),
+        path: path.join(__dirname, '/i18n/'),
         watch: true,
       },
     }),

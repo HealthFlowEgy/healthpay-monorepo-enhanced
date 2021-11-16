@@ -60,8 +60,16 @@ export class SharedMerchantService {
       data: {
         uid: this.helpers.doCreateUUID('providerAuthMerchant'),
         token,
-        userId,
-        merchantId,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        merchant: {
+          connect: {
+            id: merchantId,
+          },
+        },
       },
     });
   }
@@ -82,8 +90,16 @@ export class SharedMerchantService {
       data: {
         uid: this.helpers.doCreateUUID('userAuthMerchant'),
         token,
-        userId,
-        merchantId,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        merchant: {
+          connect: {
+            id: merchantId,
+          },
+        },
       },
     });
   }

@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import {
   Merchant,
   ProviderAuthMerchant,
+  MerchantType,
   User,
   UserAuthMerchant,
 } from '@prisma/client';
@@ -34,6 +35,10 @@ export class SharedMerchantService {
   }
   async getMerchantList(): Promise<Merchant[]> {
     return this.prisma.merchant.findMany();
+  }
+
+  async getMerchantByType(type: MerchantType | undefined): Promise<Merchant> {
+    return this.prisma.merchant.findFirst({ where: { isHp: type } });
   }
 
   async getMerchantByUID(uid: string): Promise<Merchant | null> {

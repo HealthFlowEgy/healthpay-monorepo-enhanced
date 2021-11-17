@@ -41,15 +41,12 @@ export class HpNodejsController {
   }
 
   @Post('/api/notificationUrl')
-  async onNotificationUrl(
-    @Res() res,
-    @Body() updatedTxBody: any,
-  ): Promise<any> {
+  async onNotificationUrl(@Body() updatedTxBody: any): Promise<any> {
     const { order_id, status, transaction_id, hash } = updatedTxBody;
     const tx = await this.sharedService.sharedTransaction.getTransactionByUid(
       transaction_id,
     );
-    if (!tx) {
+    if (!tx || tx.status !== 'PENDING') {
       console.log('[invalid_notification_tx]');
       throw new NotFoundException();
     }
@@ -57,10 +54,12 @@ export class HpNodejsController {
     await this.sharedService.sharedTransaction.doUpdateTx(tx.id, {
       status: 'COMPLETED',
     });
-
+    const merchant = await this.sharedService.sharedMerchant.getMerchantByType(
+      'CASHIN',
+    );
     await this.sharedService.sharedBalance.doTransFromMerchantToUser(
       tx.userId,
-      6,
+      merchant.id,
       tx.amount,
       'healthpayCashInMerchant',
     );

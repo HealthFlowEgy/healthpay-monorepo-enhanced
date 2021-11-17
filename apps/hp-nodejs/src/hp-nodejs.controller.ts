@@ -57,12 +57,16 @@ export class HpNodejsController {
     const merchant = await this.sharedService.sharedMerchant.getMerchantByType(
       'CASHIN',
     );
-    await this.sharedService.sharedBalance.doTransFromMerchantToUser(
-      tx.userId,
-      merchant.id,
-      tx.amount,
-      'healthpayCashInMerchant',
-    );
+    try {
+      await this.sharedService.sharedBalance.doTransFromMerchantToUser(
+        tx.userId,
+        merchant.id,
+        tx.amount,
+        'healthpayCashInMerchant',
+      );
+    } catch (e) {
+      console.log('[invalid_notification_tx]', JSON.stringify([e]));
+    }
 
     return {
       status: 'success',

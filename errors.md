@@ -33,3 +33,5 @@
 ### 2xxx (invalid user authentication headers)
 
 - `2001`: header: authorization is invalid
+- `2002`: user not found
+- `2003`: user already exists

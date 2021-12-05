@@ -300,7 +300,6 @@ model personal_access_tokens {
   last_used_at   DateTime? @default(now())
   created_at     DateTime  @default(now())
   updated_at     DateTime? @default(now()) @updatedAt
-
 }
 
 model Sessions {

@@ -1,6 +1,13 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, User } from '@prisma/client';
 import moment from 'moment';
@@ -27,14 +34,15 @@ export class SharedUserService {
     return this.prisma.user.findFirst({ where: { mobile } });
   }
 
-  async doUpsertUser({
-    mobile,
-    firstName,
-    lastName,
-    email,
-  }: doUpsertUserInput): Promise<User | null> {
+  async doUpsertUser(
+    { mobile, firstName, lastName, email }: doUpsertUserInput,
+    validationCheckUser: boolean,
+  ): Promise<User | null> {
     let user = await this.getUserByMobile(mobile);
     if (!user) {
+      if (validationCheckUser) {
+        throw new NotFoundException('2002');
+      }
       user = await this.doCreateNewUser({
         mobile,
         firstName,

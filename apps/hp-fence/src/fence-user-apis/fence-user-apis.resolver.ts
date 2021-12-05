@@ -15,35 +15,15 @@ export class FenceUserApisResolver {
   ) {}
   // register mutation
   @Mutation(() => User, { nullable: true })
-  async register(
-    @Args('mobile') mobile: string,
-    @Args('firstName') firstName: string,
-    @Args('lastName') lastName: string,
-    @Args('email', { nullable: true }) email: string,
-  ) {
-    return this.services.sharedUser.doUpsertUser({
-      mobile,
-      firstName,
-      lastName,
-      email,
-    });
+  async register(@Args('mobile') mobile: string) {
+    return this.services.sharedUser.doUpsertUser({ mobile }, false);
   }
   // register mutation
 
   // login mutation
   @Mutation(() => User, { nullable: true })
-  async login(
-    @Args('mobile') mobile: string,
-    @Args('firstName') firstName: string,
-    @Args('lastName') lastName: string,
-    @Args('email', { nullable: true }) email: string,
-  ) {
-    return this.services.sharedUser.doUpsertUser({
-      mobile,
-      firstName,
-      lastName,
-      email,
-    });
+  async login(@Args('mobile') mobile: string) {
+    return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
   // login mutation
 

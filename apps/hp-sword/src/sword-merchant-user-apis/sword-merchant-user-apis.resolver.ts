@@ -36,12 +36,15 @@ export class SwordMerchantUserApisResolver {
     // @CurrentMerchant() merchant: Merchant,
   ) {
     console.log('[loginUser]', mobile, firstName, lastName, email);
-    return this.services.sharedUser.doUpsertUser({
-      mobile,
-      firstName,
-      lastName,
-      email,
-    });
+    return this.services.sharedUser.doUpsertUser(
+      {
+        mobile,
+        firstName,
+        lastName,
+        email,
+      },
+      false,
+    );
   }
 
   @Mutation(() => UserWithToken, { nullable: true })

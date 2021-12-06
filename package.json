@@ -28,6 +28,7 @@
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/swagger": "^5.1.5",
     "@prisma/client": "^2.30.0",
     "@types/bcrypt": "^5.0.0",
     "@types/crypto-js": "^4.0.2",
@@ -40,6 +41,7 @@
     "class-validator": "^0.13.1",
     "crypto": "^1.0.1",
     "crypto-js": "^4.1.1",
+    "fastify-swagger": "^4.12.6",
     "graphql": "^15.5.1",
     "moment": "^2.29.1",
     "nestjs-graphql-validator": "^0.0.12",
@@ -51,6 +53,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "swagger-ui-express": "^4.2.0",
     "uuid": "^8.3.2",
     "websocket": "^1.0.34",
     "yup": "^0.32.11"

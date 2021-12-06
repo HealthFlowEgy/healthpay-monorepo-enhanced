@@ -2,17 +2,17 @@
   "search.exclude": {
     "**/dist": true,
     "**/apps/healthpay": true,
-    "**/apps/hp-sword": true,
+    "**/apps/hp-sword": false,
   },
   "files.exclude": {
     "***/dist": true,
-    "**/apps/hp-sword": true,
+    "**/apps/hp-sword": false,
     "**/apps/healthpay": true,
   },
   "files.watcherExclude": {
     "**/dist": true,
     "**/apps/healthpay": true,
-    "**/apps/hp-sword": true,
+    "**/apps/hp-sword": false,
   },
   "cSpell.words": [
     "CASHIN",

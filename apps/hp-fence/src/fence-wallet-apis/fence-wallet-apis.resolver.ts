@@ -16,6 +16,6 @@ export class FenceWalletApisResolver {
   @Query(() => Wallet)
   @UseGuards(JwtAuthGuard)
   async userWallet(@CurrentUser() user: User) {
-    return await this.services.sharedWallet.getWalletByUserUID(user.uid);
+    return this.services.sharedWallet.getWalletByUserId(user.id);
   }
 }

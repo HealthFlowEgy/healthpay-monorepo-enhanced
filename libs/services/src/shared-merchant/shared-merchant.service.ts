@@ -65,16 +65,8 @@ export class SharedMerchantService {
       data: {
         uid: this.helpers.doCreateUUID('providerAuthMerchant'),
         token,
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-        merchant: {
-          connect: {
-            id: merchantId,
-          },
-        },
+        merchantId,
+        userId,
       },
     });
   }

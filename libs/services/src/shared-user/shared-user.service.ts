@@ -36,7 +36,7 @@ export class SharedUserService {
 
   async doUpsertUser(
     { mobile, firstName, lastName, email }: doUpsertUserInput,
-    validationCheckUser: boolean,
+    validationCheckUser: boolean = null,
   ): Promise<User | null> {
     let user = await this.getUserByMobile(mobile);
     if (!user) {

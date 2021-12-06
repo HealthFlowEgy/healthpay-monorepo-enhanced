@@ -115,6 +115,14 @@ export class SharedWalletService {
         'insufficient funds in payer wallet',
       );
 
+    if (pWallet.total === amount) {
+      await this.prisma.wallet.update({
+        where: { id: pWallet.id },
+        data: {
+          total: 0,
+        },
+      });
+    }
     // const updatePayableWallet = await this.prisma.wallet.update({
     //   where: { id: pWallet.id },
     //   data: { total: pWallet.total - amount },

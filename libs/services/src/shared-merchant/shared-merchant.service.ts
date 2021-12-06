@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import {
   Merchant,
   ProviderAuthMerchant,
+  MerchantType,
   User,
   UserAuthMerchant,
 } from '@prisma/client';
@@ -36,8 +37,16 @@ export class SharedMerchantService {
     return this.prisma.merchant.findMany();
   }
 
+  async getMerchantByType(type: MerchantType | undefined): Promise<Merchant> {
+    return this.prisma.merchant.findFirst({ where: { isHp: type } });
+  }
+
   async getMerchantByUID(uid: string): Promise<Merchant | null> {
     return this.prisma.merchant.findFirst({ where: { uid } });
+  }
+
+  async getMerchantById(id: number): Promise<Merchant | null> {
+    return this.prisma.merchant.findFirst({ where: { id } });
   }
 
   async doCreateLinkToProvider(
@@ -56,8 +65,16 @@ export class SharedMerchantService {
       data: {
         uid: this.helpers.doCreateUUID('providerAuthMerchant'),
         token,
-        userId,
-        merchantId,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        merchant: {
+          connect: {
+            id: merchantId,
+          },
+        },
       },
     });
   }
@@ -78,8 +95,16 @@ export class SharedMerchantService {
       data: {
         uid: this.helpers.doCreateUUID('userAuthMerchant'),
         token,
-        userId,
-        merchantId,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        merchant: {
+          connect: {
+            id: merchantId,
+          },
+        },
       },
     });
   }

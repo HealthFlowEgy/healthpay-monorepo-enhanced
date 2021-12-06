@@ -1,8 +1,9 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
+import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
 import { Inject, Injectable } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { Balance } from '@prisma/client';
-import moment from 'moment';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { SortedBalance } from './shared-balance.types';
 
@@ -13,6 +14,10 @@ export class SharedBalanceService {
     @Inject(HelpersService) private helpers: HelpersService,
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
   ) {}
+
+  public async getAllBalances(where: any): Promise<Balance[]> {
+    return this.prisma.balance.findMany(where);
+  }
 
   public async getBalanceToFromWalletId(walletId: number): Promise<Balance[]> {
     return this.prisma.balance.findMany({
@@ -25,6 +30,7 @@ export class SharedBalanceService {
       take: 10,
     });
   }
+
   async doTransFromMerchantToUser(
     rUserId: number,
     pMerchantId: number,
@@ -33,15 +39,17 @@ export class SharedBalanceService {
   ): Promise<Balance> {
     const rWallet = await this.sharedWallet.getWalletByUserId(rUserId);
     const pWallet = await this.sharedWallet.getWalletByMerchantId(pMerchantId);
+    const txId = this.helpers.doCreateUUID('balance');
     await this.sharedWallet.transferAmountBetweenWallets(
       rWallet,
       pWallet,
       amount,
+      txId,
       true,
     );
     return this.prisma.balance.create({
       data: {
-        uid: this.helpers.doCreateUUID('balance'),
+        uid: txId,
         amount,
         payableMerchant: {
           connect: {
@@ -72,15 +80,17 @@ export class SharedBalanceService {
   ): Promise<Balance> {
     const rWallet = await this.sharedWallet.getWalletByMerchantId(rMerchantId);
     const pWallet = await this.sharedWallet.getWalletByMerchantId(pMerchantId);
+    const txID = this.helpers.doCreateUUID('balance');
     await this.sharedWallet.transferAmountBetweenWallets(
       rWallet,
       pWallet,
       amount,
+      txID,
       true,
     );
     return this.prisma.balance.create({
       data: {
-        uid: this.helpers.doCreateUUID('balance'),
+        uid: txID,
         amount,
         payableMerchant: {
           connect: {
@@ -116,15 +126,17 @@ export class SharedBalanceService {
   ): Promise<Balance> {
     const rWallet = await this.sharedWallet.getWalletByUserId(rUserId);
     const pWallet = await this.sharedWallet.getWalletByUserId(pUserId);
+    const txID = this.helpers.doCreateUUID('balance');
     await this.sharedWallet.transferAmountBetweenWallets(
       rWallet,
       pWallet,
       amount,
+      txID,
       true,
     );
     return this.prisma.balance.create({
       data: {
-        uid: this.helpers.doCreateUUID('balance'),
+        uid: txID,
         amount,
         payableWallet: {
           connect: {
@@ -150,16 +162,18 @@ export class SharedBalanceService {
   ): Promise<Balance> {
     const rWallet = await this.sharedWallet.getWalletByMerchantId(rMerchantId);
     const pWallet = await this.sharedWallet.getWalletByUserId(pUserId);
+    const txID = this.helpers.doCreateUUID('balance');
     await this.sharedWallet.transferAmountBetweenWallets(
       rWallet,
       pWallet,
       amount,
+      txID,
       true,
       true,
     );
     return this.prisma.balance.create({
       data: {
-        uid: this.helpers.doCreateUUID('balance'),
+        uid: txID,
         amount,
         receivableMerchant: {
           connect: {
@@ -213,6 +227,50 @@ export class SharedBalanceService {
       },
     });
     return this.sortBalance(balanceWithWallets);
+  }
+
+  @OnEvent(WEBSOCKET_EVENTS.TX_CONFIRMED)
+  async onTxConfirmed({ data }: any) {
+    const { signature } = data;
+    const balanceId = signature.split('.')[0];
+    console.log('[mark_tx_as_confirmed]', balanceId);
+    const balance = await this.prisma.balance.findFirst({
+      where: { uid: balanceId },
+    });
+    if (balance) {
+      return this.prisma.balance.update({
+        where: {
+          uid: balanceId,
+        },
+        data: {
+          confirmedAt: new Date(),
+          rejectedAt: null,
+        },
+      });
+    }
+    return;
+  }
+
+  @OnEvent(WEBSOCKET_EVENTS.TX_REJECTED)
+  async onTxRejected({ data }: any) {
+    const { signature } = data;
+    const balanceId = signature.split('.')[0];
+    console.log('[mark_tx_as_rejected]', balanceId);
+    const balance = await this.prisma.balance.findFirst({
+      where: { uid: balanceId },
+    });
+    if (balance) {
+      return this.prisma.balance.update({
+        where: {
+          uid: balanceId,
+        },
+        data: {
+          rejectedAt: new Date(),
+          confirmedAt: null,
+        },
+      });
+    }
+    return;
   }
 
   private sortBalance(walletBalanceLog: any): SortedBalance[] {

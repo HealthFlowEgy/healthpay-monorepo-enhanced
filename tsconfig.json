@@ -49,6 +49,12 @@
       ],
       "@app/services/*": [
         "libs/services/src/*"
+      ],
+      "@app/websocket": [
+        "libs/websocket/src"
+      ],
+      "@app/websocket/*": [
+        "libs/websocket/src/*"
       ]
     }
   }

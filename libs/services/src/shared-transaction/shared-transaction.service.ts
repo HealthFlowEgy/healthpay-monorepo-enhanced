@@ -11,6 +11,16 @@ export class SharedTransactionService {
     @Inject(HelpersService) private helpers: HelpersService,
     @Inject(OnelinkService) private onelink: OnelinkService,
   ) {}
+
+  // get trasnaction by id
+  public async getTransactionById(id: number): Promise<Transaction> {
+    return this.prisma.transaction.findFirst({ where: { id } });
+  }
+
+  public async getTransactionByUid(uid: string): Promise<Transaction> {
+    return this.prisma.transaction.findFirst({ where: { uid } });
+  }
+
   public async doCreateTransaction(
     user: User,
     amount: number,
@@ -33,6 +43,15 @@ export class SharedTransactionService {
         },
         amount,
       },
+    });
+  }
+
+  public async doUpdateTx(id, data): Promise<Transaction> {
+    return this.prisma.transaction.update({
+      where: {
+        id,
+      },
+      data,
     });
   }
 }

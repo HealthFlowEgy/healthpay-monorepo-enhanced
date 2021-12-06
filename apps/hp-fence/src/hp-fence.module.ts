@@ -19,6 +19,7 @@ import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout
 import { ValuController } from './valu/valu.controller';
 import { ConfigModule } from '@nestjs/config';
 import { ValidationsModule } from '@app/validations';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -30,6 +31,9 @@ import { ValidationsModule } from '@app/validations';
       context: ({ req, connection }) =>
         connection ? { req: connection.context } : { req },
     }),
+
+    EventEmitterModule.forRoot(),
+
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       parser: I18nJsonParser,

@@ -24,6 +24,7 @@ model User {
   isVerified            Boolean                @default(false)
   createdFrom           String?                @default("HEALTH_PAY")
   prefLang              String?                @default("en")
+  remember_token        String? @db.Text
   otp                   OTP[]
   notifyTokens          UserNotifyTokens[]
   notifications         Notification[]
@@ -187,6 +188,8 @@ model Balance {
   type                 BALANCE_TYPE @default(U2U)
   amount               Float
   notes                String?
+  confirmedAt          DateTime?
+  rejectedAt           DateTime?
   createdAt            DateTime?    @default(now())
   updatedAt            DateTime?    @updatedAt
 }
@@ -274,7 +277,7 @@ model Admin {
   email                     String    @unique
   email_verified_at         DateTime? @default(now())
   password                  String
-  remember_token            String?
+  remember_token            String?   @db.Text
   profile_phone_path        String?
   two_factor_secret         String?   @db.Text
   two_factor_recovery_codes String?   @db.Text

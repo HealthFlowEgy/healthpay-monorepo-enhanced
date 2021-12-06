@@ -1,7 +1,10 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
+import { fromPrisma } from '@app/websocket/transaction';
+import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { Wallet } from '@prisma/client';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { Prisma, Wallet } from '@prisma/client';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 
 @Injectable()
@@ -10,27 +13,34 @@ export class SharedWalletService {
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
     @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
+  async getAllWallets(where?: any): Promise<Wallet[]> {
+    return this.prisma.wallet.findMany(where);
+  }
+
   async getWalletByUserId(userId: number): Promise<Wallet> {
-    return this.prisma.wallet.findFirst({
+    return this.getAndUpdateWallet({
       where: {
         userId,
       },
     });
   }
   async getWalletByUserUID(userUID: string): Promise<Wallet> {
-    return this.prisma.user
+    const wallet = await this.prisma.user
       .findFirst({
         where: {
           uid: userUID,
         },
       })
       .wallet();
+
+    return this.getAndUpdateWallet({ where: { id: wallet.id } });
   }
 
   async getWalletByMerchantId(merchantId: number): Promise<Wallet> {
-    return this.prisma.merchant
+    const wallet = await this.prisma.merchant
       .findFirst({
         where: {
           id: merchantId,
@@ -38,10 +48,11 @@ export class SharedWalletService {
       })
       .owner()
       .wallet();
+    return this.getAndUpdateWallet({ where: { id: wallet.id } });
   }
 
   async getWalletById(id: number): Promise<Wallet> {
-    return this.prisma.wallet.findFirst({
+    return this.getAndUpdateWallet({
       where: {
         id,
       },
@@ -61,10 +72,38 @@ export class SharedWalletService {
     });
   }
 
+  async getAndUpdateWallet(where: Prisma.WalletFindFirstArgs): Promise<Wallet> {
+    const wallet = await this.prisma.wallet.findFirst(where);
+    this.eventEmitter.emit(WEBSOCKET_EVENTS.UTXO_QUERY, wallet);
+    return wallet;
+  }
+
+  @OnEvent(WEBSOCKET_EVENTS.UTXO_UPDATE)
+  async onUTXOUpdate({ data }: any): Promise<boolean> {
+    let walletId = 0;
+    if (data.publicKey === 'root') {
+      const hpMerchant = await this.prisma.merchant.findFirst({
+        where: { isHp: 'CASHIN' },
+      });
+      walletId = hpMerchant.id;
+    } else {
+      walletId = parseInt(data.publicKey);
+    }
+
+    const updateWallet = await this.prisma.wallet.update({
+      where: { id: walletId },
+      data: {
+        total: parseFloat((data.amount / 100).toFixed(2)),
+      },
+    });
+    return !!updateWallet.id;
+  }
+
   async transferAmountBetweenWallets(
     rWallet: Wallet,
     pWallet: Wallet,
     amount: number,
+    txId: string,
     safetyCheck?: boolean,
     notify?: boolean,
   ): Promise<boolean> {
@@ -74,10 +113,19 @@ export class SharedWalletService {
         '7001',
         'insufficient funds in payer wallet',
       );
-    const updatePayableWallet = await this.prisma.wallet.update({
-      where: { id: pWallet.id },
-      data: { total: pWallet.total - amount },
-    });
+
+    if (pWallet.total === amount) {
+      await this.prisma.wallet.update({
+        where: { id: pWallet.id },
+        data: {
+          total: 0,
+        },
+      });
+    }
+    // const updatePayableWallet = await this.prisma.wallet.update({
+    //   where: { id: pWallet.id },
+    //   data: { total: pWallet.total - amount },
+    // });
     // TODO: add healthpay commission
     if (notify) {
       const pUser = await this.prisma.wallet
@@ -90,10 +138,15 @@ export class SharedWalletService {
         .send();
     }
 
-    const updateReceivableWallet = await this.prisma.wallet.update({
-      where: { id: rWallet.id },
-      data: { total: rWallet.total + amount },
-    });
-    return !!(updateReceivableWallet.id && updatePayableWallet.id);
+    this.eventEmitter.emit(
+      WEBSOCKET_EVENTS.PRISMA_NEW_TX,
+      fromPrisma(pWallet.id, rWallet.id, amount, 0, txId),
+    );
+
+    // const updateReceivableWallet = await this.prisma.wallet.update({
+    //   where: { id: rWallet.id },
+    //   data: { total: rWallet.total + amount },
+    // });
+    return true;
   }
 }

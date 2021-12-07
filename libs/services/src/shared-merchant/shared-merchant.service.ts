@@ -30,6 +30,14 @@ export class SharedMerchantService {
     );
   }
 
+  public async cashInMerchant(): Promise<Merchant | null> {
+    return this.prisma.merchant.findFirst({
+      where: {
+        isHp: 'CASHIN',
+      },
+    });
+  }
+
   async getMerchantByApiHeader(apiHeader: string): Promise<Merchant | null> {
     return this.prisma.merchant.findFirst({ where: { apiHeader } });
   }

@@ -32,8 +32,8 @@ export class User {
   // @Field(() => [CashOutMethod])
   // cashOutMethods: [CashOutMethod];
 
-  // @Field(() => Wallet, { nullable: true })
-  // wallet: Wallet | null;
+  @Field(() => Wallet, { nullable: true })
+  wallet: Wallet | null;
 }
 
 @ObjectType()

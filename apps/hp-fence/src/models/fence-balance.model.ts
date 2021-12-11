@@ -17,6 +17,12 @@ export class Balance {
   @Field(() => Date)
   createdAt: Date;
 
+  @Field(() => Date)
+  confirmedAt: Date;
+
+  @Field(() => Date)
+  rejectedAt: Date;
+
   @Field(() => User, { nullable: true })
   user: User | null;
 

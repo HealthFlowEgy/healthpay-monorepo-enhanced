@@ -8,8 +8,9 @@ export class PrismaService
 {
   async onModuleInit() {
     await this.$connect();
-
     this.$use(async (params, next) => {
+      // TODO: Add prisma logging middleware
+      const before = Date.now();
       if (params.action == 'createMany' || params.action == 'create') {
         params.args['data'] = {
           ...params.args['data'],
@@ -17,7 +18,12 @@ export class PrismaService
           updatedAt: new Date().toISOString(),
         };
       }
-      return next(params);
+      const result = await next(params);
+      const after = Date.now();
+      console.log(
+        `Query ${params.model}.${params.action} took ${after - before}ms`,
+      );
+      return result;
     });
   }
 

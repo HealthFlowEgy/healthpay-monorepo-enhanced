@@ -16,8 +16,25 @@ export class FenceWalletApisResolver {
   ) {}
   @Query(() => Wallet)
   @UseGuards(JwtAuthGuard)
-  async userWallet(@CurrentUser() user: User) {
-    return this.services.sharedWallet.getWalletByUserId(user.id);
+  async userWallet(
+    @CurrentUser() user: User,
+    @Args('take', { nullable: true }) take: number,
+    @Args('startDate', { nullable: true }) startDate: string,
+    @Args('endDate', { nullable: true }) endDate: string,
+  ) {
+    const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
+    const balance =
+      await this.services.sharedBalance.getUserWalletWithBalanceWithMerchantsUsers(
+        wallet.id,
+        startDate,
+        endDate,
+        take,
+      );
+    return {
+      id: wallet.id,
+      total: wallet.total,
+      balance: balance,
+    };
   }
 
   @Mutation(() => Transaction, { nullable: true })

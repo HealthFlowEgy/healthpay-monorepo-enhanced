@@ -3,7 +3,7 @@ import { PrismaService } from '@app/prisma';
 import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
 import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Balance } from '@prisma/client';
+import { Balance, Wallet } from '@prisma/client';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { SortedBalance } from './shared-balance.types';
 
@@ -195,38 +195,33 @@ export class SharedBalanceService {
       },
     });
   }
-
+  // TODO: Make wallet return with start and end date with balance arr
+  // TODO: first
   async getUserWalletWithBalanceWithMerchantsUsers(
     walletId: number,
+    startDate?: string,
+    endDate?: string,
+    last?: number,
   ): Promise<SortedBalance[]> {
-    const balanceWithWallets = await this.prisma.wallet.findFirst({
-      where: {
-        id: walletId,
-      },
-      include: {
-        payableBalance: {
-          include: {
-            receivableMerchant: true,
-            receivableWallet: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-        receivableBalance: {
-          include: {
-            payableMerchant: true,
-            payableWallet: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    return this.sortBalance(balanceWithWallets);
+    let wallet: Wallet;
+    if (
+      last !== undefined &&
+      startDate === undefined &&
+      endDate === undefined
+    ) {
+      wallet = await this.sharedWallet.walletWithLastTranx(walletId, last);
+      return this.sortBalance(wallet);
+    } else if (startDate !== undefined && last === undefined) {
+      wallet = await this.sharedWallet.walletWithRangeDate(
+        walletId,
+        startDate,
+        endDate,
+      );
+      return this.sortBalance(wallet);
+    } else if (last === undefined && startDate === undefined) {
+      wallet = await this.sharedWallet.walletWithLastTranx(walletId);
+      return this.sortBalance(wallet);
+    }
   }
 
   @OnEvent(WEBSOCKET_EVENTS.TX_CONFIRMED)

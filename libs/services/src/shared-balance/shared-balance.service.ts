@@ -204,22 +204,21 @@ export class SharedBalanceService {
     last?: number,
   ): Promise<SortedBalance[]> {
     let wallet: Wallet;
-    if (
-      last !== undefined &&
-      startDate === undefined &&
-      endDate === undefined
-    ) {
-      wallet = await this.sharedWallet.walletWithLastTranx(walletId, last);
+
+    if (!startDate && !endDate && !last) {
+      wallet = await this.sharedWallet.walletWithAllTranx(walletId);
       return this.sortBalance(wallet);
-    } else if (startDate !== undefined && last === undefined) {
+    }
+    if (startDate && endDate && !last) {
       wallet = await this.sharedWallet.walletWithRangeDate(
         walletId,
         startDate,
         endDate,
       );
       return this.sortBalance(wallet);
-    } else if (last === undefined && startDate === undefined) {
-      wallet = await this.sharedWallet.walletWithAllTranx(walletId);
+    }
+    if (!startDate && !endDate && last) {
+      wallet = await this.sharedWallet.walletWithLastTranx(walletId, last);
       return this.sortBalance(wallet);
     }
   }

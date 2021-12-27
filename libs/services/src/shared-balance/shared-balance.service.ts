@@ -209,7 +209,7 @@ export class SharedBalanceService {
       wallet = await this.sharedWallet.walletWithAllTranx(walletId);
       return this.sortBalance(wallet);
     }
-    if (startDate && endDate && !last) {
+    if (startDate && !last) {
       wallet = await this.sharedWallet.walletWithRangeDate(
         walletId,
         startDate,

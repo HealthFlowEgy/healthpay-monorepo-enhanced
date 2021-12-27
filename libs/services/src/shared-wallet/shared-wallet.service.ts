@@ -321,7 +321,7 @@ export class SharedWalletService {
       return wallet;
     }
   }
-  async walletWithLastTranx(walletId: number, take?: number): Promise<Wallet> {
+  async walletWithLastTranx(walletId: number, take: number): Promise<Wallet> {
     const wallet = await this.prisma.wallet.findFirst({
       where: {
         id: walletId,
@@ -340,6 +340,37 @@ export class SharedWalletService {
         },
         receivableBalance: {
           take: take,
+          include: {
+            payableMerchant: true,
+            payableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return wallet;
+  }
+  async walletWithAllTranx(walletId: number): Promise<Wallet> {
+    const wallet = await this.prisma.wallet.findFirst({
+      where: {
+        id: walletId,
+      },
+      include: {
+        payableBalance: {
+          include: {
+            receivableMerchant: true,
+            receivableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        receivableBalance: {
           include: {
             payableMerchant: true,
             payableWallet: {

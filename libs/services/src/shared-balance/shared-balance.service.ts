@@ -219,7 +219,7 @@ export class SharedBalanceService {
       );
       return this.sortBalance(wallet);
     } else if (last === undefined && startDate === undefined) {
-      wallet = await this.sharedWallet.walletWithLastTranx(walletId);
+      wallet = await this.sharedWallet.walletWithAllTranx(walletId);
       return this.sortBalance(wallet);
     }
   }

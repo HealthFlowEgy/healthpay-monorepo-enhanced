@@ -12,7 +12,7 @@ export class FenceCashoutUserSettingsResolver {
     @Parent() settings: CashOutUserSettings,
   ): Promise<CashOutMethod> {
     return this.services.sharedCashoutMethod.cashOutMethodBySettingsId(
-      settings.id,
+      settings.method.id,
     );
   }
 }

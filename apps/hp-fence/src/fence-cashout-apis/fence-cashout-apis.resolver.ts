@@ -36,10 +36,33 @@ export class FenceCashOutApisResolver {
   }
 
   @Query(() => [CashOutMethod])
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async cashOutMethods(): Promise<CashOutMethod[]> {
-    const data = await this.services.sharedCashoutMethod.cashOutMethods();
-
-    return [];
+    return await this.services.sharedCashoutMethod.cashOutMethods();
+  }
+  @Mutation(() => CashOutUserSettings)
+  @UseGuards(JwtAuthGuard)
+  async createCashOutUserSettings(
+    @CurrentUser() user: User,
+    @Args('creditorNo') creditorNo: string,
+    @Args('methodId') methodId: number,
+  ): Promise<CashOutUserSettings> {
+    const settings =
+      await this.services.sharedCashOutSettingsService.doCreateSettings(
+        user.id,
+        creditorNo,
+        methodId,
+      );
+    const method =
+      await this.services.sharedCashoutMethod.cashOutMethodBySettingsId(
+        settings.typeId,
+      );
+    return {
+      id: settings.id,
+      creditorNo: settings.creditorNo,
+      createdAt: settings.createdAt,
+      updatedAt: settings.updatedAt,
+      method,
+    };
   }
 }

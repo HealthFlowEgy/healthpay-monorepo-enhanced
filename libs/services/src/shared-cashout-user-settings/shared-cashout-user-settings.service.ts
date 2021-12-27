@@ -18,7 +18,7 @@ export class SharedCashOutUserSettingsService {
     userId: number,
     creditorNo: string,
     methodId: number,
-  ): Promise<any> {
+  ): Promise<CashOutSettings> {
     return await this.prisma.cashOutSettings.create({
       data: {
         uid: this.helpers.doCreateUUID('cashOutSettings'),

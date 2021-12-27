@@ -160,7 +160,6 @@ export class SharedWalletService {
     walletId: number,
     startDate: string,
   ): Promise<Wallet> {
-    console.log('[SharedWallet].walletWithStartDate', startDate);
     const wallet = await this.prisma.wallet.findFirst({
       where: {
         id: walletId,
@@ -198,7 +197,6 @@ export class SharedWalletService {
         },
       },
     });
-    console.log('[SharedWallet].walletWithStartDate', wallet);
     return wallet;
   }
 
@@ -355,7 +353,6 @@ export class SharedWalletService {
     return wallet;
   }
   async walletWithAllTranx(walletId: number): Promise<Wallet> {
-    console.log('[SharedWallet].walletWithAllTranx', walletId);
     const wallet = await this.prisma.wallet.findFirst({
       where: {
         id: walletId,

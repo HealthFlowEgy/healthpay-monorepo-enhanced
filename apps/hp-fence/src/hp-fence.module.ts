@@ -20,6 +20,8 @@ import { ValuController } from './valu/valu.controller';
 import { ConfigModule } from '@nestjs/config';
 import { ValidationsModule } from '@app/validations';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { FenceCashoutRequestResolver } from './fence-cashout-request/fence-cashout-request.resolver';
+import { FenceCashoutRequestApisResolver } from './fence-cashout-request-apis/fence-cashout-request-apis.resolver';
 
 @Module({
   imports: [
@@ -60,6 +62,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     FenceCashOutApisResolver,
     FenceCashoutUserSettingsResolver,
     FenceCashoutMethodResolver,
+    FenceCashoutRequestResolver,
+    FenceCashoutRequestApisResolver,
   ],
 })
 export class HpFenceModule {}

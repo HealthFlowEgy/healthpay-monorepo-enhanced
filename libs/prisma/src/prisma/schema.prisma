@@ -24,7 +24,7 @@ model User {
   isVerified            Boolean                @default(false)
   createdFrom           String?                @default("HEALTH_PAY")
   prefLang              String?                @default("en")
-  remember_token        String? @db.Text
+  remember_token        String?                @db.Text
   otp                   OTP[]
   notifyTokens          UserNotifyTokens[]
   notifications         Notification[]
@@ -97,6 +97,7 @@ model Notification {
   id        Int       @id @default(autoincrement())
   msg       String
   msg_ar    String?
+  vars      Json?
   userId    Int?
   delivered Boolean   @default(false)
   user      User?     @relation(fields: [userId], references: [id])

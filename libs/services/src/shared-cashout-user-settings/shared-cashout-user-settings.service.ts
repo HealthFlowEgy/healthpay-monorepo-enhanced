@@ -1,11 +1,7 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  CashOutSettings,
-  CashOutTypeLength,
-  CashOutTypes,
-} from '@prisma/client';
+import { CashOutSettings } from '@prisma/client';
 
 @Injectable()
 export class SharedCashOutUserSettingsService {

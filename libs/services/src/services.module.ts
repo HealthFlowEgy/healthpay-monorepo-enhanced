@@ -14,6 +14,7 @@ import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings
 import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
 import { SharedHpOpsService } from './shared-hp-ops/shared-hp-ops.service';
 import { SharedCashoutRequestService } from './shared-cashout-request/shared-cashout-request.service';
+import { SharedNotificationsService } from './shared-notifications/shared-notifications.service';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { SharedCashoutRequestService } from './shared-cashout-request/shared-cas
     SharedCashoutMethodService,
     SharedHpOpsService,
     SharedCashoutRequestService,
+    SharedNotificationsService,
   ],
   exports: [ServicesService],
 })

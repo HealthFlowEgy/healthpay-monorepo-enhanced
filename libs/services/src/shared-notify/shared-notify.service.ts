@@ -89,7 +89,7 @@ export class SharedNotifyService {
       }
     }
 
-    await this.logMessage(this.composed.message, this.thisUser.id);
+    await this.logMessage(this.thisUser.id);
 
     return {
       errors,
@@ -113,10 +113,11 @@ export class SharedNotifyService {
     return this.send();
   }
 
-  private async logMessage(msg: string, userId: number) {
+  private async logMessage(userId: number) {
     return this.prisma.notification.create({
       data: {
-        msg: msg,
+        msg: this.composed.message,
+        vars: this.composed.vars,
         user: {
           connect: {
             id: userId,

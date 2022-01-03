@@ -2,10 +2,18 @@ import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import { fromPrisma } from '@app/websocket/transaction';
 import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Prisma, Wallet } from '@prisma/client';
+import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
+import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
+import { SharedUserService } from '../shared-user/shared-user.service';
 
 @Injectable()
 export class SharedWalletService {
@@ -13,6 +21,10 @@ export class SharedWalletService {
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
     @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
+    @Inject(forwardRef(() => SharedBalanceService))
+    private sharedBalance: SharedBalanceService,
+    @Inject(SharedPaymentRequestService)
+    private sharedPaymentRequests: SharedPaymentRequestService,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -96,6 +108,22 @@ export class SharedWalletService {
         total: parseFloat((data.amount / 100).toFixed(2)),
       },
     });
+
+    const pending = await this.sharedPaymentRequests.getPayablePendingRequests(
+      updateWallet.userId,
+      data.amount / 100,
+    );
+
+    if (pending.length > 0) {
+      this.sharedPaymentRequests.resolvePaymentRequest(pending[0]);
+      this.sharedBalance.doTransFromUserToMerchant(
+        pending[0].merchantId,
+        updateWallet.userId,
+        pending[0].amount,
+        'pending-payment-request' + pending[0].id,
+      );
+    }
+
     return !!updateWallet.id;
   }
 

@@ -13,6 +13,7 @@ import { SharedTransactionService } from './shared-transaction/shared-transactio
 import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings/shared-cashout-user-settings.service';
 import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
 import { SharedHpOpsService } from './shared-hp-ops/shared-hp-ops.service';
+import { SharedPaymentRequestService } from './shared-payment-request/shared-payment-request.service';
 
 @Module({
   imports: [
@@ -26,7 +27,6 @@ import { SharedHpOpsService } from './shared-hp-ops/shared-hp-ops.service';
   providers: [
     ServicesService,
     PrismaService,
-    SharedWalletService,
     SharedUserService,
     SharedMerchantService,
     SharedNotifyService,
@@ -35,6 +35,8 @@ import { SharedHpOpsService } from './shared-hp-ops/shared-hp-ops.service';
     SharedCashOutUserSettingsService,
     SharedCashoutMethodService,
     SharedHpOpsService,
+    SharedPaymentRequestService,
+    SharedWalletService,
   ],
   exports: [ServicesService],
 })

@@ -147,6 +147,33 @@ export class SwordMerchantUserApisResolver {
       userToken: { minLen: 5 },
     }),
   )
+  async sendPaymentRequest(
+    @Args('userToken') userToken: string,
+    @Args('amount') amount: number,
+    // induced fields
+    @CurrentMerchant() merchant: Merchant,
+  ) {
+    const user = await this.services.sharedMerchant.getUserFromLink(
+      merchant,
+      userToken,
+    );
+    return {
+      isSuccess:
+        !!(await this.services.sharedPaymentRequest.createPaymentRequest(
+          user,
+          merchant,
+          amount,
+        )),
+    };
+  }
+
+  @Mutation(() => Success, { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    new NestjsGraphqlValidator({
+      userToken: { minLen: 5 },
+    }),
+  )
   async payToUser(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,

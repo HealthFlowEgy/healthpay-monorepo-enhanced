@@ -29,11 +29,20 @@ export class User {
   @Field(() => String, { nullable: true })
   mobile?: string | null;
 
-  // @Field(() => [CashOutMethod])
-  // cashOutMethods: [CashOutMethod];
+  @Field(() => String, { nullable: true })
+  prefLang?: string | null;
 
-  @Field(() => Wallet, { nullable: true })
-  wallet: Wallet | null;
+  @Field(() => String, { nullable: true })
+  nationalId?: string | null;
+
+  @Field(() => String, { nullable: true })
+  nationalDoc?: string | null;
+
+  @Field(() => Boolean, { nullable: true })
+  isNationalVerified?: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  isVerified?: boolean | null;
 }
 
 @ObjectType()

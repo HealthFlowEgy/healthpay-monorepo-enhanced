@@ -77,6 +77,7 @@ export class SharedPaymentRequestService {
         user: {
           id: userId,
         },
+        status: 'PENDING',
         amount: {
           lte: amount,
         },

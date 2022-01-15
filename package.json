@@ -5,7 +5,10 @@
   "author": "",
   "private": true,
   "license": "PRIVATE",
-  "engines": {},
+  "engines": {
+    "node": "12.16.2",
+    "npm": "6.13.4"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "postinstall-sword": "npx prisma migrate deploy --schema=libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=libs/prisma/src/prisma/schema.prisma && nest build hp-sword",

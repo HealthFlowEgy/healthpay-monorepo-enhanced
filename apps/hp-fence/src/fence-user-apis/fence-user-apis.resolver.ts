@@ -5,7 +5,7 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../decorators/user.decorator';
@@ -117,7 +117,7 @@ export class FenceUserApisResolver {
     @Args('nationalDocBack', { nullable: true }) nationalDocBack: string,
     @CurrentUser() user: User,
   ) {
-    if (user.nationalId && user.nationalDoc) {
+    if (user.nationalId && user.nationalDocFront && user.nationalDocBack) {
       throw new BadRequestException(5005, 'User already uploaded docs');
     }
     const request =

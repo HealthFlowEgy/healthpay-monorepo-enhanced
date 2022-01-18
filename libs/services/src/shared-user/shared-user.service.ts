@@ -2,11 +2,9 @@ import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import {
   BadRequestException,
-  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, User } from '@prisma/client';
@@ -14,7 +12,6 @@ import moment from 'moment';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { doUpsertUserInput } from './shared-user.types';
-import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class SharedUserService {
   constructor(

@@ -21,7 +21,6 @@ export class SharedWalletService {
   }
 
   async getWalletByUserId(userId: number): Promise<Wallet> {
-    const user = await this.prisma.user.findFirst({ where: { id: userId } });
     return this.getAndUpdateWallet({
       where: {
         userId,

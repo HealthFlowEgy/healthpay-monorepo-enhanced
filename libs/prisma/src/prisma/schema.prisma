@@ -11,7 +11,8 @@ model User {
   id                    Int                      @id @default(autoincrement())
   uid                   String                   @unique
   nationalId            String?
-  nationalDoc           String?
+  nationalDocFront      String?
+  nationalDocBack       String?
   avatar                String?
   isNationalVerified    Boolean                  @default(false)
   email                 String?                  @unique

@@ -113,7 +113,8 @@ export class FenceUserApisResolver {
   )
   async verifyUserDocs(
     @Args('nationalId', { nullable: true }) nationalId: string,
-    @Args('nationalDoc', { nullable: true }) nationalDoc: string,
+    @Args('nationalDocFront', { nullable: true }) nationalDocFront: string,
+    @Args('nationalDocBack', { nullable: true }) nationalDocBack: string,
     @CurrentUser() user: User,
   ) {
     if (user.nationalId && user.nationalDoc) {
@@ -123,7 +124,8 @@ export class FenceUserApisResolver {
       await this.services.sharedUser.createVerificationUserRequest(
         user.id,
         nationalId,
-        nationalDoc,
+        nationalDocFront,
+        nationalDocBack,
       );
     if (!request) {
       throw new BadRequestException(5005, 'Sorry can not verify your docs');

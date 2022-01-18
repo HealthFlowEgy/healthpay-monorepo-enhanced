@@ -85,7 +85,8 @@ export class SharedUserService {
       | 'email'
       | 'avatar'
       | 'nationalId'
-      | 'nationalDoc'
+      | 'nationalDocFront'
+      | 'nationalDocBack'
       | 'uid'
     >,
   ): Promise<User> {
@@ -169,7 +170,8 @@ export class SharedUserService {
   public async createVerificationUserRequest(
     userId: number,
     nationalId: string,
-    nationalDoc: string,
+    nationalDocFront: string,
+    nationalDocBack: string,
   ): Promise<boolean> {
     try {
       const request = await this.prisma.userVerificationRequest.create({
@@ -185,7 +187,7 @@ export class SharedUserService {
       if (request) {
         const updatedUser = await this.prisma.user.update({
           where: { id: userId },
-          data: { nationalId, nationalDoc },
+          data: { nationalId, nationalDocFront, nationalDocBack },
         });
         if (updatedUser) {
           return true;

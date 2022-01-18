@@ -166,6 +166,38 @@ export class SharedUserService {
     return user;
   }
 
+  public async createVerificationUserRequest(
+    userId: number,
+    nationalId: string,
+    nationalDoc: string,
+  ): Promise<boolean> {
+    try {
+      const request = await this.prisma.userVerificationRequest.create({
+        data: {
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          status: 'PENDING',
+        },
+      });
+      if (request) {
+        const updatedUser = await this.prisma.user.update({
+          where: { id: userId },
+          data: { nationalId, nationalDoc },
+        });
+        if (updatedUser) {
+          return true;
+        }
+      } else {
+        return false;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   // TODO: create shared valu service
   public async createValuHmac(userId: number): Promise<any> {
     const user = await this.getUserById(userId);

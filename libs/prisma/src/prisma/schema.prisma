@@ -8,23 +8,24 @@ datasource db {
 }
 
 model User {
-  id                    Int                    @id @default(autoincrement())
-  uid                   String                 @unique
+  id                    Int                      @id @default(autoincrement())
+  uid                   String                   @unique
   nationalId            String?
   nationalDoc           String?
   avatar                String?
-  isNationalVerified    Boolean                @default(false)
-  email                 String?                @unique
+  isNationalVerified    Boolean                  @default(false)
+  email                 String?                  @unique
   firstName             String?
   lastName              String?
-  mobile                String                 @unique
+  mobile                String                   @unique
   password              String?
-  loginFrom             String?                @default("HEALTH_PAY")
-  lastLogin             DateTime?              @default(now())
-  isVerified            Boolean                @default(false)
-  createdFrom           String?                @default("HEALTH_PAY")
-  prefLang              String?                @default("en")
-  remember_token        String?                @db.Text
+  loginFrom             String?                  @default("HEALTH_PAY")
+  lastLogin             DateTime?                @default(now())
+  isVerified            Boolean                  @default(false)
+  verificationRequest   UserVerificationRequest?
+  createdFrom           String?                  @default("HEALTH_PAY")
+  prefLang              String?                  @default("en")
+  remember_token        String?                  @db.Text
   otp                   OTP[]
   notifyTokens          UserNotifyTokens[]
   notifications         Notification[]
@@ -37,14 +38,25 @@ model User {
   cashOutRequest        CashOutRequest[]
   cashOutSettings       CashOutSettings[]
   valuHmac              ValuHmac[]
-  cashInOps             Operation?             @relation(fields: [cashInOpsId], references: [id], name: "UserCashInOps")
+  cashInOps             Operation?               @relation(fields: [cashInOpsId], references: [id], name: "UserCashInOps")
   cashInOpsId           Int?
-  cashOutOps            Operation?             @relation(fields: [cashOutOpsId], references: [id], name: "UserCashOutOps")
+  cashOutOps            Operation?               @relation(fields: [cashOutOpsId], references: [id], name: "UserCashOutOps")
   cashOutOpsId          Int?
-  transferOps           Operation?             @relation(fields: [transferOpsId], references: [id], name: "UserTransferOps")
+  transferOps           Operation?               @relation(fields: [transferOpsId], references: [id], name: "UserTransferOps")
   transferOpsId         Int?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime?              @default(now()) @updatedAt
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime?                @default(now()) @updatedAt
+
+}
+
+model UserVerificationRequest {
+  id        Int                 @id @default(autoincrement())
+  userId    Int                 @unique
+  user      User                @relation(fields: [userId], references: [id])
+  status    VERIFICATION_STATUS @default(PENDING)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime?           @default(now()) @updatedAt
+
 
 }
 
@@ -124,8 +136,8 @@ model Merchant {
   payableBalance    Balance[]              @relation("PayableMerchantBalance")
   createdAt         DateTime               @default(now())
   updatedAt         DateTime?              @default(now()) @updatedAt
+  Transaction       Transaction[]
 
-  Transaction Transaction[]
   @@unique([name, ownerId], name: "name_ownerId_unique")
 }
 
@@ -338,6 +350,13 @@ enum TRANS_STATUS {
   CANCELLED
   COMPLETED
   DECLINED
+}
+
+enum VERIFICATION_STATUS {
+  PENDING
+  VERIFIED
+  SUSPENDED
+  BLACKLIST
 }
 
 enum OPERATION_METHOD_TYPE {

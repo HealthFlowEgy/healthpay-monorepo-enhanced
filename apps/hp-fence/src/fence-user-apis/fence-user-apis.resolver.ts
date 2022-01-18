@@ -1,10 +1,16 @@
 import { ServicesService } from '@app/services';
-import { Inject, UseGuards, UsePipes } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { Success } from '../models/fence-success.model';
 import { User, UserWithToken } from '../models/fence-user.model';
 
 @Resolver()
@@ -96,6 +102,37 @@ export class FenceUserApisResolver {
     });
   }
   // update profile mutation
+
+  // verify user docs mutation
+  @Mutation(() => Success, { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    new NestjsGraphqlValidator({
+      nationalId: { maxLen: 14, minLen: 14 },
+    }),
+  )
+  async verifyUserDocs(
+    @Args('nationalId', { nullable: true }) nationalId: string,
+    @Args('nationalDoc', { nullable: true }) nationalDoc: string,
+    @CurrentUser() user: User,
+  ) {
+    if (user.nationalId && user.nationalDoc) {
+      throw new BadRequestException(5005, 'User already uploaded docs');
+    }
+    const request =
+      await this.services.sharedUser.createVerificationUserRequest(
+        user.id,
+        nationalId,
+        nationalDoc,
+      );
+    if (!request) {
+      throw new BadRequestException(5005, 'Sorry can not verify your docs');
+    }
+    return {
+      isSuccess: true,
+    };
+  }
+  // verify user docs mutation
 
   // profile query
   @Query(() => User)

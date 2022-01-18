@@ -22,12 +22,6 @@ export class SharedWalletService {
 
   async getWalletByUserId(userId: number): Promise<Wallet> {
     const user = await this.prisma.user.findFirst({ where: { id: userId } });
-    this.sharedNotify
-      .toUser(user)
-      .compose('deduct', { amount: 10 })
-      .allChannels()
-      .send();
-
     return this.getAndUpdateWallet({
       where: {
         userId,

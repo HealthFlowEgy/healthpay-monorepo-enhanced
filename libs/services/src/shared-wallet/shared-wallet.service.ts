@@ -96,8 +96,15 @@ export class SharedWalletService {
     if (data.publicKey === 'root') {
       const hpMerchant = await this.prisma.merchant.findFirst({
         where: { isHp: 'CASHIN' },
+        include: {
+          owner: {
+            include: {
+              wallet: true,
+            },
+          },
+        },
       });
-      walletId = hpMerchant.id;
+      walletId = hpMerchant.owner.wallet.id;
     } else {
       walletId = parseInt(data.publicKey);
     }

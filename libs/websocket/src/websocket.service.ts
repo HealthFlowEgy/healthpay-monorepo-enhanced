@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { w3cwebsocket } from 'websocket';
-import WsTransaction from './transaction';
+import WsTransaction, { HP_RESERVED_IDS } from './transaction';
 import WebsocketEvent from './websocket-event';
 import { WEBSOCKET_EVENTS } from './websocket-events';
 
@@ -141,7 +141,11 @@ export class WebsocketService {
   onUTXOQuery({ id }: Wallet) {
     const newEvent = new WebsocketEvent();
     newEvent.setEventType('UTXO_QUERY');
-    newEvent.setData({ publicKey: `${id}` });
+    let strID = `${id}`;
+    if (HP_RESERVED_IDS.includes(`${id}`)) {
+      strID = 'root';
+    }
+    newEvent.setData({ publicKey: strID });
     this.send(newEvent);
   }
 }

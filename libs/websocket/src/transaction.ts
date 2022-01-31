@@ -1,6 +1,6 @@
 import { SHA256 } from 'crypto-js';
 
-const HP_RESERVED_IDS = ['12', '13', '0', '6'];
+export const HP_RESERVED_IDS = ['12', '13', '0', '6'];
 
 export default class WsTransaction {
   inputPublicKey: string;

@@ -92,47 +92,51 @@ export class SharedWalletService {
 
   @OnEvent(WEBSOCKET_EVENTS.UTXO_UPDATE)
   async onUTXOUpdate({ data }: any): Promise<boolean> {
-    let walletId = 0;
-    if (data.publicKey === 'root') {
-      const hpMerchant = await this.prisma.merchant.findFirst({
-        where: { isHp: 'CASHIN' },
-        include: {
-          owner: true,
+    try {
+      let walletId = 0;
+      if (data.publicKey === 'root') {
+        const hpMerchant = await this.prisma.merchant.findFirst({
+          where: { isHp: 'CASHIN' },
+          include: {
+            owner: true,
+          },
+        });
+        const ownerWallet = await this.prisma.wallet.findFirst({
+          where: {
+            userId: hpMerchant.owner.id,
+          },
+        });
+        walletId = ownerWallet.id;
+      } else {
+        walletId = parseInt(data.publicKey);
+      }
+
+      const updateWallet = await this.prisma.wallet.update({
+        where: { id: walletId },
+        data: {
+          total: parseFloat((data.amount / 100).toFixed(2)),
         },
       });
-      const ownerWallet = await this.prisma.wallet.findFirst({
-        where: {
-          userId: hpMerchant.owner.id,
-        },
-      });
-      walletId = ownerWallet.id;
-    } else {
-      walletId = parseInt(data.publicKey);
+
+      const pending =
+        await this.sharedPaymentRequests.getPayablePendingRequests(
+          updateWallet.userId,
+          data.amount / 100,
+        );
+
+      if (pending.length > 0) {
+        this.sharedPaymentRequests.resolvePaymentRequest(pending[0]);
+        this.sharedBalance.doTransFromUserToMerchant(
+          pending[0].merchantId,
+          updateWallet.userId,
+          pending[0].amount,
+          'pending-payment-request' + pending[0].id,
+        );
+      }
+      return !!updateWallet.id;
+    } catch (e) {
+      console.log('[utxo-update exepction]', e);
     }
-
-    const updateWallet = await this.prisma.wallet.update({
-      where: { id: walletId },
-      data: {
-        total: parseFloat((data.amount / 100).toFixed(2)),
-      },
-    });
-
-    const pending = await this.sharedPaymentRequests.getPayablePendingRequests(
-      updateWallet.userId,
-      data.amount / 100,
-    );
-
-    if (pending.length > 0) {
-      this.sharedPaymentRequests.resolvePaymentRequest(pending[0]);
-      this.sharedBalance.doTransFromUserToMerchant(
-        pending[0].merchantId,
-        updateWallet.userId,
-        pending[0].amount,
-        'pending-payment-request' + pending[0].id,
-      );
-    }
-
-    return !!updateWallet.id;
   }
 
   async transferAmountBetweenWallets(

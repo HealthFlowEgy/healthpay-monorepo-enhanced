@@ -20,21 +20,21 @@ export class SharedPaymentRequestService {
     merchant: Merchant,
     amount: number,
   ): Promise<PaymentRequest> {
-    const transaction = await this.transaction.doCreateTransaction(
-      user,
-      amount,
-      merchant,
-    );
+    // const transaction = await this.transaction.doCreateTransaction(
+    //   user,
+    //   amount,
+    //   merchant,
+    // );
     return this.prisma.paymentRequest.create({
       data: {
         uid: this.helpers.doCreateUUID('paymentRequest'),
         amount,
         status: 'PENDING',
-        transaction: {
-          connect: {
-            id: transaction.id,
-          },
-        },
+        // transaction: {
+        //   connect: {
+        //     id: transaction.id,
+        //   },
+        // },
         merchant: {
           connect: {
             id: merchant.id,

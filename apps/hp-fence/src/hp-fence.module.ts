@@ -49,7 +49,7 @@ import { ValuController } from './valu/valu.controller';
     ServicesModule,
     HelpersModule,
     AuthModule,
-    ConfigModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     ValidationsModule,
     WebsocketModule
   ],

@@ -133,16 +133,16 @@ export class SharedWalletService {
     //   data: { total: pWallet.total - amount },
     // });
     // TODO: add healthpay commission
-    if (notify) {
-      const pUser = await this.prisma.wallet
-        .findFirst({ where: { id: pWallet.id } })
-        .user();
-      this.sharedNotify
-        .toUser(pUser)
-        .compose('deduct', { amount })
-        .allChannels()
-        .send();
-    }
+    // if (notify) {
+    //   const pUser = await this.prisma.wallet
+    //     .findFirst({ where: { id: pWallet.id } })
+    //     .user();
+    //   this.sharedNotify
+    //     .toUser(pUser)
+    //     .compose('deduct', { amount })
+    //     .allChannels()
+    //     .send();
+    // }
 
     this.eventEmitter.emit(
       WEBSOCKET_EVENTS.PRISMA_NEW_TX,

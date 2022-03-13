@@ -35,6 +35,8 @@ export class FenceCashoutRequestApisResolver {
         amount,
         settingsId,
       );
+      const hpMerchant = await this.services.sharedMerchant.cashInMerchant()
+      await this.services.sharedBalance.doTransFromUserToMerchant(hpMerchant.id, user.id, amount, 'deducted due cashout request')
     return request;
   }
 }

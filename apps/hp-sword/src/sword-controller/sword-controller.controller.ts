@@ -16,25 +16,25 @@ export class SwordControllerController {
     private eventEmitter2: EventEmitter2,
   ) {}
 
-  @Get('/init')
-  async init(): Promise<string> {
-    const wallets = await this.services.sharedWallet.getAllWallets({
-      where: { id: { gt: 0 } },
-    });
+  // @Get('/init')
+  // async init(): Promise<string> {
+  //   const wallets = await this.services.sharedWallet.getAllWallets({
+  //     where: { id: { gt: 0 } },
+  //   });
 
-    const transArr = [];
+  //   const transArr = [];
 
-    for (const wallet of wallets) {
-      let trans = undefined;
-      if (wallet.total > 0) {
-        trans = fromPrisma('root', wallet.id, wallet.total, 0, wallet.id);
-        this.eventEmitter2.emit(WEBSOCKET_EVENTS.PRISMA_NEW_TX, trans);
-        await sleep(1000);
-      }
-    }
+  //   for (const wallet of wallets) {
+  //     let trans = undefined;
+  //     if (wallet.total > 0) {
+  //       trans = fromPrisma('root', wallet.id, wallet.total, 0, wallet.id);
+  //       this.eventEmitter2.emit(WEBSOCKET_EVENTS.PRISMA_NEW_TX, trans);
+  //       await sleep(1000);
+  //     }
+  //   }
 
-    return JSON.stringify(transArr);
-  }
+  //   return JSON.stringify(transArr);
+  // }
 
   @Get('/tryone')
   async tryone(): Promise<string> {

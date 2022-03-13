@@ -8,6 +8,7 @@ export class SharedCashoutRequestService {
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
+    
   ) {}
 
   public async requestsByUserId(userId: number): Promise<CashOutRequest[]> {
@@ -32,6 +33,7 @@ export class SharedCashoutRequestService {
     amount: number,
     settingsId: number,
   ): Promise<CashOutRequest> {
+
     const request = await this.prisma.cashOutRequest.create({
       data: {
         uid: this.helpers.doCreateUUID('cashOutRequest'),
@@ -50,6 +52,7 @@ export class SharedCashoutRequestService {
         },
       },
     });
+
     return request;
   }
 }

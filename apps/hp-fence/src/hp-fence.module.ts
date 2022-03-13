@@ -1,6 +1,7 @@
 import { HelpersModule } from '@app/helpers';
 import { ServicesModule } from '@app/services';
 import { ValidationsModule } from '@app/validations';
+import { WebsocketModule } from '@app/websocket';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -50,6 +51,7 @@ import { ValuController } from './valu/valu.controller';
     AuthModule,
     ConfigModule,
     ValidationsModule,
+    WebsocketModule
   ],
   controllers: [HpFenceController, ValuController],
   providers: [

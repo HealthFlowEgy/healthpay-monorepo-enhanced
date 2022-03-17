@@ -21,7 +21,9 @@ export class SmsService {
         this.configService.get<string>('TWILIO_SID'),
         this.configService.get<string>('TWILIO_AUTH_TOKEN'),
       );
-    } catch (e) {}
+    } catch (e) {
+      console.log('[SMS] Twilio not configured', e);
+    }
   }
 
   async getAccessToken() {
@@ -57,7 +59,10 @@ export class SmsService {
           to: recipients, // Text this number
           from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
         })
-        .then((message) => console.log(message.sid));
+        .then((message) => console.log(message.sid))
+        .catch((e) => {
+          console.log('[SMS] Twilio failed', e);
+        });
     }
 
     return {};

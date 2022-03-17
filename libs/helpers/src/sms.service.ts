@@ -50,7 +50,7 @@ export class SmsService {
         this.configService.get<string>('TWILIO_SID'),
         this.configService.get<string>('TWILIO_AUTH_TOKEN'),
       );
-      console.log('[SMS] Twilio client created', this.tClinet);
+      console.log('[SMS] Twilio client created');
     } catch (e) {
       console.log('[SMS] Twilio not configured', e);
     }

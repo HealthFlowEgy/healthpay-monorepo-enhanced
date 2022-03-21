@@ -56,6 +56,7 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "swagger-ui-express": "^4.2.0",
+    "twilio": "^3.75.1",
     "uuid": "^8.3.2",
     "websocket": "^1.0.34",
     "yup": "^0.32.11"

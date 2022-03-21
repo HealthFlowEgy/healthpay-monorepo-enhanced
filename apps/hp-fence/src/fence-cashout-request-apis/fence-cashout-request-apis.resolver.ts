@@ -35,8 +35,29 @@ export class FenceCashoutRequestApisResolver {
         amount,
         settingsId,
       );
-      const hpMerchant = await this.services.sharedMerchant.cashInMerchant()
-      await this.services.sharedBalance.doTransFromUserToMerchant(hpMerchant.id, user.id, amount, 'deducted due cashout request')
+    const hpMerchant = await this.services.sharedMerchant.cashInMerchant();
+    await this.services.sharedBalance.doTransFromUserToMerchant(
+      hpMerchant.id,
+      user.id,
+      amount,
+      'deducted due cashout request',
+    );
+    try {
+      const notifyAdmin = await this.services.sharedUser.getUserByMobile(
+        '+201097771130',
+      );
+      await this.services.sharedNotify
+        .toUser(notifyAdmin)
+        .compose('cashout')
+        .allChannels()
+        .send();
+    } catch (e) {
+      console.log(
+        '[FenceCashoutRequestApisResolver.createCashOutRequest.e]',
+        e,
+      );
+    }
+
     return request;
   }
 }

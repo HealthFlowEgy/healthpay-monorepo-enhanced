@@ -3,7 +3,7 @@ import { PrismaService } from '@app/prisma';
 import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
 import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Balance } from '@prisma/client';
+import { Balance, Prisma } from '@prisma/client';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { SortedBalance } from './shared-balance.types';
 
@@ -15,7 +15,9 @@ export class SharedBalanceService {
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
   ) {}
 
-  public async getAllBalances(where: any): Promise<Balance[]> {
+  public async getAllBalances(
+    where: Prisma.BalanceFindManyArgs,
+  ): Promise<Balance[]> {
     return this.prisma.balance.findMany(where);
   }
 
@@ -237,17 +239,7 @@ export class SharedBalanceService {
     const balance = await this.prisma.balance.findFirst({
       where: { uid: balanceId },
     });
-    if (balance) {
-      return this.prisma.balance.update({
-        where: {
-          uid: balanceId,
-        },
-        data: {
-          confirmedAt: new Date(),
-          rejectedAt: null,
-        },
-      });
-    }
+    this.markBalanceAsPaid(balance);
     return;
   }
 
@@ -259,18 +251,32 @@ export class SharedBalanceService {
     const balance = await this.prisma.balance.findFirst({
       where: { uid: balanceId },
     });
-    if (balance) {
-      return this.prisma.balance.update({
-        where: {
-          uid: balanceId,
-        },
-        data: {
-          rejectedAt: new Date(),
-          confirmedAt: null,
-        },
-      });
-    }
+    this.markBalanceAsRejected(balance);
     return;
+  }
+
+  async markBalanceAsPaid(balanceId: Balance): Promise<Balance> {
+    return this.prisma.balance.update({
+      where: {
+        uid: balanceId.uid,
+      },
+      data: {
+        confirmedAt: new Date(),
+        rejectedAt: null,
+      },
+    });
+  }
+
+  async markBalanceAsRejected(balanceId: Balance): Promise<Balance> {
+    return this.prisma.balance.update({
+      where: {
+        uid: balanceId.uid,
+      },
+      data: {
+        rejectedAt: new Date(),
+        confirmedAt: null,
+      },
+    });
   }
 
   private sortBalance(walletBalanceLog: any): SortedBalance[] {

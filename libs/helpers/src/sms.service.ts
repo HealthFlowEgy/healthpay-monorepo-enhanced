@@ -26,7 +26,11 @@ export class SmsService {
     this.access_token = response.data.data.access_token;
   }
 
-  async sendMessage(messageText: string, recipients: string) {
+  async sendMessage(
+    messageText: string,
+    recipients: string,
+    confirmed?: boolean,
+  ) {
     try {
       const msgObject = {
         senderName: this.configService.get<string>('SMS_SENDERID'),
@@ -45,29 +49,30 @@ export class SmsService {
       console.log('[sendMessage]', messageText);
     } catch (e) {}
 
-    try {
-      this.tClinet = Twilio(
-        this.configService.get<string>('TWILIO_SID'),
-        this.configService.get<string>('TWILIO_AUTH_TOKEN'),
-      );
-      console.log('[SMS] Twilio client created');
-    } catch (e) {
-      console.log('[SMS] Twilio not configured', e);
-    }
+    if (confirmed) {
+      try {
+        this.tClinet = Twilio(
+          this.configService.get<string>('TWILIO_SID'),
+          this.configService.get<string>('TWILIO_AUTH_TOKEN'),
+        );
+        console.log('[SMS] Twilio client created');
+      } catch (e) {
+        console.log('[SMS] Twilio not configured', e);
+      }
 
-    if (this.tClinet) {
-      this.tClinet.messages
-        .create({
-          body: messageText,
-          to: recipients, // Text this number
-          from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
-        })
-        .then((message) => console.log(message.sid))
-        .catch((e) => {
-          console.log('[SMS] Twilio failed', e);
-        });
+      if (this.tClinet) {
+        this.tClinet.messages
+          .create({
+            body: messageText,
+            to: recipients, // Text this number
+            from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
+          })
+          .then((message) => console.log(message.sid))
+          .catch((e) => {
+            console.log('[SMS] Twilio failed', e);
+          });
+      }
     }
-
     return {};
   }
 }

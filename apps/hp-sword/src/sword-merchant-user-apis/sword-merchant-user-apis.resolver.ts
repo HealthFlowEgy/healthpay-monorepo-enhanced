@@ -157,6 +157,9 @@ export class SwordMerchantUserApisResolver {
       merchant,
       userToken,
     );
+
+    const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
+
     return {
       isSuccess:
         !!(await this.services.sharedPaymentRequest.createPaymentRequest(

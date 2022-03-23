@@ -15,6 +15,7 @@ import { SharedCashoutMethodService } from './shared-cashout-method/shared-casho
 import { SharedHpOpsService } from './shared-hp-ops/shared-hp-ops.service';
 import { SharedPaymentRequestService } from './shared-payment-request/shared-payment-request.service';
 import { SharedUtxoService } from './shared-utxo/shared-utxo.service';
+import { SharedCronService } from './shared-cron/shared-cron.service';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { SharedUtxoService } from './shared-utxo/shared-utxo.service';
     SharedPaymentRequestService,
     SharedWalletService,
     SharedUtxoService,
+    SharedCronService,
   ],
   exports: [ServicesService],
 })

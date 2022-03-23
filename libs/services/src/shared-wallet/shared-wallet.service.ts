@@ -6,14 +6,13 @@ import {
   ForbiddenException,
   forwardRef,
   Inject,
-  Injectable,
+  Injectable
 } from '@nestjs/common';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma, Wallet } from '@prisma/client';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
-import { SharedUserService } from '../shared-user/shared-user.service';
 
 @Injectable()
 export class SharedWalletService {
@@ -127,7 +126,7 @@ export class SharedWalletService {
         .toUser(pUser)
         .compose('deduct', { amount })
         .allChannels()
-        .send();
+        .send(false);
     }
 
     this.eventEmitter.emit(

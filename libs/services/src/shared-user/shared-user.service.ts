@@ -1,10 +1,9 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import {
-  BadRequestException,
-  Inject,
+  BadRequestException, Inject,
   Injectable,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, User } from '@prisma/client';

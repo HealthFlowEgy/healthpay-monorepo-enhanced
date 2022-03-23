@@ -11,6 +11,12 @@ export class SwordUserWalletResolver {
   @ResolveField()
   async balance(@Parent() wallet: Wallet): Promise<Balance[]> {
     const { id } = wallet;
-    return this.services.sharedBalance.getBalanceToFromWalletId(id);
+    const balances = await this.services.sharedBalance.getBalanceToFromWalletId(
+      id,
+    );
+    return balances.map((el) => ({
+      ...el,
+      status: el.confirmedAt ? 'confirmed' : el.rejectedAt ? 'rejected' : 'pending',
+    }));
   }
 }

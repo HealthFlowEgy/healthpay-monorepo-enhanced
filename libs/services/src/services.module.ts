@@ -14,6 +14,7 @@ import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings
 import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
 import { SharedHpOpsService } from './shared-hp-ops/shared-hp-ops.service';
 import { SharedPaymentRequestService } from './shared-payment-request/shared-payment-request.service';
+import { SharedUtxoService } from './shared-utxo/shared-utxo.service';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { SharedPaymentRequestService } from './shared-payment-request/shared-pay
     SharedHpOpsService,
     SharedPaymentRequestService,
     SharedWalletService,
+    SharedUtxoService,
   ],
   exports: [ServicesService],
 })

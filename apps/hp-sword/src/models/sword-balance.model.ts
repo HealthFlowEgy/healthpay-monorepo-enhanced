@@ -12,6 +12,11 @@ export class Balance {
   @Field(() => String)
   type: string;
 
+
+  @Field(() => String)
+  status: string;
+
+
   @Field(() => Date)
   createdAt: Date;
 }

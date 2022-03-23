@@ -15,6 +15,7 @@
     "start-nodejs": "DEBUG=false node dist/apps/hp-nodejs/main.js",
     "start": "DEBUG=false node dist/apps/hp-sword/main.js",
     "start:dev": "nest start --watch",
+    "start:dev-hp-sword": "nest start hp-sword --watch",
     "start:debug": "nest start --debug --watch",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest"

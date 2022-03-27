@@ -268,7 +268,7 @@ export class SharedBalanceService {
         await this.sharedPaymentRequests.getPaymentRequestById(
           parseInt(paymentRequestId),
         );
-      // await this.sharedPaymentRequests.resolvePaymentRequest(paymentRequest);
+      await this.sharedPaymentRequests.resolvePaymentRequest(paymentRequest);
     }
 
     return this.prisma.balance.update({

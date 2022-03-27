@@ -57,12 +57,14 @@ export class SharedUtxoService {
     );
     if (pending.length > 0) {
       const firstPaymentRequest = pending[0];
-      this.sharedPaymentRequests.resolvePaymentRequest(firstPaymentRequest);
       this.sharedBalance.doTransFromUserToMerchant(
         firstPaymentRequest.merchantId,
         userWallet.userId,
         firstPaymentRequest.amount,
         'pending-payment-request-' + pending[0].id,
+      );
+      this.sharedPaymentRequests.markPaymentRequestAsProcessing(
+        firstPaymentRequest,
       );
     }
     return !!userWallet.id;

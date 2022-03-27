@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import moment from 'moment';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
+import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
 
 @Injectable()
 export class SharedCronService {
@@ -10,6 +11,8 @@ export class SharedCronService {
   constructor(
     @Inject(forwardRef(() => SharedBalanceService))
     private sharedBalance: SharedBalanceService,
+    @Inject(SharedPaymentRequestService)
+    private sharedPaymentRequests: SharedPaymentRequestService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -29,6 +32,22 @@ export class SharedCronService {
       await this.sharedBalance.markBalanceAsRejected(
         balance,
         'failed-to-be-proccessed',
+      );
+    }
+
+    const processingRequests =
+      await this.sharedPaymentRequests.getProcessingPaymentRequests({
+        where: {
+          createdAt: {
+            lte: moment().subtract(1, 'day').toISOString(),
+          },
+        },
+      });
+
+    for (let index = 0; index < processingRequests.length; index++) {
+      const paymentRequest = processingRequests[index];
+      await this.sharedPaymentRequests.markPaymentRequestAsPending(
+        paymentRequest,
       );
     }
 

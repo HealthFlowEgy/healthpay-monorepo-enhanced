@@ -16,7 +16,11 @@ export class SwordUserWalletResolver {
     );
     return balances.map((el) => ({
       ...el,
-      status: el.confirmedAt ? 'confirmed' : el.rejectedAt ? 'rejected' : 'pending',
+      status: el.confirmedAt
+        ? 'confirmed'
+        : el.rejectedAt
+        ? 'rejected'
+        : 'pending',
     }));
   }
 }

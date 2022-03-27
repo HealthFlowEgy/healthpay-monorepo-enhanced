@@ -251,7 +251,7 @@ export class SharedBalanceService {
     const balance = await this.prisma.balance.findFirst({
       where: { uid: balanceId },
     });
-    this.markBalanceAsRejected(balance);
+    this.markBalanceAsRejected(balance, 'invalid-transaction-detected');
     return;
   }
 
@@ -267,7 +267,10 @@ export class SharedBalanceService {
     });
   }
 
-  async markBalanceAsRejected(balanceId: Balance): Promise<Balance> {
+  async markBalanceAsRejected(
+    balanceId: Balance,
+    notes?: string,
+  ): Promise<Balance> {
     return this.prisma.balance.update({
       where: {
         uid: balanceId.uid,
@@ -275,6 +278,7 @@ export class SharedBalanceService {
       data: {
         rejectedAt: new Date(),
         confirmedAt: null,
+        notes,
       },
     });
   }

@@ -26,7 +26,10 @@ export class SharedCronService {
 
     for (let index = 0; index < pendingBalances.length; index++) {
       const balance = pendingBalances[index];
-      await this.sharedBalance.markBalanceAsRejected(balance);
+      await this.sharedBalance.markBalanceAsRejected(
+        balance,
+        'failed-to-be-proccessed',
+      );
     }
 
     this.logger.debug(`${pendingBalances.length} pending balances`);

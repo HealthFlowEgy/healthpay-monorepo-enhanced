@@ -9,7 +9,7 @@ import { Success } from '../models/sword-success.model';
 import { Transaction } from '../models/sword-transaction.model';
 import { User, UserWithToken } from '../models/sword-user.model';
 import { Wallet } from '../models/sword-wallet.model';
-
+import slugify from 'slugify';
 @Resolver()
 export class SwordMerchantUserApisResolver {
   constructor(@Inject(ServicesService) private services: ServicesService) {}
@@ -91,6 +91,7 @@ export class SwordMerchantUserApisResolver {
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
+      amount: { min: 50, max: 50000 },
     }),
   )
   async topupWalletUser(
@@ -117,11 +118,13 @@ export class SwordMerchantUserApisResolver {
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
+      amount: { min: 1 },
     }),
   )
   async deductFromUser(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,
+    @Args('description', { nullable: true }) description: string,
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
@@ -135,7 +138,7 @@ export class SwordMerchantUserApisResolver {
         merchant.id,
         user.id,
         amount,
-        '_',
+        slugify(description || 'no-description'),
       )),
     };
   }
@@ -145,6 +148,7 @@ export class SwordMerchantUserApisResolver {
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
+      amount: { min: 1 },
     }),
   )
   async sendPaymentRequest(
@@ -175,11 +179,13 @@ export class SwordMerchantUserApisResolver {
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
+      amount: { min: 1 },
     }),
   )
   async payToUser(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,
+    @Args('description', { nullable: true }) description: string,
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
@@ -193,7 +199,7 @@ export class SwordMerchantUserApisResolver {
         user.id,
         merchant.id,
         amount,
-        '_',
+        slugify(description || 'no-description'),
       )),
     };
   }

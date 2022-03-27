@@ -47,7 +47,7 @@ export class SharedUserService {
       });
     }
     const generatedOtp = await this.doCreateOtp(user.id);
-
+    console.log('[generatedOtp]', generatedOtp);
     await this.sharedNotify
       .toUser(user)
       .allChannels()

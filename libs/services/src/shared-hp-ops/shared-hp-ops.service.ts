@@ -1,13 +1,15 @@
 import { Merchant, MerchantType } from '.prisma/client';
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedUserService } from '../shared-user/shared-user.service';
 
 @Injectable()
 export class SharedHpOpsService {
+  private readonly logger = new Logger(SharedHpOpsService.name);
+
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(SharedUserService) private sharedUser: SharedUserService,
@@ -22,7 +24,9 @@ export class SharedHpOpsService {
           isHp: type,
         },
       });
-    } catch (e) {}
+    } catch (e) {
+      this.logger.error(`[merchantByType] ${e.message}`);
+    }
   }
   async cashIn(
     checkAmount: number,

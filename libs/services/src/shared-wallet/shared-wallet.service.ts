@@ -2,17 +2,30 @@ import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import { fromPrisma } from '@app/websocket/transaction';
 import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma, Wallet } from '@prisma/client';
+import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
+import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
 
 @Injectable()
 export class SharedWalletService {
+  private readonly logger = new Logger(SharedWalletService.name);
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
     @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
+    @Inject(forwardRef(() => SharedBalanceService))
+    private sharedBalance: SharedBalanceService,
+    @Inject(SharedPaymentRequestService)
+    private sharedPaymentRequests: SharedPaymentRequestService,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -78,33 +91,6 @@ export class SharedWalletService {
     return wallet;
   }
 
-  async walletWithTranx(where: Prisma.WalletFindFirstArgs): Promise<Wallet> {
-    const wallet = await this.prisma.wallet.findFirst(where);
-    this.eventEmitter.emit(WEBSOCKET_EVENTS.UTXO_QUERY, wallet);
-    return wallet;
-  }
-
-  @OnEvent(WEBSOCKET_EVENTS.UTXO_UPDATE)
-  async onUTXOUpdate({ data }: any): Promise<boolean> {
-    let walletId = 0;
-    if (data.publicKey === 'root') {
-      const hpMerchant = await this.prisma.merchant.findFirst({
-        where: { isHp: 'CASHIN' },
-      });
-      walletId = hpMerchant.id;
-    } else {
-      walletId = parseInt(data.publicKey);
-    }
-
-    const updateWallet = await this.prisma.wallet.update({
-      where: { id: walletId },
-      data: {
-        total: parseFloat((data.amount / 100).toFixed(2)),
-      },
-    });
-    return !!updateWallet.id;
-  }
-
   async transferAmountBetweenWallets(
     rWallet: Wallet,
     pWallet: Wallet,
@@ -114,11 +100,13 @@ export class SharedWalletService {
     notify?: boolean,
   ): Promise<boolean> {
     const safety = safetyCheck || true;
-    if (safety && pWallet.total < amount)
+    if (safety && pWallet.total < amount) {
+      this.logger.error(`[transferAmountBetweenWallets] 7001 ${pWallet.id}`);
       throw new ForbiddenException(
         '7001',
         'insufficient funds in payer wallet',
       );
+    }
 
     if (pWallet.total === amount) {
       await this.prisma.wallet.update({
@@ -133,16 +121,16 @@ export class SharedWalletService {
     //   data: { total: pWallet.total - amount },
     // });
     // TODO: add healthpay commission
-    // if (notify) {
-    //   const pUser = await this.prisma.wallet
-    //     .findFirst({ where: { id: pWallet.id } })
-    //     .user();
-    //   this.sharedNotify
-    //     .toUser(pUser)
-    //     .compose('deduct', { amount })
-    //     .allChannels()
-    //     .send();
-    // }
+    if (notify) {
+      const pUser = await this.prisma.wallet
+        .findFirst({ where: { id: pWallet.id } })
+        .user();
+      this.sharedNotify
+        .toUser(pUser)
+        .compose('deduct', { amount })
+        .allChannels()
+        .send(false);
+    }
 
     this.eventEmitter.emit(
       WEBSOCKET_EVENTS.PRISMA_NEW_TX,

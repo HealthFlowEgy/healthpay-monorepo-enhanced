@@ -6,6 +6,7 @@ import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings
 import { SharedMerchantService } from './shared-merchant/shared-merchant.service';
 import { SharedNotificationsService } from './shared-notifications/shared-notifications.service';
 import { SharedNotifyService } from './shared-notify/shared-notify.service';
+import { SharedPaymentRequestService } from './shared-payment-request/shared-payment-request.service';
 import { SharedTransactionService } from './shared-transaction/shared-transaction.service';
 import { SharedUserService } from './shared-user/shared-user.service';
 import { SharedWalletService } from './shared-wallet/shared-wallet.service';
@@ -28,5 +29,7 @@ export class ServicesService {
     public sharedCashoutRequestService: SharedCashoutRequestService,
     @Inject(SharedNotificationsService)
     public sharedNotificationsService: SharedNotificationsService,
+    @Inject(SharedPaymentRequestService)
+    public sharedPaymentRequest: SharedPaymentRequestService,
   ) {}
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import Twilio from 'twilio';
@@ -6,7 +6,9 @@ import Twilio from 'twilio';
 export class SmsService {
   instance: AxiosInstance | null = null;
   access_token: string | null = null;
-  tClinet: any;
+  tClinet: Twilio.Twilio;
+  private readonly logger = new Logger(SmsService.name);
+
   constructor(private configService: ConfigService) {
     this.instance = axios.create({
       baseURL: this.configService.get<string>('SMS_BASEURL'),
@@ -26,7 +28,11 @@ export class SmsService {
     this.access_token = response.data.data.access_token;
   }
 
-  async sendMessage(messageText: string, recipients: string) {
+  async sendMessage(
+    messageText: string,
+    recipients: string,
+    confirmed?: boolean,
+  ) {
     try {
       const msgObject = {
         senderName: this.configService.get<string>('SMS_SENDERID'),
@@ -42,32 +48,31 @@ export class SmsService {
         '/messaging?access_token=' + this.access_token,
         msgObject,
       );
-      console.log('[sendMessage]', messageText);
-    } catch (e) { }
-
-    try {
-      this.tClinet = Twilio(
-        this.configService.get<string>('TWILIO_SID'),
-        this.configService.get<string>('TWILIO_AUTH_TOKEN'),
-      );
-      console.log('[SMS] Twilio client created');
+      this.logger.verbose(`[sendMessage]  ${messageText}`);
     } catch (e) {
-      console.log('[SMS] Twilio not configured', e);
+      this.logger.error(`[sendMessageError] ${JSON.stringify(e)}`);
     }
 
-    if (this.tClinet) {
-      this.tClinet.messages
-        .create({
-          body: messageText,
-          to: recipients, // Text this number
-          from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
-        })
-        .then((message) => console.log(message.sid))
-        .catch((e) => {
-          console.log('[SMS] Twilio failed', e);
-        });
+    if (confirmed) {
+      try {
+        this.tClinet = Twilio(
+          this.configService.get<string>('TWILIO_SID'),
+          this.configService.get<string>('TWILIO_AUTH_TOKEN'),
+        );
+        this.tClinet.messages
+          .create({
+            body: messageText,
+            to: recipients, // Text this number
+            from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
+          })
+          .then((message) => this.logger.verbose(message.sid))
+          .catch((e) => {
+            this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+          });
+      } catch (e) {
+        this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+      }
     }
-
     return {};
   }
 }

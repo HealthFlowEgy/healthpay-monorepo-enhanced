@@ -13,8 +13,10 @@ import { SharedTransactionService } from './shared-transaction/shared-transactio
 import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings/shared-cashout-user-settings.service';
 import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
 import { SharedHpOpsService } from './shared-hp-ops/shared-hp-ops.service';
+import { SharedPaymentRequestService } from './shared-payment-request/shared-payment-request.service';
+import { SharedUtxoService } from './shared-utxo/shared-utxo.service';
+import { SharedCronService } from './shared-cron/shared-cron.service';
 import { SharedCashoutRequestService } from './shared-cashout-request/shared-cashout-request.service';
-import { SharedNotificationsService } from './shared-notifications/shared-notifications.service';
 
 @Module({
   imports: [
@@ -29,7 +31,6 @@ import { SharedNotificationsService } from './shared-notifications/shared-notifi
     SharedCashoutRequestService,
     ServicesService,
     PrismaService,
-    SharedWalletService,
     SharedUserService,
     SharedMerchantService,
     SharedNotifyService,
@@ -38,7 +39,10 @@ import { SharedNotificationsService } from './shared-notifications/shared-notifi
     SharedCashOutUserSettingsService,
     SharedCashoutMethodService,
     SharedHpOpsService,
-    SharedNotificationsService,
+    SharedPaymentRequestService,
+    SharedWalletService,
+    SharedUtxoService,
+    SharedCronService,
   ],
   exports: [ServicesService],
 })

@@ -1,15 +1,17 @@
 import { Wallet } from '@prisma/client';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { w3cwebsocket } from 'websocket';
-import WsTransaction from './transaction';
+import WsTransaction, { HP_RESERVED_IDS } from './transaction';
 import WebsocketEvent from './websocket-event';
 import { WEBSOCKET_EVENTS } from './websocket-events';
 
 @Injectable()
 export class WebsocketService {
   // constractor init websocket
+  private readonly logger = new Logger(WebsocketService.name);
+
   ws: w3cwebsocket;
   retryMS: number;
   retryTO: any;
@@ -43,7 +45,7 @@ export class WebsocketService {
    * send message to server
    */
   onOpen() {
-    console.log('[HP_LEDGER] CONNECTED');
+    this.logger.verbose('[HP_LEDGER] CONNECTED');
   }
 
   /*
@@ -56,7 +58,7 @@ export class WebsocketService {
    * close websocket
    */
   onClose() {
-    console.log('[HP_LEDGER] CLOSED');
+    this.logger.error('[HP_LEDGER] CLOSED');
     this.reconnect();
   }
 
@@ -70,7 +72,6 @@ export class WebsocketService {
    * receive message from server
    */
   onMessage(event) {
-    console.log('[LEDGER_EVENT]', event.data);
     const message = new WebsocketEvent();
     message.createFromJSON(event.data);
     if (message.isValid()) {
@@ -86,8 +87,6 @@ export class WebsocketService {
    * @private
    */
   onError(event) {
-    console.log(event.type);
-    console.log('[HP_LEDGER] ERROR');
     this.reconnect();
   }
 
@@ -100,7 +99,7 @@ export class WebsocketService {
    * reconnect websocket
    */
   reconnect() {
-    console.log(`reconnect in ${this.retryMS}`);
+    this.logger.verbose(`reconnect in ${this.retryMS}`);
     clearTimeout(this.retryTO);
     this.retryTO = setTimeout(() => this.init(), this.retryMS);
   }
@@ -141,7 +140,11 @@ export class WebsocketService {
   onUTXOQuery({ id }: Wallet) {
     const newEvent = new WebsocketEvent();
     newEvent.setEventType('UTXO_QUERY');
-    newEvent.setData({ publicKey: `${id}` });
+    let strID = `${id}`;
+    if (HP_RESERVED_IDS.includes(`${id}`)) {
+      strID = 'root';
+    }
+    newEvent.setData({ publicKey: strID });
     this.send(newEvent);
   }
 }

@@ -4,6 +4,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +15,8 @@ import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { doUpsertUserInput } from './shared-user.types';
 @Injectable()
 export class SharedUserService {
+  private readonly logger = new Logger(SharedUserService.name);
+
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
@@ -48,7 +51,7 @@ export class SharedUserService {
       });
     }
     const generatedOtp = await this.doCreateOtp(user.id);
-
+    this.logger.verbose(`[generatedOtp] ${generatedOtp}`);
     await this.sharedNotify
       .toUser(user)
       .allChannels()
@@ -165,6 +168,10 @@ export class SharedUserService {
           id: firstOtp.id,
         },
       });
+
+    if (!firstOtp || firstOtp.isUsed === true) {
+      this.logger.error(`[otp] 5002 ${otp}`);
+      throw new BadRequestException('5002', 'invalid user otp');
     }
 
     // TODO: mark old otps as used after 1 day

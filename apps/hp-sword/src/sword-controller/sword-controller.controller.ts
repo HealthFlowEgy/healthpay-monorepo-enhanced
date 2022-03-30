@@ -1,7 +1,5 @@
 import { ServicesService } from '@app/services';
 import { WebsocketService } from '@app/websocket';
-import WsTransaction, { fromPrisma } from '@app/websocket/transaction';
-import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
 import { Controller, Get, Inject } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 function sleep(ms) {

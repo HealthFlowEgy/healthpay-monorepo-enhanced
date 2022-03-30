@@ -47,7 +47,7 @@ export class HpNodejsController {
       transaction_id,
     );
     if (!tx || tx.status !== 'PENDING') {
-      console.log('[invalid_notification_tx]');
+      console.log('[invalid_notification_tx]', updatedTxBody);
       throw new NotFoundException();
     }
 
@@ -65,7 +65,7 @@ export class HpNodejsController {
         'healthpayCashInMerchant',
       );
     } catch (e) {
-      console.log('[invalid_notification_tx]', JSON.stringify([e]));
+      console.log('[invalid_notification_tx_excp]', e);
     }
 
     return {

@@ -1,7 +1,7 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Balance, Prisma } from '@prisma/client';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
@@ -10,6 +10,8 @@ import { SortedBalance } from './shared-balance.types';
 
 @Injectable()
 export class SharedBalanceService {
+  private readonly logger = new Logger(SharedBalanceService.name);
+
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
@@ -238,7 +240,7 @@ export class SharedBalanceService {
   async onTxConfirmed({ data }: any) {
     const { signature } = data;
     const balanceId = signature.split('.')[0];
-    console.log('[mark_tx_as_confirmed]', balanceId);
+    this.logger.verbose(`[mark_tx_as_confirmed] ${balanceId} ${signature}`);
     const balance = await this.prisma.balance.findFirst({
       where: { uid: balanceId },
     });
@@ -250,7 +252,7 @@ export class SharedBalanceService {
   async onTxRejected({ data }: any) {
     const { signature } = data;
     const balanceId = signature.split('.')[0];
-    console.log('[mark_tx_as_rejected]', balanceId);
+    this.logger.verbose(`[mark_tx_as_rejected] ${balanceId} ${signature}`);
     const balance = await this.prisma.balance.findFirst({
       where: { uid: balanceId },
     });

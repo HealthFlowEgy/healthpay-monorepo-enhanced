@@ -6,7 +6,8 @@ import {
   ForbiddenException,
   forwardRef,
   Inject,
-  Injectable
+  Injectable,
+  Logger,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma, Wallet } from '@prisma/client';
@@ -16,6 +17,7 @@ import { SharedPaymentRequestService } from '../shared-payment-request/shared-pa
 
 @Injectable()
 export class SharedWalletService {
+  private readonly logger = new Logger(SharedWalletService.name);
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
@@ -99,6 +101,7 @@ export class SharedWalletService {
   ): Promise<boolean> {
     const safety = safetyCheck || true;
     if (safety && pWallet.total < amount) {
+      this.logger.error(`[transferAmountBetweenWallets] 7001 ${pWallet.id}`);
       throw new ForbiddenException(
         '7001',
         'insufficient funds in payer wallet',

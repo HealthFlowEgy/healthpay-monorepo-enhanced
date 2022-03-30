@@ -1,6 +1,6 @@
 import { SmsService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { I18nService } from 'nestjs-i18n';
@@ -8,6 +8,7 @@ import { AvailableMessages, SendNotifyResults } from './shared-notify.types';
 
 @Injectable()
 export class SharedNotifyService {
+  private readonly logger = new Logger(SharedNotifyService.name);
   private thisUser: Pick<User, 'id' | 'prefLang' | 'mobile'> | null;
 
   private composed = {
@@ -84,10 +85,12 @@ export class SharedNotifyService {
     }
     if (this.options.includeSms) {
       try {
-        const apiResponse = await this.sendSms(i18nMessage , confirmed);
+        const apiResponse = await this.sendSms(i18nMessage, confirmed);
         success.push(JSON.stringify(apiResponse));
       } catch (e) {
-        errors.push(JSON.stringify(e));
+        const stringErr = typeof e === 'object' ? JSON.stringify(e) : e;
+        errors.push(stringErr);
+        this.logger.error(`[send] ${stringErr}`);
       }
     }
 
@@ -101,7 +104,7 @@ export class SharedNotifyService {
 
   private sendSms(msg: string, confirmed?: boolean) {
     if (this.configService.get('NODE_ENV') === 'production') {
-      return this.smsServ.sendMessage(msg, this.thisUser.mobile , confirmed);
+      return this.smsServ.sendMessage(msg, this.thisUser.mobile, confirmed);
     }
   }
 

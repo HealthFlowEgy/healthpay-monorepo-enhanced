@@ -1,5 +1,5 @@
 import { ServicesService } from '@app/services';
-import { Inject, UseGuards, UsePipes } from '@nestjs/common';
+import { Inject, Logger, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Merchant } from '@prisma/client';
 import NestjsGraphqlValidator from 'nestjs-graphql-validator';
@@ -12,6 +12,8 @@ import { Wallet } from '../models/sword-wallet.model';
 import slugify from 'slugify';
 @Resolver()
 export class SwordMerchantUserApisResolver {
+  private readonly logger = new Logger(SwordMerchantUserApisResolver.name);
+
   constructor(@Inject(ServicesService) private services: ServicesService) {}
 
   @Mutation(() => User, { nullable: true })
@@ -35,7 +37,10 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     // @CurrentMerchant() merchant: Merchant,
   ) {
-    console.log('[loginUser]', mobile, firstName, lastName, email);
+    this.logger.verbose(
+      `[loginUser], ${mobile}, ${firstName}, ${lastName}, ${email}`,
+    );
+
     return this.services.sharedUser.doUpsertUser(
       {
         mobile,
@@ -65,7 +70,7 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
-    console.log('[authUser]', mobile, otp, isProvider);
+    this.logger.verbose(`[authUser], ${mobile}, ${otp}, ${isProvider}`);
 
     const user = await this.services.sharedUser.doVerifyMobileWithOtp(
       mobile,
@@ -100,12 +105,13 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
-    console.log('[topupWalletUser]', userToken, amount);
-
     const user = await this.services.sharedMerchant.getUserFromLink(
       merchant,
       userToken,
     );
+
+    this.logger.verbose(`[topupWalletUser], ${amount}, ${user.id}`);
+
     return this.services.sharedTransaction.doCreateTransaction(
       user,
       amount,

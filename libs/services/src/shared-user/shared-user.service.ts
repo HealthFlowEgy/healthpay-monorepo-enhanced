@@ -1,9 +1,11 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import {
-  BadRequestException, Inject,
+  BadRequestException,
+  Inject,
   Injectable,
-  NotFoundException
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, User } from '@prisma/client';
@@ -13,6 +15,8 @@ import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { doUpsertUserInput } from './shared-user.types';
 @Injectable()
 export class SharedUserService {
+  private readonly logger = new Logger(SharedUserService.name);
+
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
@@ -47,7 +51,7 @@ export class SharedUserService {
       });
     }
     const generatedOtp = await this.doCreateOtp(user.id);
-    console.log('[generatedOtp]', generatedOtp);
+    this.logger.verbose(`[generatedOtp] ${generatedOtp}`);
     await this.sharedNotify
       .toUser(user)
       .allChannels()
@@ -147,6 +151,7 @@ export class SharedUserService {
     });
 
     if (!firstOtp || firstOtp.isUsed === true) {
+      this.logger.error(`[otp] 5002 ${otp}`);
       throw new BadRequestException('5002', 'invalid user otp');
     }
     await this.prisma.oTP.update({

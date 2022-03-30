@@ -17,6 +17,7 @@ import { SharedPaymentRequestService } from './shared-payment-request/shared-pay
 import { SharedUtxoService } from './shared-utxo/shared-utxo.service';
 import { SharedCronService } from './shared-cron/shared-cron.service';
 import { SharedCashoutRequestService } from './shared-cashout-request/shared-cashout-request.service';
+import { SharedNotificationsService } from './shared-notifications/shared-notifications.service';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { SharedCashoutRequestService } from './shared-cashout-request/shared-cas
     SharedWalletService,
     SharedUtxoService,
     SharedCronService,
+    SharedNotificationsService
   ],
   exports: [ServicesService],
 })

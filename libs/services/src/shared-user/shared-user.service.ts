@@ -157,7 +157,8 @@ export class SharedUserService {
         throw new BadRequestException('5002', 'invalid user otp');
       }
     } else {
-      if (!firstOtp || firstOtp.isUsed === true) {
+      if (!firstOtp || firstOtp.isUsed) {
+        this.logger.error(`[otp] 5002 ${otp}`);
         throw new BadRequestException('5002', 'invalid user otp');
       }
       await this.prisma.oTP.update({
@@ -168,10 +169,6 @@ export class SharedUserService {
           id: firstOtp.id,
         },
       });
-
-    if (!firstOtp || firstOtp.isUsed === true) {
-      this.logger.error(`[otp] 5002 ${otp}`);
-      throw new BadRequestException('5002', 'invalid user otp');
     }
 
     // TODO: mark old otps as used after 1 day

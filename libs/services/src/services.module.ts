@@ -26,6 +26,7 @@ import { SharedNotificationsService } from './shared-notifications/shared-notifi
     ConfigModule,
   ],
   providers: [
+    SharedCashoutRequestService,
     ServicesService,
     PrismaService,
     SharedWalletService,
@@ -37,7 +38,6 @@ import { SharedNotificationsService } from './shared-notifications/shared-notifi
     SharedCashOutUserSettingsService,
     SharedCashoutMethodService,
     SharedHpOpsService,
-    SharedCashoutRequestService,
     SharedNotificationsService,
   ],
   exports: [ServicesService],

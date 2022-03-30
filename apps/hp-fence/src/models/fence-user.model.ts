@@ -41,6 +41,9 @@ export class User {
   @Field(() => String, { nullable: true })
   nationalDocBack?: string | null;
 
+  @Field(() => String, { nullable: true })
+  nationalDoc?: string | null;
+
   @Field(() => Boolean, { nullable: true })
   isNationalVerified?: boolean | null;
 

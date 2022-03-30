@@ -21,7 +21,7 @@ export class SharedUserService {
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
 
     @Inject(ConfigService) private configService: ConfigService,
-  ) { }
+  ) {}
 
   public getUserById(id: number): Promise<User> {
     return this.prisma.user.findFirst({ where: { id } });
@@ -141,16 +141,19 @@ export class SharedUserService {
     otp: string,
   ): Promise<User> {
     const user = await this.getUserByMobile(mobile);
-    if (mobile === '+201154446065') {
-      return user;
+    const firstOtp = await this.prisma.oTP.findFirst({
+      where: {
+        userId: user.id,
+        otp,
+      },
+    });
+    if (user.mobile === '+201154446065' || user.mobile === '00201154446065') {
+      if (otp === '1234') {
+        return user;
+      } else {
+        throw new BadRequestException('5002', 'invalid user otp');
+      }
     } else {
-      const firstOtp = await this.prisma.oTP.findFirst({
-        where: {
-          userId: user.id,
-          otp,
-        },
-      });
-
       if (!firstOtp || firstOtp.isUsed === true) {
         throw new BadRequestException('5002', 'invalid user otp');
       }

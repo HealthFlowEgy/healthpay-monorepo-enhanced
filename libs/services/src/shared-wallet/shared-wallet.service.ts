@@ -108,7 +108,8 @@ export class SharedWalletService {
       );
     }
 
-    if (pWallet.total === amount) {
+    if (Math.floor(pWallet.total) === Math.floor(amount)) {
+      this.logger.verbose('[transferAmountBetweenWallets] User Wallet Total 0');
       await this.prisma.wallet.update({
         where: { id: pWallet.id },
         data: {

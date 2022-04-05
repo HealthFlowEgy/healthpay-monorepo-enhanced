@@ -210,6 +210,52 @@ export class SwordMerchantUserApisResolver {
     };
   }
 
+  @Mutation(() => Success, { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    new NestjsGraphqlValidator({
+      userToken: { minLen: 5 },
+      amount: { min: 1 },
+    }),
+  )
+  async logoutUser(
+    @Args('userToken') userToken: string,
+    // induced fields
+    @CurrentMerchant() merchant: Merchant,
+  ) {
+    const user = await this.services.sharedMerchant.getUserFromLink(
+      merchant,
+      userToken,
+    );
+    this.logger.verbose(`[logoutUser], ${user.id} ${user.mobile}`);
+    let providerConnected = null;
+    const userConnected =
+      await this.services.sharedMerchant.getUserAuthMerchant(
+        merchant.id,
+        userToken,
+      );
+    if (userConnected) {
+      await this.services.sharedMerchant.deleteUserAuthMerchant(
+        userConnected.id,
+      );
+    } else {
+      providerConnected =
+        await this.services.sharedMerchant.getProviderAuthMerchant(
+          merchant.id,
+          userToken,
+        );
+      if (providerConnected) {
+        await this.services.sharedMerchant.deleteProverAuthMerchant(
+          providerConnected.id,
+        );
+      }
+    }
+
+    return {
+      isSuccess: !!userConnected || !!providerConnected,
+    };
+  }
+
   @Query(() => Wallet, { nullable: true })
   @UseGuards(JwtAuthGuard)
   @UsePipes(

@@ -53,7 +53,9 @@ export class OnelinkService {
         '/transaction/create',
         data,
       );
-      this.logger.verbose(`[createTransaction], ${transactionRes.data}`);
+      this.logger.verbose(
+        `[createTransaction], ${JSON.stringify(transactionRes.data)}`,
+      );
       return transactionRes.data;
     } catch (e) {
       this.logger.verbose(

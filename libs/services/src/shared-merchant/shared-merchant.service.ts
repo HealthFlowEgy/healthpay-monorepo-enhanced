@@ -142,6 +142,22 @@ export class SharedMerchantService {
     });
   }
 
+  async deleteUserAuthMerchant(id): Promise<UserAuthMerchant> {
+    return this.prisma.userAuthMerchant.delete({
+      where: {
+        id: id,
+      },
+    });
+  }
+
+  async deleteProverAuthMerchant(id): Promise<ProviderAuthMerchant> {
+    return this.prisma.providerAuthMerchant.delete({
+      where: {
+        id: id,
+      },
+    });
+  }
+
   async doLinkUserOrProviderToMerchant(
     merchant: Merchant,
     user: User,

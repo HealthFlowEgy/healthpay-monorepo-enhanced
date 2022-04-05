@@ -1,5 +1,5 @@
 import { ServicesService } from '@app/services';
-import { Inject, UseGuards, UsePipes } from '@nestjs/common';
+import { HttpException, Inject, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { CurrentUser } from '../decorators/user.decorator';
@@ -28,6 +28,7 @@ export class FenceMerchantApisResolver {
     @Args('amount') amount: number,
     @CurrentUser() user: User,
   ): Promise<{ isSuccess: boolean }> {
+    throw new HttpException('Not implemented', 500);
     const merchant = await this.services.sharedMerchant.getMerchantByUID(
       merchantUID,
     );

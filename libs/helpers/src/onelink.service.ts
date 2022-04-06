@@ -1,4 +1,8 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
@@ -8,6 +12,7 @@ import { OnelinkTransactionResponse } from './helpers.types';
 export class OnelinkService {
   private instance: AxiosInstance | null = null;
   private access_token: string | null = null;
+  private readonly logger = new Logger(OnelinkService.name);
 
   constructor(private configService: ConfigService) {
     this.instance = axios.create({
@@ -48,10 +53,14 @@ export class OnelinkService {
         '/transaction/create',
         data,
       );
-      console.log('[createTransaction]', transactionRes.data);
+      this.logger.verbose(
+        `[createTransaction], ${JSON.stringify(transactionRes.data)}`,
+      );
       return transactionRes.data;
     } catch (e) {
-      console.log('[createTransactionError]', e.response.data);
+      this.logger.verbose(
+        `[createTransactionError], ${JSON.stringify(e.response.data || e)}`,
+      );
       throw new UnprocessableEntityException('6002', e.response.data);
     }
   }

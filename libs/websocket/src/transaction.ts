@@ -1,8 +1,11 @@
+import { Logger } from '@nestjs/common';
 import { SHA256 } from 'crypto-js';
 
-const HP_RESERVED_IDS = ['12', '13', '0', '6'];
+export const HP_RESERVED_IDS = ['12', '13', '0', '6'];
 
 export default class WsTransaction {
+  private readonly logger = new Logger(WsTransaction.name);
+
   inputPublicKey: string;
   outputPublicKey: string;
   amount: number;
@@ -41,7 +44,7 @@ export default class WsTransaction {
   }
 
   _setSignature() {
-    console.log(this.hash);
+    this.logger.verbose(`[_setSignature] ${this.hash}`);
     this.signature =
       this.transRef +
       '.' +
@@ -49,9 +52,9 @@ export default class WsTransaction {
   }
 
   _calculateHash() {
-    console.log(
-      '[calchash]',
-      `${this.inputPublicKey + this.outputPublicKey + this.amount + this.fee}`,
+    this.logger.verbose(
+      `[calchash]
+      ${this.inputPublicKey + this.outputPublicKey + this.amount + this.fee}`,
     );
     return SHA256(
       this.inputPublicKey + this.outputPublicKey + this.amount + this.fee,

@@ -14,11 +14,13 @@ import { SwordMerchantWithTokenResolver } from './sword-merchant-apis/sword-merc
 import { SwordMerchantUserApisResolver } from './sword-merchant-user-apis/sword-merchant-user-apis.resolver';
 import { SwordUserWalletResolver } from './sword-user-wallet/sword-user-wallet.resolver';
 import { SwordControllerController } from './sword-controller/sword-controller.controller';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
       introspection: true,

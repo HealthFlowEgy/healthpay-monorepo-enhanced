@@ -1,5 +1,5 @@
 import { ServicesService } from '@app/services';
-import { BadRequestException, Inject, UseGuards } from '@nestjs/common';
+import { BadRequestException, Inject, Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -9,6 +9,8 @@ import { User } from '../models/fence-user.model';
 
 @Resolver()
 export class FenceCashoutRequestApisResolver {
+  private readonly logger = new Logger(FenceCashoutRequestApisResolver.name);
+
   constructor(@Inject(ServicesService) private services: ServicesService) {}
   @Query(() => [CashOutRequest], { nullable: true })
   @UseGuards(JwtAuthGuard)
@@ -54,7 +56,7 @@ export class FenceCashoutRequestApisResolver {
         .allChannels()
         .send();
     } catch (e) {
-      console.log(
+      this.logger.error(
         '[FenceCashoutRequestApisResolver.createCashOutRequest.e]',
         e,
       );

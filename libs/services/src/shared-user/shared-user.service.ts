@@ -4,6 +4,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +15,8 @@ import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { doUpsertUserInput } from './shared-user.types';
 @Injectable()
 export class SharedUserService {
+  private readonly logger = new Logger(SharedUserService.name);
+
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
@@ -48,7 +51,7 @@ export class SharedUserService {
       });
     }
     const generatedOtp = await this.doCreateOtp(user.id);
-
+    this.logger.verbose(`[generatedOtp] ${generatedOtp}`);
     await this.sharedNotify
       .toUser(user)
       .allChannels()
@@ -141,17 +144,21 @@ export class SharedUserService {
     otp: string,
   ): Promise<User> {
     const user = await this.getUserByMobile(mobile);
-    if (mobile === '+201154446065') {
-      return user;
+    const firstOtp = await this.prisma.oTP.findFirst({
+      where: {
+        userId: user.id,
+        otp,
+      },
+    });
+    if (user.mobile === '+201154446065' || user.mobile === '00201154446065') {
+      if (otp === '1234') {
+        return user;
+      } else {
+        throw new BadRequestException('5002', 'invalid user otp');
+      }
     } else {
-      const firstOtp = await this.prisma.oTP.findFirst({
-        where: {
-          userId: user.id,
-          otp,
-        },
-      });
-
-      if (!firstOtp || firstOtp.isUsed === true) {
+      if (!firstOtp || firstOtp.isUsed) {
+        this.logger.error(`[otp] 5002 ${otp}`);
         throw new BadRequestException('5002', 'invalid user otp');
       }
       await this.prisma.oTP.update({

@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ServicesService } from '@app/services';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Merchant } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly services: ServicesService,
     private readonly jwtService: JwtService,
@@ -24,6 +25,7 @@ export class AuthService {
       const { apiKey, ...result } = merchant;
       return result;
     }
+    this.logger.error(`[validateUser] 3001 ${apiHeader} ${apiKey}`);
     throw new UnauthorizedException('3001', 'param: apiKey is invalid');
   }
 

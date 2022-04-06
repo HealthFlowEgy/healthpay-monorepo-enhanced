@@ -28,6 +28,8 @@ export class FenceCashoutRequestApisResolver {
     const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
     if (wallet.total < amount) {
       throw new BadRequestException('7001', 'Insufficient funds');
+    } else {
+      throw new BadRequestException('7001', 'Insufficient funds');
     }
     const request =
       await this.services.sharedCashoutRequestService.doCreateCashOutRequest(

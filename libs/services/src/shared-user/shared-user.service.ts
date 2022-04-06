@@ -21,7 +21,7 @@ export class SharedUserService {
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
 
     @Inject(ConfigService) private configService: ConfigService,
-  ) { }
+  ) {}
 
   public getUserById(id: number): Promise<User> {
     return this.prisma.user.findFirst({ where: { id } });
@@ -185,6 +185,7 @@ export class SharedUserService {
           status: 'PENDING',
         },
       });
+
       if (request) {
         const updatedUser = await this.prisma.user.update({
           where: { id: userId },

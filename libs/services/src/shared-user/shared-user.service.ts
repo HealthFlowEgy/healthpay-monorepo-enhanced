@@ -214,15 +214,15 @@ export class SharedUserService {
     const user = await this.getUserById(userId);
     const hmac = await this.helpers.encryptTxt();
     const orderId = this.generateOrderId(32);
-    await this.prisma.valuHmac.create({
-      data: {
-        uid: this.helpers.doCreateUUID('valuHmac'),
-        orderId: orderId,
-        user: { connect: { id: user.id } },
-        hmac: hmac,
-        ...this.helpers.generateDates(),
-      },
-    });
+    // await this.prisma.valuHmac.create({
+    //   data: {
+    //     uid: this.helpers.doCreateUUID('valuHmac'),
+    //     orderId: orderId,
+    //     user: { connect: { id: user.id } },
+    //     hmac: hmac,
+    //     ...this.helpers.generateDates(),
+    //   },
+    // });
     return { hmac: hmac, orderId: orderId };
   }
   public async updateValuHmacLoanNumber(

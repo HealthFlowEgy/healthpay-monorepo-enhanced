@@ -1,10 +1,7 @@
-import { Inject, Logger, UseGuards, UsePipes } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { AuthService } from '../auth/auth.service';
 import { ApiHeader } from '../decorators/api-header.decorator';
-import { CurrentMerchant } from '../decorators/merchant.decorator';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Merchant, MerchantWithToken } from '../models/sword-merchant.model';
 
 @Resolver()

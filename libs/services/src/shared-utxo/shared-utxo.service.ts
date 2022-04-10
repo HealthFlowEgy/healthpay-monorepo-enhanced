@@ -58,20 +58,18 @@ export class SharedUtxoService {
     if (pending.length > 0) {
       const firstPaymentRequest = pending[0];
 
-
       const confirmedBalances = await this.sharedBalance.getAllBalances({
         where: {
           notes: 'pending-payment-request-' + firstPaymentRequest.id,
-          confirmedAt: {
-            gte: '2019',
-          },
         },
       });
       if (confirmedBalances.length > 0) {
-        await this.sharedPaymentRequests.resolvePaymentRequest(
-          firstPaymentRequest,
-        );
-        await this.handlePendingPaymentRequests(userWallet);
+        if (confirmedBalances[0].confirmedAt) {
+          await this.sharedPaymentRequests.resolvePaymentRequest(
+            firstPaymentRequest,
+          );
+          await this.handlePendingPaymentRequests(userWallet);
+        }
         return;
       }
 

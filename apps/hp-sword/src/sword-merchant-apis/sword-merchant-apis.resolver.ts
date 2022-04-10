@@ -2,6 +2,7 @@ import { Inject, Logger } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthService } from '../auth/auth.service';
 import { ApiHeader } from '../decorators/api-header.decorator';
+import { UserIp } from '../decorators/user-ip.decorator';
 import { Merchant, MerchantWithToken } from '../models/sword-merchant.model';
 
 @Resolver()
@@ -22,8 +23,9 @@ export class SwordMerchantWithTokenResolver {
   async authMerchant(
     @Args('apiKey') apiKey: string,
     @ApiHeader() apiHeader: string,
+    @UserIp() userIp: any,
   ) {
-    this.logger.verbose(`[authMerchant], ${apiKey}`);
+    this.logger.verbose(`[authMerchant], ${apiKey} ${userIp}`);
     const merchant = await this.authService.validateUser(apiHeader, apiKey);
     return {
       token: this.authService.login({

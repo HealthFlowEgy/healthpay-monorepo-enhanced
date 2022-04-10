@@ -229,26 +229,26 @@ export class SharedUserService {
     hmac: string,
     loanNumber: string,
   ): Promise<any> {
-    const valuHmac = await this.prisma.valuHmac.findFirst({
-      where: { hmac },
-    });
-    if (!valuHmac) {
-      throw new BadRequestException('5003', 'invalid hmac');
-    }
-    await this.prisma.valuHmac.update({
-      where: { id: valuHmac.id },
-      data: { loanNumber },
-    });
-    return valuHmac;
+    // const valuHmac = await this.prisma.valuHmac.findFirst({
+    //   where: { hmac },
+    // });
+    // if (!valuHmac) {
+    //   throw new BadRequestException('5003', 'invalid hmac');
+    // }
+    // await this.prisma.valuHmac.update({
+    //   where: { id: valuHmac.id },
+    //   data: { loanNumber },
+    // });
+    // return valuHmac;
   }
   public async getValuOrderIdByHmac(hmac: string): Promise<any> {
-    const valuHmac = await this.prisma.valuHmac.findFirst({
-      where: { hmac },
-    });
-    if (!valuHmac.orderId) {
-      throw new BadRequestException('5003', 'invalid order id');
-    }
-    return valuHmac.orderId;
+    // const valuHmac = await this.prisma.valuHmac.findFirst({
+    //   where: { hmac },
+    // });
+    // if (!valuHmac.orderId) {
+    //   throw new BadRequestException('5003', 'invalid order id');
+    // }
+    // return valuHmac.orderId;
   }
 
   private generateOrderId(length): string {

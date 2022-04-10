@@ -271,6 +271,9 @@ export class SharedBalanceService {
       const paymentRequestId = balanceId.notes.split(
         'pending-payment-request-',
       )[1];
+      this.logger.verbose(
+        `[markBalanceAsPaid] ${balanceId.uid} found a pending payment request ${paymentRequestId}`,
+      );
       const paymentRequest =
         await this.sharedPaymentRequests.getPaymentRequestById(
           parseInt(paymentRequestId),
@@ -313,7 +316,7 @@ export class SharedBalanceService {
       data: {
         rejectedAt: new Date(),
         confirmedAt: null,
-        notes,
+        notes: balanceId.notes + '-rejected-' + notes,
       },
     });
   }

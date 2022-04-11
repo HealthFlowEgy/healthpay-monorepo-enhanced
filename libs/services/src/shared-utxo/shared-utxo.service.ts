@@ -32,7 +32,7 @@ export class SharedUtxoService {
       data.publicKey,
       data.amount,
     );
-    await this.handlePendingPaymentRequests(userWallet);
+    // await this.handlePendingPaymentRequests(userWallet);
 
     return true;
   }

@@ -11,7 +11,7 @@ import { User } from '../models/fence-user.model';
 export class FenceCashoutRequestApisResolver {
   private readonly logger = new Logger(FenceCashoutRequestApisResolver.name);
 
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
   @Query(() => [CashOutRequest], { nullable: true })
   @UseGuards(JwtAuthGuard)
   async cashOutRequests(@CurrentUser() user: User): Promise<CashOutRequest[]> {
@@ -31,9 +31,9 @@ export class FenceCashoutRequestApisResolver {
     if (wallet.total < amount) {
       throw new BadRequestException('7001', 'Insufficient funds');
     }
-    else {
-      throw new BadRequestException('7001', 'Insufficient funds');
-    }
+    // else {
+    //   throw new BadRequestException('7001', 'Insufficient funds');
+    // }
     const request =
       await this.services.sharedCashoutRequestService.doCreateCashOutRequest(
         user.id,

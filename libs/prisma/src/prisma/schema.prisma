@@ -9,10 +9,8 @@ datasource db {
 
 model SiteSettings {
   id        Int       @id @default(autoincrement())
-  uid       String    @unique
-  cashOut   Boolean   @default(true)
-  cashIn    Boolean   @default(true)
-  transfer  Boolean   @default(true)
+  key       String    @unique
+  value     Boolean
   createdAt DateTime  @default(now())
   updatedAt DateTime? @default(now()) @updatedAt
 }
@@ -48,15 +46,16 @@ model User {
   transactions          Transaction[]
   cashOutRequest        CashOutRequest[]
   cashOutSettings       CashOutSettings[]
-  valuHmac              ValuHmac[]
   cashInOps             Operation?               @relation(fields: [cashInOpsId], references: [id], name: "UserCashInOps")
   cashInOpsId           Int?
   cashOutOps            Operation?               @relation(fields: [cashOutOpsId], references: [id], name: "UserCashOutOps")
   cashOutOpsId          Int?
   transferOps           Operation?               @relation(fields: [transferOpsId], references: [id], name: "UserTransferOps")
   transferOpsId         Int?
+  financingRequest      FinancingRequest[]
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime?                @default(now()) @updatedAt
+
 
 }
 
@@ -89,20 +88,6 @@ model Operation {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime?             @default(now()) @updatedAt
 
-}
-
-model ValuHmac {
-  id         Int       @id @default(autoincrement())
-  uid        String    @unique
-  hmac       String
-  orderId    String?
-  userId     Int?
-  user       User?     @relation(fields: [userId], references: [id])
-  isValid    Boolean   @default(true)
-  isComplete Boolean   @default(false)
-  loanNumber String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime? @default(now()) @updatedAt
 }
 
 model UserNotifyTokens {
@@ -191,11 +176,54 @@ model Wallet {
   id                Int       @id @default(autoincrement())
   userId            Int       @unique
   total             Float
+  financingAmount   Float
   user              User      @relation(fields: [userId], references: [id])
   payableBalance    Balance[] @relation("PayableBalance")
   receivableBalance Balance[] @relation("ReceivableBalance")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime? @default(now()) @updatedAt
+}
+
+model FinancingCompany {
+  id               Int                     @id @default(autoincrement())
+  name             String
+  admins           FinancingCompanyAdmin[]
+  financingRequest FinancingRequest[]
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime?               @default(now()) @updatedAt
+}
+
+model FinancingCompanyAdmin {
+  id                 Int               @id @default(autoincrement())
+  name               String
+  email              String            @unique
+  password           String
+  financingCompany   FinancingCompany? @relation(fields: [financingCompanyId], references: [id])
+  financingCompanyId Int?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime?         @default(now()) @updatedAt
+}
+
+model FinancingRequest {
+  id                 Int               @id @default(autoincrement())
+  amount             Float
+  user               User              @relation(fields: [userId], references: [id])
+  userId             Int
+  company            FinancingCompany? @relation(fields: [financingCompanyId], references: [id])
+  financingCompanyId Int?
+  status             FINANCING_STATUS  @default(PENDING)
+  isTransfered       Boolean           @default(false)
+  transferedAt       DateTime?
+  financingAmount    Float?
+  updatedAt          DateTime?         @default(now()) @updatedAt
+  createdAt          DateTime          @default(now())
+}
+
+enum FINANCING_STATUS {
+  INPROGRESS
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 model Balance {
@@ -243,6 +271,7 @@ model CashOutRequest {
   userId          Int
   cashOutMethod   CashOutSettings? @relation(fields: [cashOutMethodId], references: [id])
   cashOutMethodId Int?
+  comment         String?          @db.Text
   status          CASHOUT_STATUS   @default(PENDING)
   createdAt       DateTime?        @default(now())
   updatedAt       DateTime?        @updatedAt

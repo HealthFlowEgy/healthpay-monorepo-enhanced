@@ -23,7 +23,7 @@ import { FenceWalletApisResolver } from './fence-wallet-apis/fence-wallet-apis.r
 import { FenceWalletResolver } from './fence-wallet/fence-wallet.resolver';
 import { HpFenceController } from './hp-fence.controller';
 import { HpFenceService } from './hp-fence.service';
-import { ValuController } from './valu/valu.controller';
+import { FinancingController } from './financing/financing.controller';
 
 @Module({
   imports: [
@@ -53,7 +53,7 @@ import { ValuController } from './valu/valu.controller';
     ValidationsModule,
     WebsocketModule
   ],
-  controllers: [HpFenceController, ValuController],
+  controllers: [HpFenceController, FinancingController],
   providers: [
     HpFenceService,
     FenceUserApisResolver,

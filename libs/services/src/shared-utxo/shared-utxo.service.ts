@@ -57,6 +57,22 @@ export class SharedUtxoService {
     );
     if (pending.length > 0) {
       const firstPaymentRequest = pending[0];
+
+      const confirmedBalances = await this.sharedBalance.getAllBalances({
+        where: {
+          notes: 'pending-payment-request-' + firstPaymentRequest.id,
+        },
+      });
+      if (confirmedBalances.length > 0) {
+        if (confirmedBalances[0].confirmedAt) {
+          await this.sharedPaymentRequests.resolvePaymentRequest(
+            firstPaymentRequest,
+          );
+          await this.handlePendingPaymentRequests(userWallet);
+        }
+        return;
+      }
+
       this.sharedBalance.doTransFromUserToMerchant(
         firstPaymentRequest.merchantId,
         userWallet.userId,

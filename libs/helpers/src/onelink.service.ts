@@ -21,28 +21,27 @@ export class OnelinkService {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        'x-api-key': '8301df53-4ca9-465b-9878-a134c4a17942',
       },
     });
   }
 
   private async getAccessToken() {
-    const response = await this.instance.post('/login', {
-      username: this.configService.get<string>('ONELINK_USERNAME'),
-      password: this.configService.get<string>('ONELINK_PASSWORD'),
+    const response = await this.instance.post('/auth/login', {
+      api_key: '8301df53-4ca9-465b-9878-a134c4a17942',
+      api_secret: '28cb42c5-01d9-4c09-98f8-e1e276497a52',
     });
+    console.log(response.data);
     this.access_token = response.data.token;
   }
 
-  async createTransaction(
-    user: User,
-    amount: number,
-  ): Promise<OnelinkTransactionResponse> {
+  async createTransaction(user: User, amount: number): Promise<any> {
     try {
       if (!this.access_token) {
         await this.getAccessToken();
       }
+
       const data = {
-        token: this.access_token,
         first_name: ' ' + user.firstName + ' ',
         last_name: ' ' + user.firstName + user.lastName + ' ',
         mobile: user.mobile.replace('+2', ''),
@@ -52,11 +51,21 @@ export class OnelinkService {
       const transactionRes = await this.instance.post(
         '/transaction/create',
         data,
+        {
+          headers: {
+            Authorization: `Bearer ${this.access_token}`,
+          },
+        },
       );
       this.logger.verbose(
         `[createTransaction], ${JSON.stringify(transactionRes.data)}`,
       );
-      return transactionRes.data;
+      // return transactionRes.data;
+      this.logger.verbose(transactionRes.data.uid);
+      return {
+        transaction_id: transactionRes.data.uid,
+        iframe: transactionRes.data.iframe_url,
+      };
     } catch (e) {
       this.logger.verbose(
         `[createTransactionError], ${JSON.stringify(e.response.data || e)}`,

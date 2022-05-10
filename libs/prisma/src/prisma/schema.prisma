@@ -8,13 +8,13 @@ datasource db {
 }
 
 model SiteSettings {
-  id                    Int                      @id @default(autoincrement())
-  uid                   String                   @unique
-  cashOut               Boolean                  @default(true)
-  cashIn                Boolean                  @default(true)
-  transfer              Boolean                  @default(true)
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime?                @default(now()) @updatedAt
+  id        Int       @id @default(autoincrement())
+  uid       String    @unique
+  cashOut   Boolean   @default(true)
+  cashIn    Boolean   @default(true)
+  transfer  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
 }
 
 model User {

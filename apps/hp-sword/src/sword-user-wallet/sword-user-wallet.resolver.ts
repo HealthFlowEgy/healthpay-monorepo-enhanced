@@ -18,13 +18,15 @@ export class SwordUserWalletResolver {
     );
 
     this.logger.verbose(`[balance] ${balances.length} balances found`);
-    return balances.map((el) => ({
-      ...el,
-      status: el.confirmedAt
-        ? 'confirmed'
-        : el.rejectedAt
-        ? 'rejected'
-        : 'pending',
-    }));
+    return balances
+      .filter((b) => b.confirmedAt != null)
+      .map((el) => ({
+        ...el,
+        status: el.confirmedAt
+          ? 'confirmed'
+          : el.rejectedAt
+          ? 'rejected'
+          : 'pending',
+      }));
   }
 }

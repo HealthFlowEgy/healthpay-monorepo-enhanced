@@ -38,7 +38,8 @@ export class FenceCashOutApisResolver {
   @Query(() => [CashOutMethod])
   @UseGuards(JwtAuthGuard)
   async cashOutMethods(): Promise<CashOutMethod[]> {
-    return await this.services.sharedCashoutMethod.cashOutMethods();
+
+    return  this.services.sharedCashoutMethod.cashOutMethods();;
   }
   @Mutation(() => CashOutUserSettings)
   @UseGuards(JwtAuthGuard)

@@ -72,16 +72,16 @@ export class WebsocketService {
    * receive message from server
    */
   onMessage(event) {
-    const message = new WebsocketEvent();
-    message.createFromJSON(event.data);
-    this.logger.log(
-      `[onMessage] ${message.getEventType()} ${JSON.stringify(
-        message.getData(),
-      )}`,
-    );
-    if (message.isValid()) {
-      this.handleMessage(message);
-    }
+    // const message = new WebsocketEvent();
+    // message.createFromJSON(event.data);
+    // this.logger.log(
+    //   `[onMessage] ${message.getEventType()} ${JSON.stringify(
+    //     message.getData(),
+    //   )}`,
+    // );
+    // if (message.isValid()) {
+    //   this.handleMessage(message);
+    // }
   }
 
   /*

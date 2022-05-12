@@ -15,6 +15,25 @@ export class SharedCronService {
     private sharedPaymentRequests: SharedPaymentRequestService,
   ) {}
 
+  @Cron(CronExpression.EVERY_HOUR)
+  async revertPendingRequests() {
+    const pendingRequests =
+      await this.sharedPaymentRequests.getProcessingPaymentRequests({
+        where: {
+          status: 'CANCELLED',
+          updatedAt: {
+            lt: moment().subtract(1, 'hour').toISOString(),
+          },
+        },
+      });
+    for (let index = 0; index < pendingRequests.length; index++) {
+      const pendingStaleRequest = pendingRequests[index];
+      await this.sharedPaymentRequests.markPaymentRequestAsPending(
+        pendingStaleRequest,
+      );
+    }
+  }
+
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleCron() {
     const pendingBalances = await this.sharedBalance.getAllBalances({

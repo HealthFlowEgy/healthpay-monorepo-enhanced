@@ -105,7 +105,7 @@ export class SharedPaymentRequestService {
         },
       },
       orderBy: {
-        id: 'asc',
+        amount: 'asc',
       },
     });
   }

@@ -32,6 +32,7 @@ export class SharedUtxoService {
       data.publicKey,
       data.amount,
     );
+
     if (data.amount > 0) {
       await this.handlePendingPaymentRequests(userWallet);
     }
@@ -71,8 +72,8 @@ export class SharedUtxoService {
             firstPaymentRequest,
           );
           await this.handlePendingPaymentRequests(userWallet);
+          return;
         }
-        return;
       }
 
       this.sharedBalance.doTransFromUserToMerchant(

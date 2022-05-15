@@ -24,6 +24,7 @@ import { FenceWalletResolver } from './fence-wallet/fence-wallet.resolver';
 import { HpFenceController } from './hp-fence.controller';
 import { HpFenceService } from './hp-fence.service';
 import { ValuController } from './valu/valu.controller';
+import { AuthFinanceModule } from './auth-finance/auth-finance.module';
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { ValuController } from './valu/valu.controller';
     AuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ValidationsModule,
-    WebsocketModule
+    WebsocketModule,
+    AuthFinanceModule
   ],
   controllers: [HpFenceController, ValuController],
   providers: [

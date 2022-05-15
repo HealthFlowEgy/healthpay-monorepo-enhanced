@@ -8,13 +8,9 @@ datasource db {
 }
 
 model SiteSettings {
-  id                    Int                      @id @default(autoincrement())
-  uid                   String                   @unique
-  cashOut               Boolean                  @default(true)
-  cashIn                Boolean                  @default(true)
-  transfer              Boolean                  @default(true)
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime?                @default(now()) @updatedAt
+  id    Int     @id @default(autoincrement())
+  key   String  @unique
+  value Boolean
 }
 
 model User {
@@ -55,8 +51,10 @@ model User {
   cashOutOpsId          Int?
   transferOps           Operation?               @relation(fields: [transferOpsId], references: [id], name: "UserTransferOps")
   transferOpsId         Int?
+  financingRequest      FinancingRequest[]
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime?                @default(now()) @updatedAt
+
 
 }
 
@@ -191,11 +189,53 @@ model Wallet {
   id                Int       @id @default(autoincrement())
   userId            Int       @unique
   total             Float
+  financingAmount   Float?    @default(0)
   user              User      @relation(fields: [userId], references: [id])
   payableBalance    Balance[] @relation("PayableBalance")
   receivableBalance Balance[] @relation("ReceivableBalance")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime? @default(now()) @updatedAt
+}
+
+model FinancingCompany {
+  id                Int                @id @default(autoincrement())
+  name              String             @unique
+  img               String?
+  admins            FinancingAdmin[]
+  financingRequests FinancingRequest[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime?          @default(now()) @updatedAt
+
+}
+
+model FinancingAdmin {
+  id                 Int               @id @default(autoincrement())
+  financingCompany   FinancingCompany? @relation(fields: [financingCompanyId], references: [id])
+  financingCompanyId Int?
+  username           String            @unique
+  password           String
+  name               String
+  img                String?
+  mobile             String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime?         @default(now()) @updatedAt
+}
+
+model FinancingRequest {
+  id              Int                      @id @default(autoincrement())
+  uid             String                   @unique
+  user            User                     @relation(fields: [userId], references: [id])
+  userId          Int
+  company         FinancingCompany?        @relation(fields: [companyId], references: [id])
+  companyId       Int?
+  requestedAmount Float
+  approvedAmount  Float?
+  status          FINANCING_REQUEST_STATUS @default(PENDING)
+  reason          String
+  fullName        String
+  transfered_at   DateTime?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime?                @default(now()) @updatedAt
 }
 
 model Balance {
@@ -339,20 +379,18 @@ model Sessions {
 }
 
 model PaymentRequest {
-  id         Int            @id @default(autoincrement())
-  uid        String         @unique
-  amount     Float
-  status     CASHOUT_STATUS @default(PENDING)
-  userId     Int
-  user       User           @relation(fields: [userId], references: [id])
-  merchantId Int
-  merchant   Merchant       @relation(fields: [merchantId], references: [id])
-
-  transactionId Int?         @unique
-  transaction   Transaction? @relation(fields: [transactionId], references: [id])
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @default(now()) @updatedAt
+  id            Int            @id @default(autoincrement())
+  uid           String         @unique
+  amount        Float
+  status        CASHOUT_STATUS @default(PENDING)
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id])
+  merchantId    Int
+  merchant      Merchant       @relation(fields: [merchantId], references: [id])
+  transactionId Int?           @unique
+  transaction   Transaction?   @relation(fields: [transactionId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime?      @default(now()) @updatedAt
 
 }
 
@@ -377,6 +415,14 @@ enum OPERATION_METHOD_TYPE {
 }
 
 enum CASHOUT_STATUS {
+  PENDING
+  CANCELLED
+  APPROVED
+  DECLINED
+}
+
+enum FINANCING_REQUEST_STATUS {
+  INPROGRESS
   PENDING
   CANCELLED
   APPROVED

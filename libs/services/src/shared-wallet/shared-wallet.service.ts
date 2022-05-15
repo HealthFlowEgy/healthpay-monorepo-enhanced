@@ -76,7 +76,7 @@ export class SharedWalletService {
     return this.prisma.wallet.create({
       data: {
         total: 0,
-        financingAmount: 0,
+        // financingAmount: 0,
         user: {
           connect: {
             id: ownerId,

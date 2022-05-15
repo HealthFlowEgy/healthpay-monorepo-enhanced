@@ -44,7 +44,6 @@ model User {
   transactions          Transaction[]
   cashOutRequest        CashOutRequest[]
   cashOutSettings       CashOutSettings[]
-  valuHmac              ValuHmac[]
   cashInOps             Operation?               @relation(fields: [cashInOpsId], references: [id], name: "UserCashInOps")
   cashInOpsId           Int?
   cashOutOps            Operation?               @relation(fields: [cashOutOpsId], references: [id], name: "UserCashOutOps")
@@ -87,20 +86,6 @@ model Operation {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime?             @default(now()) @updatedAt
 
-}
-
-model ValuHmac {
-  id         Int       @id @default(autoincrement())
-  uid        String    @unique
-  hmac       String
-  orderId    String?
-  userId     Int?
-  user       User?     @relation(fields: [userId], references: [id])
-  isValid    Boolean   @default(true)
-  isComplete Boolean   @default(false)
-  loanNumber String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime? @default(now()) @updatedAt
 }
 
 model UserNotifyTokens {
@@ -283,6 +268,7 @@ model CashOutRequest {
   userId          Int
   cashOutMethod   CashOutSettings? @relation(fields: [cashOutMethodId], references: [id])
   cashOutMethodId Int?
+  comment         String?          @db.Text
   status          CASHOUT_STATUS   @default(PENDING)
   createdAt       DateTime?        @default(now())
   updatedAt       DateTime?        @updatedAt

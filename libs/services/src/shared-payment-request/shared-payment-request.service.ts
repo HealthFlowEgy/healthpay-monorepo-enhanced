@@ -13,7 +13,7 @@ export class SharedPaymentRequestService {
     @Inject(OnelinkService) private onelink: OnelinkService,
     @Inject(SharedTransactionService)
     private transaction: SharedTransactionService,
-  ) {}
+  ) { }
 
   async createPaymentRequest(
     user: User,
@@ -75,6 +75,10 @@ export class SharedPaymentRequestService {
         },
         status: 'PENDING',
       },
+      include: {
+        merchant: true,
+        transaction: true,
+      }
     });
   }
 

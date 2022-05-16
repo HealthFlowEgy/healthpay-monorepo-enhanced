@@ -9,7 +9,7 @@ import { Success } from '../models/fence-success.model';
 import { User } from '../models/fence-user.model';
 @Resolver()
 export class FenceMerchantApisResolver {
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
   @Query(() => [Merchant])
   @UseGuards(JwtAuthGuard)
   async merchantList(): Promise<Merchant[]> {

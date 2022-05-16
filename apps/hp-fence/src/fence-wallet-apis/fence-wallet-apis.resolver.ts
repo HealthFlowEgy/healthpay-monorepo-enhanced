@@ -1,8 +1,6 @@
 import { ServicesService } from '@app/services';
-import { SharedNotifyService } from '@app/services/shared-notify/shared-notify.service';
 import { Inject, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Transaction } from '../models/fence-transaction.model';
@@ -13,8 +11,7 @@ import { Wallet } from '../models/fence-wallet.model';
 export class FenceWalletApisResolver {
   constructor(
     @Inject(ServicesService) private services: ServicesService,
-    @Inject(AuthService) private authService: AuthService, // @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
-  ) {}
+  ) { }
   @Query(() => Wallet)
   @UseGuards(JwtAuthGuard)
   async userWallet(
@@ -23,8 +20,6 @@ export class FenceWalletApisResolver {
     @Args('startDate', { nullable: true }) startDate: string,
     @Args('endDate', { nullable: true }) endDate: string,
   ) {
-    // const myUser = await this.services.sharedUser.getUserById(user.id);
-
     const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
     const balance =
       await this.services.sharedBalance.getUserWalletWithBalanceWithMerchantsUsers(

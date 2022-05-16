@@ -23,6 +23,7 @@ import { FenceWalletApisResolver } from './fence-wallet-apis/fence-wallet-apis.r
 import { FenceWalletResolver } from './fence-wallet/fence-wallet.resolver';
 import { HpFenceController } from './hp-fence.controller';
 import { HpFenceService } from './hp-fence.service';
+import { FenceFinancingApisResolver } from './fence-financing-apis/fence-financing-apis.resolver';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { HpFenceService } from './hp-fence.service';
     FenceCashoutRequestResolver,
     FenceCashoutRequestApisResolver,
     FenceNotificationsApisResolver,
+    FenceFinancingApisResolver,
   ],
 })
 export class HpFenceModule { }

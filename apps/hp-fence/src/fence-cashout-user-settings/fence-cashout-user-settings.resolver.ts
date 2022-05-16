@@ -6,7 +6,7 @@ import { CashOutUserSettings } from '../models/fence-cashout-user-settings.model
 
 @Resolver(CashOutUserSettings)
 export class FenceCashoutUserSettingsResolver {
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
   @ResolveField()
   async method(
     @Parent() settings: CashOutUserSettings,

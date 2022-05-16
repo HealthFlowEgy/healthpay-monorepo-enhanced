@@ -4,6 +4,7 @@ import {
   Inject,
   UseGuards,
   UsePipes,
+  Logger
 } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import NestjsGraphqlValidator from 'nestjs-graphql-validator';
@@ -15,10 +16,11 @@ import { User, UserWithToken } from '../models/fence-user.model';
 
 @Resolver()
 export class FenceUserApisResolver {
+  private readonly logger = new Logger(FenceUserApisResolver.name);
   constructor(
     @Inject(ServicesService) private services: ServicesService,
     @Inject(AuthService) private authService: AuthService,
-  ) {}
+  ) { }
   // register mutation
   @Mutation(() => User, { nullable: true })
   async register(@Args('mobile') mobile: string) {
@@ -49,7 +51,8 @@ export class FenceUserApisResolver {
       mobile,
       otp,
     );
-
+    const requests = await this.services.sharedFinanceService.requestsByUserId(user.id)
+    console.log("authUser", requests)
     if (!user) {
       return;
     }

@@ -268,7 +268,6 @@ model CashOutRequest {
   userId          Int
   cashOutMethod   CashOutSettings? @relation(fields: [cashOutMethodId], references: [id])
   cashOutMethodId Int?
-  comment         String?          @db.Text
   status          CASHOUT_STATUS   @default(PENDING)
   createdAt       DateTime?        @default(now())
   updatedAt       DateTime?        @updatedAt

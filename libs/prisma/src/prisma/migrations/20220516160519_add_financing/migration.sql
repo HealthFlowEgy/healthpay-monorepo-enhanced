@@ -4,17 +4,11 @@
   - You are about to drop the `ValuHmac` table. If the table is not empty, all the data it contains will be lost.
 
 */
--- DropForeignKey
-ALTER TABLE `ValuHmac` DROP FOREIGN KEY `ValuHmac_userId_fkey`;
-
 -- AlterTable
 ALTER TABLE `CashOutRequest` ADD COLUMN `comment` TEXT NULL;
 
 -- AlterTable
 ALTER TABLE `Wallet` ADD COLUMN `financingAmount` DOUBLE NULL DEFAULT 0;
-
--- DropTable
-DROP TABLE `ValuHmac`;
 
 -- CreateTable
 CREATE TABLE `SiteSettings` (

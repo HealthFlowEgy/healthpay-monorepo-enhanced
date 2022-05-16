@@ -51,7 +51,6 @@ import { HpFenceService } from './hp-fence.service';
     ConfigModule.forRoot({ isGlobal: true }),
     ValidationsModule,
     WebsocketModule,
-    AuthFinanceModule
   ],
   controllers: [HpFenceController],
   providers: [

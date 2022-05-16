@@ -27,7 +27,7 @@ export class SharedWalletService {
     @Inject(SharedPaymentRequestService)
     private sharedPaymentRequests: SharedPaymentRequestService,
     private eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async getAllWallets(where?: any): Promise<Wallet[]> {
     return this.prisma.wallet.findMany(where);

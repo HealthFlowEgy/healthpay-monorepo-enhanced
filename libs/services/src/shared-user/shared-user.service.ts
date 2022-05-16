@@ -24,7 +24,7 @@ export class SharedUserService {
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
 
     @Inject(ConfigService) private configService: ConfigService,
-  ) {}
+  ) { }
 
   public getUserById(id: number): Promise<User> {
     return this.prisma.user.findFirst({ where: { id } });
@@ -207,58 +207,5 @@ export class SharedUserService {
     } catch (e) {
       console.error(e);
     }
-  }
-
-  // TODO: create shared valu service
-  public async createValuHmac(userId: number): Promise<any> {
-    const user = await this.getUserById(userId);
-    const hmac = await this.helpers.encryptTxt();
-    const orderId = this.generateOrderId(32);
-    await this.prisma.valuHmac.create({
-      data: {
-        uid: this.helpers.doCreateUUID('valuHmac'),
-        orderId: orderId,
-        user: { connect: { id: user.id } },
-        hmac: hmac,
-        ...this.helpers.generateDates(),
-      },
-    });
-    return { hmac: hmac, orderId: orderId };
-  }
-  public async updateValuHmacLoanNumber(
-    hmac: string,
-    loanNumber: string,
-  ): Promise<any> {
-    const valuHmac = await this.prisma.valuHmac.findFirst({
-      where: { hmac },
-    });
-    if (!valuHmac) {
-      throw new BadRequestException('5003', 'invalid hmac');
-    }
-    await this.prisma.valuHmac.update({
-      where: { id: valuHmac.id },
-      data: { loanNumber },
-    });
-    return valuHmac;
-  }
-  public async getValuOrderIdByHmac(hmac: string): Promise<any> {
-    const valuHmac = await this.prisma.valuHmac.findFirst({
-      where: { hmac },
-    });
-    if (!valuHmac.orderId) {
-      throw new BadRequestException('5003', 'invalid order id');
-    }
-    return valuHmac.orderId;
-  }
-
-  private generateOrderId(length): string {
-    let result = '';
-    const characters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
   }
 }

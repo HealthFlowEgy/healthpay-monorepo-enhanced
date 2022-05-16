@@ -5,7 +5,6 @@
 
 */
 -- AlterTable
-ALTER TABLE `CashOutRequest` ADD COLUMN `comment` TEXT NULL;
 
 -- AlterTable
 ALTER TABLE `Wallet` ADD COLUMN `financingAmount` DOUBLE NULL DEFAULT 0;

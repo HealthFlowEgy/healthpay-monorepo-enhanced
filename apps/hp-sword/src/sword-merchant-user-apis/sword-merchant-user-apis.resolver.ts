@@ -256,14 +256,14 @@ export class SwordMerchantUserApisResolver {
     };
   }
 
-  @Query(() => Wallet, { nullable: true })
+  @Query(() => PaymentRequest, { nullable: true })
   @UseGuards(JwtAuthGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 1 },
     }),
   )
-  async userWallet(
+  async userPaymentRequests(
     @Args('userToken') userToken: string,
     // induced fields
     @CurrentMerchant() merchant: Merchant,
@@ -272,6 +272,8 @@ export class SwordMerchantUserApisResolver {
       merchant,
       userToken,
     );
-    return this.services.sharedWallet.getWalletByUserId(user.id);
+    return this.services.sharedPaymentRequest.getPaymentRequestsByUserId(
+      user.id,
+    );
   }
 }

@@ -12,7 +12,7 @@ export class AuthService {
     private readonly services: ServicesService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async validateUser(
     apiHeader: string,

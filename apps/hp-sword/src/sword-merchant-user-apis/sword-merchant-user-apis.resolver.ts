@@ -10,6 +10,7 @@ import { Transaction } from '../models/sword-transaction.model';
 import { User, UserWithToken } from '../models/sword-user.model';
 import { Wallet } from '../models/sword-wallet.model';
 import slugify from 'slugify';
+import { PaymentRequest } from '../models/sword-payment-requests.model';
 @Resolver()
 export class SwordMerchantUserApisResolver {
   private readonly logger = new Logger(SwordMerchantUserApisResolver.name);

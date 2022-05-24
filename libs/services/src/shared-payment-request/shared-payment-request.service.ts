@@ -65,8 +65,8 @@ export class SharedPaymentRequestService {
     });
   }
 
-  async getPaymentRequestsByUserId(userId: number): Promise<PaymentRequest> {
-    return this.prisma.paymentRequest.findFirst({
+  async getPaymentRequestsByUserId(userId: number): Promise<PaymentRequest[]> {
+    return this.prisma.paymentRequest.findMany({
       where: {
         userId,
       },

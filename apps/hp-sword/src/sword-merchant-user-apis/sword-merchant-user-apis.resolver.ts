@@ -257,7 +257,7 @@ export class SwordMerchantUserApisResolver {
     };
   }
 
-  @Query(() => PaymentRequest, { nullable: true })
+  @Query(() => [PaymentRequest], { nullable: true })
   @UseGuards(JwtAuthGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
@@ -276,5 +276,24 @@ export class SwordMerchantUserApisResolver {
     return this.services.sharedPaymentRequest.getPaymentRequestsByUserId(
       user.id,
     );
+  }
+
+  @Query(() => Wallet, { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    new NestjsGraphqlValidator({
+      userToken: { minLen: 1 },
+    }),
+  )
+  async userWallet(
+    @Args('userToken') userToken: string,
+    // induced fields
+    @CurrentMerchant() merchant: Merchant,
+  ) {
+    const user = await this.services.sharedMerchant.getUserFromLink(
+      merchant,
+      userToken,
+    );
+    return this.services.sharedWallet.getWalletByUserId(user.id);
   }
 }

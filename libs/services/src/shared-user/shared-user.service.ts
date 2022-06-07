@@ -182,6 +182,9 @@ export class SharedUserService {
     nationalDocBack: string,
   ): Promise<boolean> {
     try {
+
+
+
       const request = await this.prisma.userVerificationRequest.create({
         data: {
           user: {
@@ -192,16 +195,18 @@ export class SharedUserService {
           status: 'PENDING',
         },
       });
-
+      console.log(request, "REQUEST");
       if (request) {
         const updatedUser = await this.prisma.user.update({
           where: { id: userId },
           data: { nationalId, nationalDocFront, nationalDocBack },
         });
         if (updatedUser) {
+          console.log("updatedUser");
           return true;
         }
       } else {
+        console.log("NOT UPDATED");
         return false;
       }
     } catch (e) {

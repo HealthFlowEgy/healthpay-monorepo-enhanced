@@ -27,7 +27,7 @@ export class SharedNotifyService {
     private configService: ConfigService,
     @Inject(I18nService)
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   public toUser(user: User): SharedNotifyService {
     this.thisUser = user;

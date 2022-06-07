@@ -40,6 +40,13 @@ export class SharedWalletService {
       },
     });
   }
+  async cashoutSettings(): Promise<any> {
+    return this.prisma.siteSettings.findFirst({
+      where: {
+        key: 'cashout',
+      }
+    })
+  }
   async getWalletByUserUID(userUID: string): Promise<Wallet> {
     const wallet = await this.prisma.user
       .findFirst({

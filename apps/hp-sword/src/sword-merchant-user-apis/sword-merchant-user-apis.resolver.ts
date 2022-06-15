@@ -12,6 +12,7 @@ import { Wallet } from '../models/sword-wallet.model';
 import slugify from 'slugify';
 import { PaymentRequest } from '../models/sword-payment-requests.model';
 import { Throttle } from '@nestjs/throttler';
+import { GqlThrottlerGuard } from '../guards/throttle.guard';
 
 @Resolver()
 export class SwordMerchantUserApisResolver {
@@ -21,7 +22,7 @@ export class SwordMerchantUserApisResolver {
 
   @Mutation(() => User, { nullable: true })
   @Throttle(3, 60 * 60)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       email: { rules: ['isEmail'], orNull: true },
@@ -57,7 +58,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => UserWithToken, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       otp: { maxLen: 6, minLen: 1 },
@@ -96,7 +97,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Transaction, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
@@ -124,7 +125,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
@@ -154,7 +155,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
@@ -185,7 +186,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
@@ -215,7 +216,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },

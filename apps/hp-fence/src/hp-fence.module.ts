@@ -78,10 +78,10 @@ import { APP_GUARD } from '@nestjs/core';
     FenceNotificationsApisResolver,
     FenceFinancingApisResolver,
     PaymentRequestApisResolver,
-    {
-      provide: APP_GUARD,
-      useClass: GqlThrottlerGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: GqlThrottlerGuard,
+    // },
   ],
 })
 export class HpFenceModule {}

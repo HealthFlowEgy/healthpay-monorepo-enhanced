@@ -11,7 +11,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Injectable()
 export class GqlThrottlerGuard extends ThrottlerGuard {
-  protected getTracker(req: Record<string, any>): string {
+  getTracker(req: Record<string, any>): string {
     console.log('[GqlThrottlerGuard.getTracker]', req.ip, req.ips);
     return req.ips.length ? req.ips[0] : req.ip;
   }

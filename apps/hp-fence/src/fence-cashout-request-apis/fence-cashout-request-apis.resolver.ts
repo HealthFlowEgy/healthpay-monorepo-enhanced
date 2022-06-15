@@ -3,6 +3,7 @@ import { BadRequestException, Inject, Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { CashOutRequest } from '../models/fence-cashout-request.model';
 import { Success } from '../models/fence-success.model';
 import { User } from '../models/fence-user.model';
@@ -13,7 +14,7 @@ export class FenceCashoutRequestApisResolver {
 
   constructor(@Inject(ServicesService) private services: ServicesService) { }
   @Query(() => [CashOutRequest], { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async cashOutRequests(@CurrentUser() user: User): Promise<CashOutRequest[]> {
     return await this.services.sharedCashoutRequestService.requestsByUserId(
       user.id,
@@ -21,7 +22,7 @@ export class FenceCashoutRequestApisResolver {
   }
 
   @Mutation(() => CashOutRequest)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async createCashOutRequest(
     @CurrentUser() user: User,
     @Args('amount') amount: number,

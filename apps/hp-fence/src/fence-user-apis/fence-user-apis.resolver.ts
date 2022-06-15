@@ -4,15 +4,17 @@ import {
   Inject,
   UseGuards,
   UsePipes,
-  Logger
+  Logger,
 } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { Success } from '../models/fence-success.model';
 import { User, UserWithToken } from '../models/fence-user.model';
+import { Throttle } from '@nestjs/throttler';
 
 @Resolver()
 export class FenceUserApisResolver {
@@ -20,8 +22,10 @@ export class FenceUserApisResolver {
   constructor(
     @Inject(ServicesService) private services: ServicesService,
     @Inject(AuthService) private authService: AuthService,
-  ) { }
+  ) {}
   // register mutation
+  @Throttle(3, 60 * 60)
+  @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async register(@Args('mobile') mobile: string) {
     return this.services.sharedUser.doUpsertUser({ mobile }, false);
@@ -29,6 +33,8 @@ export class FenceUserApisResolver {
   // register mutation
 
   // login mutation
+  @Throttle(3, 60 * 60)
+  @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async login(@Args('mobile') mobile: string) {
     // return this.services.sharedUser.doUpsertUser({ mobile }, true);
@@ -52,8 +58,10 @@ export class FenceUserApisResolver {
       mobile,
       otp,
     );
-    const requests = await this.services.sharedFinanceService.requestsByUserId(user.id)
-    console.log("authUser", requests)
+    const requests = await this.services.sharedFinanceService.requestsByUserId(
+      user.id,
+    );
+    console.log('authUser', requests);
     if (!user) {
       return;
     }
@@ -76,7 +84,7 @@ export class FenceUserApisResolver {
 
   // update profile mutation
   @Mutation(() => User, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       firstName: { maxLen: 10, minLen: 1 },
@@ -109,7 +117,7 @@ export class FenceUserApisResolver {
 
   // verify user docs mutation
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       nationalId: { maxLen: 14, minLen: 14 },
@@ -142,7 +150,7 @@ export class FenceUserApisResolver {
 
   // profile query
   @Query(() => User)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async profile(@CurrentUser() user: User) {
     return user;
   }

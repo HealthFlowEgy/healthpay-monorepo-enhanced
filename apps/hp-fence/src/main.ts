@@ -2,10 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { HpFenceModule } from './hp-fence.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ThrottleMiddleware } from 'libs/middelwares/ThrottleMiddleware';
+import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
-  const app = await NestFactory.create(HpFenceModule);
+  const app = await NestFactory.create<NestExpressApplication>(HpFenceModule);
   app.enableCors();
-  app.use(ThrottleMiddleware);
+  app.set('trust proxy', 'loopback');
   const config = new DocumentBuilder()
     .setTitle('HealthPay Fence API Docs')
     .setDescription('API description')

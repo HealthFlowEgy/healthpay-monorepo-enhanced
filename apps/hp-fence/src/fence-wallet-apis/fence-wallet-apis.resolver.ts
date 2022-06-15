@@ -3,17 +3,16 @@ import { Inject, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { Transaction } from '../models/fence-transaction.model';
 import { User } from '../models/fence-user.model';
 import { Wallet } from '../models/fence-wallet.model';
 
 @Resolver()
 export class FenceWalletApisResolver {
-  constructor(
-    @Inject(ServicesService) private services: ServicesService,
-  ) { }
+  constructor(@Inject(ServicesService) private services: ServicesService) {}
   @Query(() => Wallet)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async userWallet(
     @CurrentUser() user: User,
     @Args('take', { nullable: true }) take: number,
@@ -36,7 +35,7 @@ export class FenceWalletApisResolver {
   }
 
   @Mutation(() => Transaction, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async topupWalletUser(
     @Args('amount') amount: number,
     @CurrentUser() user: User,

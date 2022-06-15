@@ -6,7 +6,9 @@
   "compilerOptions": {
     "webpack": true,
     "tsConfigPath": "apps/healthpay/tsconfig.app.json",
-    "assets": ["i18n/**/*"]
+    "assets": [
+      "i18n/**/*"
+    ]
   },
   "projects": {
     "healthpay": {
@@ -97,6 +99,15 @@
       "sourceRoot": "apps/hp-nodejs/src",
       "compilerOptions": {
         "tsConfigPath": "apps/hp-nodejs/tsconfig.app.json"
+      }
+    },
+    "hp-financing": {
+      "type": "application",
+      "root": "apps/hp-financing",
+      "entryFile": "main",
+      "sourceRoot": "apps/hp-financing/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/hp-financing/tsconfig.app.json"
       }
     }
   }

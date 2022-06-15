@@ -27,7 +27,7 @@ export class SharedWalletService {
     @Inject(SharedPaymentRequestService)
     private sharedPaymentRequests: SharedPaymentRequestService,
     private eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async getAllWallets(where?: any): Promise<Wallet[]> {
     return this.prisma.wallet.findMany(where);
@@ -39,6 +39,13 @@ export class SharedWalletService {
         userId,
       },
     });
+  }
+  async cashoutSettings(): Promise<any> {
+    return this.prisma.siteSettings.findFirst({
+      where: {
+        key: 'cashout',
+      }
+    })
   }
   async getWalletByUserUID(userUID: string): Promise<Wallet> {
     const wallet = await this.prisma.user
@@ -76,6 +83,7 @@ export class SharedWalletService {
     return this.prisma.wallet.create({
       data: {
         total: 0,
+        // financingAmount: 0,
         user: {
           connect: {
             id: ownerId,
@@ -143,5 +151,233 @@ export class SharedWalletService {
     //   data: { total: rWallet.total + amount },
     // });
     return true;
+  }
+
+  async walletWithStartDate(
+    walletId: number,
+    startDate: string,
+  ): Promise<Wallet> {
+    const wallet = await this.prisma.wallet.findFirst({
+      where: {
+        id: walletId,
+      },
+      include: {
+        payableBalance: {
+          where: {
+            createdAt: {
+              gte: startDate,
+            },
+          },
+          include: {
+            receivableMerchant: true,
+            receivableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        receivableBalance: {
+          where: {
+            createdAt: {
+              gte: startDate,
+            },
+          },
+          include: {
+            payableMerchant: true,
+            payableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return wallet;
+  }
+
+  async walletWithEndDate(walletId: number, endDate: string): Promise<Wallet> {
+    const wallet = await this.prisma.wallet.findFirst({
+      where: {
+        id: walletId,
+      },
+      include: {
+        payableBalance: {
+          where: {
+            createdAt: {
+              lte: endDate,
+            },
+          },
+          include: {
+            receivableMerchant: true,
+            receivableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        receivableBalance: {
+          where: {
+            createdAt: {
+              lte: endDate,
+            },
+          },
+          include: {
+            payableMerchant: true,
+            payableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return wallet;
+  }
+  async walletWithStartEndDate(
+    walletId: number,
+    startDate: string,
+    endDate: string,
+  ): Promise<Wallet> {
+    const wallet = await this.prisma.wallet.findFirst({
+      where: {
+        id: walletId,
+      },
+      include: {
+        payableBalance: {
+          where: {
+            AND: [
+              {
+                createdAt: {
+                  gte: startDate,
+                },
+              },
+              {
+                createdAt: {
+                  lte: endDate,
+                },
+              },
+            ],
+          },
+          include: {
+            receivableMerchant: true,
+            receivableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        receivableBalance: {
+          where: {
+            AND: [
+              {
+                createdAt: {
+                  gte: startDate,
+                },
+              },
+              {
+                createdAt: {
+                  lte: endDate,
+                },
+              },
+            ],
+          },
+          include: {
+            payableMerchant: true,
+            payableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return wallet;
+  }
+  async walletWithRangeDate(
+    walletId: number,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<Wallet> {
+    let wallet = null;
+    if (startDate) {
+      wallet = await this.walletWithStartDate(walletId, startDate);
+      return wallet;
+    } else if (endDate) {
+      wallet = await this.walletWithEndDate(walletId, endDate);
+      return wallet;
+    } else if (startDate && endDate) {
+      wallet = await this.walletWithStartEndDate(walletId, startDate, endDate);
+      return wallet;
+    }
+  }
+  async walletWithLastTranx(walletId: number, take: number): Promise<Wallet> {
+    const wallet = await this.prisma.wallet.findFirst({
+      where: {
+        id: walletId,
+      },
+      include: {
+        payableBalance: {
+          take: take,
+          include: {
+            receivableMerchant: true,
+            receivableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        receivableBalance: {
+          take: take,
+          include: {
+            payableMerchant: true,
+            payableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return wallet;
+  }
+  async walletWithAllTranx(walletId: number): Promise<Wallet> {
+    const wallet = await this.prisma.wallet.findFirst({
+      where: {
+        id: walletId,
+      },
+      include: {
+        payableBalance: {
+          include: {
+            receivableMerchant: true,
+            receivableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        receivableBalance: {
+          include: {
+            payableMerchant: true,
+            payableWallet: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return wallet;
   }
 }

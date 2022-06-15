@@ -1,11 +1,7 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  CashOutSettings,
-  CashOutTypeLength,
-  CashOutTypes,
-} from '@prisma/client';
+import { CashOutSettings } from '@prisma/client';
 
 @Injectable()
 export class SharedCashOutUserSettingsService {
@@ -18,7 +14,7 @@ export class SharedCashOutUserSettingsService {
     userId: number,
     creditorNo: string,
     methodId: number,
-  ): Promise<any> {
+  ): Promise<CashOutSettings> {
     return await this.prisma.cashOutSettings.create({
       data: {
         uid: this.helpers.doCreateUUID('cashOutSettings'),

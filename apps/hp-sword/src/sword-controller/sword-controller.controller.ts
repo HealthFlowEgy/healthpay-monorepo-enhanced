@@ -2,6 +2,9 @@ import { ServicesService } from '@app/services';
 import { WebsocketService } from '@app/websocket';
 import { Controller, Get, Inject } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Throttle } from '@nestjs/throttler';
+
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -34,9 +37,9 @@ export class SwordControllerController {
   //   return JSON.stringify(transArr);
   // }
 
+
   @Get('/tryone')
   async tryone(): Promise<string> {
-    this.services.sharedBalance.doTransFromUserToUser(4, 3, 10, 'LEDGERTX');
-    return '';
+    return 'hello';
   }
 }

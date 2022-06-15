@@ -1,9 +1,11 @@
-import { Inject, Logger } from '@nestjs/common';
+import { Inject, Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthService } from '../auth/auth.service';
 import { ApiHeader } from '../decorators/api-header.decorator';
 import { UserIp } from '../decorators/user-ip.decorator';
 import { Merchant, MerchantWithToken } from '../models/sword-merchant.model';
+import { Throttle } from '@nestjs/throttler';
+import { GqlThrottlerGuard } from '../guards/throttle.guard';
 
 @Resolver()
 export class SwordMerchantWithTokenResolver {
@@ -20,6 +22,7 @@ export class SwordMerchantWithTokenResolver {
 
   // merchant login
   @Mutation(() => MerchantWithToken, { nullable: true })
+  @UseGuards(GqlThrottlerGuard)
   async authMerchant(
     @Args('apiKey') apiKey: string,
     @ApiHeader() apiHeader: string,

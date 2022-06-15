@@ -1,25 +1,30 @@
+import { HelpersModule } from '@app/helpers';
+import { ServicesModule } from '@app/services';
+import { ValidationsModule } from '@app/validations';
+import { WebsocketModule } from '@app/websocket';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GraphQLModule } from '@nestjs/graphql';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import path from 'path';
+import { AuthModule } from './auth/auth.module';
+import { FenceBalanceResolver } from './fence-balance/fence-balance.resolver';
+import { FenceCashOutApisResolver } from './fence-cashout-apis/fence-cashout-apis.resolver';
+import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout-method.resolver';
+import { FenceCashoutRequestApisResolver } from './fence-cashout-request-apis/fence-cashout-request-apis.resolver';
+import { FenceCashoutRequestResolver } from './fence-cashout-request/fence-cashout-request.resolver';
+import { FenceCashoutUserSettingsResolver } from './fence-cashout-user-settings/fence-cashout-user-settings.resolver';
+import { FenceMerchantApisResolver } from './fence-merchant-apis/fence-merchant-apis.resolver';
+import { FenceNotificationsApisResolver } from './fence-notifications-apis/fence-notifications-apis.resolver';
+import { FenceUserApisResolver } from './fence-user-apis/fence-user-apis.resolver';
+import { FenceUserResolver } from './fence-user/fence-user.resolver';
+import { FenceWalletApisResolver } from './fence-wallet-apis/fence-wallet-apis.resolver';
+import { FenceWalletResolver } from './fence-wallet/fence-wallet.resolver';
 import { HpFenceController } from './hp-fence.controller';
 import { HpFenceService } from './hp-fence.service';
-import { FenceUserApisResolver } from './fence-user-apis/fence-user-apis.resolver';
-import { ServicesModule } from '@app/services';
-import { HelpersModule } from '@app/helpers';
-import { AuthModule } from './auth/auth.module';
-import { FenceUserResolver } from './fence-user/fence-user.resolver';
-import { FenceWalletResolver } from './fence-wallet/fence-wallet.resolver';
-import { FenceBalanceResolver } from './fence-balance/fence-balance.resolver';
-import { FenceWalletApisResolver } from './fence-wallet-apis/fence-wallet-apis.resolver';
-import { FenceMerchantApisResolver } from './fence-merchant-apis/fence-merchant-apis.resolver';
-import { FenceCashOutApisResolver } from './fence-cashout-apis/fence-cashout-apis.resolver';
-import { FenceCashoutUserSettingsResolver } from './fence-cashout-user-settings/fence-cashout-user-settings.resolver';
-import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout-method.resolver';
-import { ValuController } from './valu/valu.controller';
-import { ConfigModule } from '@nestjs/config';
-import { ValidationsModule } from '@app/validations';
-import { EventEmitterModule } from '@nestjs/event-emitter';
+import { FenceFinancingApisResolver } from './fence-financing-apis/fence-financing-apis.resolver';
+import { PaymentRequestApisResolver } from './payment-request-apis/payment-request-apis.resolver';
 
 @Module({
   imports: [
@@ -45,10 +50,11 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ServicesModule,
     HelpersModule,
     AuthModule,
-    ConfigModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     ValidationsModule,
+    WebsocketModule,
   ],
-  controllers: [HpFenceController, ValuController],
+  controllers: [HpFenceController],
   providers: [
     HpFenceService,
     FenceUserApisResolver,
@@ -60,6 +66,11 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     FenceCashOutApisResolver,
     FenceCashoutUserSettingsResolver,
     FenceCashoutMethodResolver,
+    FenceCashoutRequestResolver,
+    FenceCashoutRequestApisResolver,
+    FenceNotificationsApisResolver,
+    FenceFinancingApisResolver,
+    PaymentRequestApisResolver,
   ],
 })
-export class HpFenceModule {}
+export class HpFenceModule { }

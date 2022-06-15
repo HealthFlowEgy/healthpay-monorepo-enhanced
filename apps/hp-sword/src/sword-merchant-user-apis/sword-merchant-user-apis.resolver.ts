@@ -11,6 +11,8 @@ import { User, UserWithToken } from '../models/sword-user.model';
 import { Wallet } from '../models/sword-wallet.model';
 import slugify from 'slugify';
 import { PaymentRequest } from '../models/sword-payment-requests.model';
+import { Throttle } from '@nestjs/throttler';
+
 @Resolver()
 export class SwordMerchantUserApisResolver {
   private readonly logger = new Logger(SwordMerchantUserApisResolver.name);
@@ -18,6 +20,7 @@ export class SwordMerchantUserApisResolver {
   constructor(@Inject(ServicesService) private services: ServicesService) {}
 
   @Mutation(() => User, { nullable: true })
+  @Throttle(3, 60 * 60)
   @UseGuards(JwtAuthGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
@@ -125,7 +128,7 @@ export class SwordMerchantUserApisResolver {
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
-      amount: { min: 1 },
+      amount: { min: 10 },
     }),
   )
   async deductFromUser(
@@ -155,7 +158,7 @@ export class SwordMerchantUserApisResolver {
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
-      amount: { min: 1 },
+      amount: { min: 10 },
     }),
   )
   async sendPaymentRequest(
@@ -186,7 +189,7 @@ export class SwordMerchantUserApisResolver {
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
-      amount: { min: 1 },
+      amount: { min: 10 },
     }),
   )
   async payToUser(

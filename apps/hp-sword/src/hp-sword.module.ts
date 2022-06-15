@@ -1,4 +1,6 @@
 import { HelpersModule } from '@app/helpers';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+
 import { ServicesModule } from '@app/services';
 import { WebsocketModule } from '@app/websocket';
 import { Module } from '@nestjs/common';
@@ -15,6 +17,8 @@ import { SwordMerchantUserApisResolver } from './sword-merchant-user-apis/sword-
 import { SwordUserWalletResolver } from './sword-user-wallet/sword-user-wallet.resolver';
 import { SwordControllerController } from './sword-controller/sword-controller.controller';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerBehindProxyGuard } from 'libs/gaurds/throttle-behind-proxy.gaurd';
+import { GqlThrottlerGuard } from './guards/throttle.guard';
 
 @Module({
   imports: [
@@ -27,8 +31,8 @@ import { ScheduleModule } from '@nestjs/schedule';
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
       debug: false,
       // introspection: true,
-      context: ({ req, connection }) =>
-        connection ? { req: connection.context } : { req },
+      context: ({ req, connection, ...rest }) =>
+        connection ? { req: connection.context, ...rest } : { req, ...rest },
     }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
@@ -37,6 +41,10 @@ import { ScheduleModule } from '@nestjs/schedule';
         path: path.join(__dirname, '/i18n/'),
         watch: true,
       },
+    }),
+    ThrottlerModule.forRoot({
+      ttl: 60, // Time to live, in seconds
+      limit: 20, // Requests within the TTL
     }),
     ServicesModule,
     HelpersModule,
@@ -48,6 +56,14 @@ import { ScheduleModule } from '@nestjs/schedule';
       provide: APP_GUARD,
       useClass: SwordMerchantsOnlyGuard,
     },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: GqlThrottlerGuard,
+    // },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerBehindProxyGuard,
+    // },
     SwordMerchantWithTokenResolver,
     SwordMerchantUserApisResolver,
     SwordUserWalletResolver,

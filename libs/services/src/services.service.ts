@@ -1,8 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { SharedBalanceService } from './shared-balance/shared-balance.service';
 import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
+import { SharedCashoutRequestService } from './shared-cashout-request/shared-cashout-request.service';
 import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings/shared-cashout-user-settings.service';
+import { SharedFinanceService } from './shared-finance/shared-finance.service';
 import { SharedMerchantService } from './shared-merchant/shared-merchant.service';
+import { SharedNotificationsService } from './shared-notifications/shared-notifications.service';
 import { SharedNotifyService } from './shared-notify/shared-notify.service';
 import { SharedPaymentRequestService } from './shared-payment-request/shared-payment-request.service';
 import { SharedTransactionService } from './shared-transaction/shared-transaction.service';
@@ -15,7 +18,7 @@ export class ServicesService {
     @Inject(SharedUserService) public sharedUser: SharedUserService,
     @Inject(SharedWalletService) public sharedWallet: SharedWalletService,
     @Inject(SharedMerchantService) public sharedMerchant: SharedMerchantService,
-    @Inject(SharedNotifyService) public shaerdNotify: SharedNotifyService,
+    @Inject(SharedNotifyService) public sharedNotify: SharedNotifyService,
     @Inject(SharedBalanceService) public sharedBalance: SharedBalanceService,
     @Inject(SharedCashOutUserSettingsService)
     public sharedCashOutSettingsService: SharedCashOutUserSettingsService,
@@ -23,7 +26,13 @@ export class ServicesService {
     public sharedCashoutMethod: SharedCashoutMethodService,
     @Inject(SharedTransactionService)
     public sharedTransaction: SharedTransactionService,
+    @Inject(SharedCashoutRequestService)
+    public sharedCashoutRequestService: SharedCashoutRequestService,
+    @Inject(SharedNotificationsService)
+    public sharedNotificationsService: SharedNotificationsService,
     @Inject(SharedPaymentRequestService)
     public sharedPaymentRequest: SharedPaymentRequestService,
-  ) {}
+    @Inject(SharedFinanceService)
+    public sharedFinanceService: SharedFinanceService,
+  ) { }
 }

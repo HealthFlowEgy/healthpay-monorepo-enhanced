@@ -1,5 +1,5 @@
 import { ServicesService } from '@app/services';
-import { Inject, UseGuards, UsePipes } from '@nestjs/common';
+import { HttpException, Inject, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { CurrentUser } from '../decorators/user.decorator';
@@ -9,7 +9,7 @@ import { Success } from '../models/fence-success.model';
 import { User } from '../models/fence-user.model';
 @Resolver()
 export class FenceMerchantApisResolver {
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
   @Query(() => [Merchant])
   @UseGuards(JwtAuthGuard)
   async merchantList(): Promise<Merchant[]> {
@@ -28,6 +28,7 @@ export class FenceMerchantApisResolver {
     @Args('amount') amount: number,
     @CurrentUser() user: User,
   ): Promise<{ isSuccess: boolean }> {
+    throw new HttpException('Not implemented', 500);
     const merchant = await this.services.sharedMerchant.getMerchantByUID(
       merchantUID,
     );

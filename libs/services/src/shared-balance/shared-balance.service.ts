@@ -3,7 +3,7 @@ import { PrismaService } from '@app/prisma';
 import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Balance, Prisma } from '@prisma/client';
+import { Balance, Prisma, Wallet } from '@prisma/client';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { SortedBalance } from './shared-balance.types';
@@ -37,6 +37,11 @@ export class SharedBalanceService {
       take: 10,
     });
   }
+
+
+
+
+
 
   async doTransFromMerchantToUser(
     rUserId: number,
@@ -203,37 +208,37 @@ export class SharedBalanceService {
     });
   }
 
+
+
+
+
+
+  // TODO: Make wallet return with start and end date with balance arr
+  // TODO: first
   async getUserWalletWithBalanceWithMerchantsUsers(
     walletId: number,
+    startDate?: string,
+    endDate?: string,
+    last?: number,
   ): Promise<SortedBalance[]> {
-    const balanceWithWallets = await this.prisma.wallet.findFirst({
-      where: {
-        id: walletId,
-      },
-      include: {
-        payableBalance: {
-          include: {
-            receivableMerchant: true,
-            receivableWallet: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-        receivableBalance: {
-          include: {
-            payableMerchant: true,
-            payableWallet: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    return this.sortBalance(balanceWithWallets);
+    let wallet: Wallet;
+
+    if (!startDate && !endDate && !last) {
+      wallet = await this.sharedWallet.walletWithAllTranx(walletId);
+      return this.sortBalance(wallet);
+    }
+    if (startDate && !last) {
+      wallet = await this.sharedWallet.walletWithRangeDate(
+        walletId,
+        startDate,
+        endDate,
+      );
+      return this.sortBalance(wallet);
+    }
+    if (!startDate && !endDate && last) {
+      wallet = await this.sharedWallet.walletWithLastTranx(walletId, last);
+      return this.sortBalance(wallet);
+    }
   }
 
   @OnEvent(WEBSOCKET_EVENTS.TX_CONFIRMED)

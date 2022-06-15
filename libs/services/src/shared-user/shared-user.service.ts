@@ -24,7 +24,7 @@ export class SharedUserService {
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
 
     @Inject(ConfigService) private configService: ConfigService,
-  ) { }
+  ) {}
 
   public getUserById(id: number): Promise<User> {
     return this.prisma.user.findFirst({ where: { id } });
@@ -182,9 +182,6 @@ export class SharedUserService {
     nationalDocBack: string,
   ): Promise<boolean> {
     try {
-
-
-
       const request = await this.prisma.userVerificationRequest.create({
         data: {
           user: {
@@ -195,18 +192,18 @@ export class SharedUserService {
           status: 'PENDING',
         },
       });
-      console.log(request, "REQUEST");
+      console.log(request, 'REQUEST');
       if (request) {
         const updatedUser = await this.prisma.user.update({
           where: { id: userId },
           data: { nationalId, nationalDocFront, nationalDocBack },
         });
         if (updatedUser) {
-          console.log("updatedUser");
+          console.log('updatedUser');
           return true;
         }
       } else {
-        console.log("NOT UPDATED");
+        console.log('NOT UPDATED');
         return false;
       }
     } catch (e) {

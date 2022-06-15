@@ -31,7 +31,8 @@ export class FenceUserApisResolver {
   // login mutation
   @Mutation(() => User, { nullable: true })
   async login(@Args('mobile') mobile: string) {
-    return this.services.sharedUser.doUpsertUser({ mobile }, true);
+    // return this.services.sharedUser.doUpsertUser({ mobile }, true);
+    return null;
   }
   // login mutation
 

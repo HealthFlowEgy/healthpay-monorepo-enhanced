@@ -44,7 +44,7 @@ import { GqlThrottlerGuard } from './guards/throttle.guard';
     }),
     ThrottlerModule.forRoot({
       ttl: 60, // Time to live, in seconds
-      limit: 20, // Requests within the TTL
+      limit: 100, // Requests within the TTL
     }),
     ServicesModule,
     HelpersModule,

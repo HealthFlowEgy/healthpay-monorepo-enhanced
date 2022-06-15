@@ -57,6 +57,18 @@ model User {
 
 }
 
+model IpActivity {
+  id         Int       @id @default(autoincrement())
+  ipAddess   String
+  merchant   Merchant? @relation(fields: [merchantId], references: [id])
+  merchantId Int?
+  action     String?
+  ops        String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @default(now()) @updatedAt
+
+}
+
 model UserVerificationRequest {
   id        Int                 @id @default(autoincrement())
   userId    Int                 @unique
@@ -130,7 +142,9 @@ model Merchant {
   payableBalance    Balance[]              @relation("PayableMerchantBalance")
   createdAt         DateTime               @default(now())
   updatedAt         DateTime?              @default(now()) @updatedAt
+  ipActivity        IpActivity[]
   Transaction       Transaction[]
+
 
   @@unique([name, ownerId], name: "name_ownerId_unique")
 }

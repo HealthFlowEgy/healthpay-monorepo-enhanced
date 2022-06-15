@@ -60,10 +60,10 @@ import { GqlThrottlerGuard } from './guards/throttle.guard';
     //   provide: APP_GUARD,
     //   useClass: GqlThrottlerGuard,
     // },
-    {
-      provide: APP_GUARD,
-      useClass: GqlThrottlerGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: GqlThrottlerGuard,
+    // },
     SwordMerchantWithTokenResolver,
     SwordMerchantUserApisResolver,
     SwordUserWalletResolver,

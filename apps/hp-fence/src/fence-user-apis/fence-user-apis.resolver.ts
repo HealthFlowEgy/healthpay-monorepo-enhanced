@@ -22,7 +22,7 @@ export class FenceUserApisResolver {
   constructor(
     @Inject(ServicesService) private services: ServicesService,
     @Inject(AuthService) private authService: AuthService,
-  ) {}
+  ) { }
   // register mutation
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
@@ -37,8 +37,7 @@ export class FenceUserApisResolver {
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async login(@Args('mobile') mobile: string) {
-    // return this.services.sharedUser.doUpsertUser({ mobile }, true);
-    return null;
+    return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
   // login mutation
 

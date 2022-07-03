@@ -19,22 +19,22 @@ export class SwordControllerController {
     private eventEmitter2: EventEmitter2,
   ) {}
 
-  @Get('/init')
-  async init(): Promise<string> {
-    return JSON.stringify(
-      await this.services.sharedPaymentRequest.getPendingPaymentRequetsWhereWalletHaveMoney(),
-    );
-  }
+  // @Get('/init')
+  // async init(): Promise<string> {
+  //   return JSON.stringify(
+  //     await this.services.sharedPaymentRequest.getPendingPaymentRequetsWhereWalletHaveMoney(),
+  //   );
+  // }
 
-  @Get('/tryone')
-  async tryone(): Promise<string> {
-    const pendingRequests =
-      await this.services.sharedPaymentRequest.getPendingPaymentRequetsWhereWalletHaveMoney();
-    // for (let index = 0; index < pendingRequests.length; index++) {
-    //   const pendingRequest = pendingRequests[index];
-    //   await this.sutxo.handlePendingPaymentRequests(pendingRequest.user.wallet);
-    // }
-    await this.services.sharedCronService.payPendingPaymentRequests();
-    return JSON.stringify(pendingRequests);
-  }
+  // @Get('/tryone')
+  // async tryone(): Promise<string> {
+  //   const pendingRequests =
+  //     await this.services.sharedPaymentRequest.getPendingPaymentRequetsWhereWalletHaveMoney();
+  //   // for (let index = 0; index < pendingRequests.length; index++) {
+  //   //   const pendingRequest = pendingRequests[index];
+  //   //   await this.sutxo.handlePendingPaymentRequests(pendingRequest.user.wallet);
+  //   // }
+  //   await this.services.sharedCronService.payPendingPaymentRequests();
+  //   return JSON.stringify(pendingRequests);
+  // }
 }

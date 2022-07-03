@@ -3,7 +3,10 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import moment from 'moment';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
-
+import { SharedUtxoService } from '../shared-utxo/shared-utxo.service';
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 @Injectable()
 export class SharedCronService {
   private readonly logger = new Logger(SharedCronService.name);
@@ -13,6 +16,9 @@ export class SharedCronService {
     private sharedBalance: SharedBalanceService,
     @Inject(SharedPaymentRequestService)
     private sharedPaymentRequests: SharedPaymentRequestService,
+
+    @Inject(SharedUtxoService)
+    private sharedUTXO: SharedUtxoService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -30,6 +36,17 @@ export class SharedCronService {
       const pendingStaleRequest = pendingRequests[index];
       await this.sharedPaymentRequests.markPaymentRequestAsPending(
         pendingStaleRequest,
+      );
+    }
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async payPendingPaymentRequests() {
+    const pendingRequests =
+      await this.sharedPaymentRequests.getPendingPaymentRequetsWhereWalletHaveMoney();
+    if (pendingRequests.length > 0) {
+      await this.sharedUTXO.handlePendingPaymentRequests(
+        pendingRequests[0].user.wallet,
       );
     }
   }

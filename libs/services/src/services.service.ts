@@ -3,6 +3,7 @@ import { SharedBalanceService } from './shared-balance/shared-balance.service';
 import { SharedCashoutMethodService } from './shared-cashout-method/shared-cashout-method.service';
 import { SharedCashoutRequestService } from './shared-cashout-request/shared-cashout-request.service';
 import { SharedCashOutUserSettingsService } from './shared-cashout-user-settings/shared-cashout-user-settings.service';
+import { SharedCronService } from './shared-cron/shared-cron.service';
 import { SharedFinanceService } from './shared-finance/shared-finance.service';
 import { SharedMerchantService } from './shared-merchant/shared-merchant.service';
 import { SharedNotificationsService } from './shared-notifications/shared-notifications.service';
@@ -34,5 +35,7 @@ export class ServicesService {
     public sharedPaymentRequest: SharedPaymentRequestService,
     @Inject(SharedFinanceService)
     public sharedFinanceService: SharedFinanceService,
-  ) { }
+    @Inject(SharedCronService)
+    public sharedCronService: SharedCronService,
+  ) {}
 }

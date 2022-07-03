@@ -13,7 +13,7 @@ export class SharedPaymentRequestService {
     @Inject(OnelinkService) private onelink: OnelinkService,
     @Inject(SharedTransactionService)
     private transaction: SharedTransactionService,
-  ) { }
+  ) {}
 
   async createPaymentRequest(
     user: User,
@@ -86,7 +86,7 @@ export class SharedPaymentRequestService {
       include: {
         merchant: true,
         transaction: true,
-      }
+      },
     });
   }
 
@@ -156,6 +156,30 @@ export class SharedPaymentRequestService {
       },
       data: {
         status: 'PENDING',
+      },
+    });
+  }
+
+  async getPendingPaymentRequetsWhereWalletHaveMoney() {
+    return this.prisma.paymentRequest.findMany({
+      where: {
+        status: 'PENDING',
+        user: {
+          wallet: {
+            is: {
+              total: {
+                gt: 5,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        user: {
+          include: {
+            wallet: true,
+          },
+        },
       },
     });
   }

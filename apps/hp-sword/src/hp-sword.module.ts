@@ -17,8 +17,7 @@ import { SwordMerchantUserApisResolver } from './sword-merchant-user-apis/sword-
 import { SwordUserWalletResolver } from './sword-user-wallet/sword-user-wallet.resolver';
 import { SwordControllerController } from './sword-controller/sword-controller.controller';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerBehindProxyGuard } from 'libs/gaurds/throttle-behind-proxy.gaurd';
-import { GqlThrottlerGuard } from './guards/throttle.guard';
+
 
 @Module({
   imports: [

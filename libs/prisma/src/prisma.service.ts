@@ -27,14 +27,15 @@ export class PrismaService
       }
       const result = await next(params);
       const after = Date.now();
+      const args =
+        params.args && typeof params.args === 'object'
+          ? JSON.stringify(params.args)
+          : params.args;
+      const resultCount = result && result.length ? result.length : 0;
       this.logger.log(
-        `Query ${params.model}.${params.action} ${
-          typeof params.args === 'object'
-            ? JSON.stringify(params.args)
-            : params.args
-        }, result: ${typeof result === 'object' ? result.length : 0} took ${
-          after - before
-        }ms`,
+        `Query ${params.model}.${
+          params.action
+        } ${args}, result: ${resultCount} took ${after - before}ms`,
       );
       return result;
     });

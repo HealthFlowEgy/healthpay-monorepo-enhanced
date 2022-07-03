@@ -46,10 +46,12 @@ export class SharedCronService {
       await this.sharedPaymentRequests.getPendingPaymentRequetsWhereWalletHaveMoney();
     for (let index = 0; index < pendingRequests.length; index++) {
       const pendingRequest = pendingRequests[index];
-      await this.sharedUTXO.handlePendingPaymentRequests(
-        pendingRequest.user.wallet,
-      );
-      await sleep(5000);
+      if (pendingRequest.amount <= pendingRequest.user.wallet.total) {
+        await this.sharedUTXO.handlePendingPaymentRequests(
+          pendingRequest.user.wallet,
+        );
+        await sleep(5000);
+      }
     }
   }
 

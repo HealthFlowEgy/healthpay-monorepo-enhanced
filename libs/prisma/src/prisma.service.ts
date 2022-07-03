@@ -32,7 +32,9 @@ export class PrismaService
           typeof params.args === 'object'
             ? JSON.stringify(params.args)
             : params.args
-        } took ${after - before}ms`,
+        }, result: ${typeof result === 'object' ? result.length : 0} took ${
+          after - before
+        }ms`,
       );
       return result;
     });

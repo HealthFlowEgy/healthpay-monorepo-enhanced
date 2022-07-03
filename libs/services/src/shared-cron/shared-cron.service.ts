@@ -40,14 +40,16 @@ export class SharedCronService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_HOUR)
   async payPendingPaymentRequests() {
     const pendingRequests =
       await this.sharedPaymentRequests.getPendingPaymentRequetsWhereWalletHaveMoney();
-    if (pendingRequests.length > 0) {
+    for (let index = 0; index < pendingRequests.length; index++) {
+      const pendingRequest = pendingRequests[index];
       await this.sharedUTXO.handlePendingPaymentRequests(
-        pendingRequests[0].user.wallet,
+        pendingRequest.user.wallet,
       );
+      await sleep(5000);
     }
   }
 

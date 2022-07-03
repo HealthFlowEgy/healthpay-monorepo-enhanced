@@ -28,7 +28,9 @@ export class PrismaService
       const result = await next(params);
       const after = Date.now();
       this.logger.log(
-        `Query ${params.model}.${params.action} took ${after - before}ms`,
+        `Query ${params.model}.${params.action} ${params.args} took ${
+          after - before
+        }ms`,
       );
       return result;
     });

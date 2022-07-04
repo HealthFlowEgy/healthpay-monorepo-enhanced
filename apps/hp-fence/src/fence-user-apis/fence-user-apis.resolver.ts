@@ -28,8 +28,8 @@ export class FenceUserApisResolver {
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async register(@Args('mobile') mobile: string) {
-    return null;
-    // return this.services.sharedUser.doUpsertUser({ mobile }, false);
+    // return null;
+    return this.services.sharedUser.doUpsertUser({ mobile }, false);
   }
   // register mutation
 
@@ -38,8 +38,8 @@ export class FenceUserApisResolver {
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async login(@Args('mobile') mobile: string) {
-     return null;
-    // return this.services.sharedUser.doUpsertUser({ mobile }, true);
+    //  return null;
+    return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
   // login mutation
 

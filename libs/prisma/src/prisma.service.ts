@@ -32,11 +32,11 @@ export class PrismaService
           ? JSON.stringify(params.args)
           : params.args;
       const resultCount = result && result.length ? result.length : 0;
-      this.logger.log(
-        `Query ${params.model}.${
-          params.action
-        } ${args}, result: ${resultCount} took ${after - before}ms`,
-      );
+      // this.logger.log(
+      //   `Query ${params.model}.${
+      //     params.action
+      //   } ${args}, result: ${resultCount} took ${after - before}ms`,
+      // );
       return result;
     });
   }

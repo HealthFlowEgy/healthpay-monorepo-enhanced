@@ -80,10 +80,10 @@ export class FenceUserApisResolver {
   async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string, @Args('secret') secret: string) {
     const date = new Date().toISOString();
     const hash = md5(date.split(":")[0] + mobile + date.split(":")[1]) + otp;
-    if (hash !== secret) {
-      throw new BadRequestException('5006', 'Invalid secret');
+    // if (hash !== secret) {
+    //   throw new BadRequestException('5006', 'Invalid secret');
 
-    }
+    // }
     const user = await this.services.sharedUser.doVerifyMobileWithOtp(
       mobile,
       otp,

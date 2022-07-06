@@ -16,6 +16,7 @@ import { Success } from '../models/fence-success.model';
 import { User, UserWithToken } from '../models/fence-user.model';
 import { Throttle } from '@nestjs/throttler';
 import { IAM } from '../models/fence.iam.model';
+const md5 = require('md5');
 
 @Resolver()
 export class FenceUserApisResolver {
@@ -37,8 +38,13 @@ export class FenceUserApisResolver {
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async register(@Args('mobile') mobile: string) {
+  async register(@Args('mobile') mobile: string, @Args('secret') secret: string) {
     // return null;
+    const date = new Date().toISOString();
+    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    if (hash !== secret) {
+      throw new BadRequestException(5005, 'Invalid secret');
+    }
     return this.services.sharedUser.doUpsertUser({ mobile }, false);
   }
   // register mutation
@@ -47,8 +53,13 @@ export class FenceUserApisResolver {
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async login(@Args('mobile') mobile: string) {
+  async login(@Args('mobile') mobile: string, @Args('secret') secret: string) {
     //  return null;
+    const date = new Date().toISOString();
+    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    if (hash !== secret) {
+      throw new BadRequestException(5005, 'Invalid secret');
+    }
     return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
   // login mutation

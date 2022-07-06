@@ -55,6 +55,7 @@ model User {
   updatedAt             DateTime?                @default(now()) @updatedAt
 
 
+  MerchantAdmins MerchantAdmins[]
 }
 
 model IpActivity {
@@ -138,6 +139,7 @@ model Merchant {
   returnUrl         String
   total             Float                  @default(0)
   isHp              MerchantType?          @default(REGULAR)
+  admins            MerchantAdmins[]
   receivableBalance Balance[]              @relation("ReceivableMerchantBalance")
   payableBalance    Balance[]              @relation("PayableMerchantBalance")
   createdAt         DateTime               @default(now())
@@ -147,6 +149,18 @@ model Merchant {
 
 
   @@unique([name, ownerId], name: "name_ownerId_unique")
+}
+
+model MerchantAdmins {
+  id          Int       @id @default(autoincrement())
+  uid         String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  merchant    Merchant? @relation(fields: [merchantId], references: [id])
+  merchantId  Int?
+  permissions Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @default(now()) @updatedAt
 }
 
 enum MerchantType {

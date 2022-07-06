@@ -38,13 +38,15 @@ export class FenceUserApisResolver {
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async register(@Args('mobile') mobile: string, @Args('secret') secret: string) {
+  async register(@Args('mobile') mobile: string
+    // , @Args('secret') secret: string
+  ) {
     // return null;
-    const date = new Date().toISOString();
-    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
-    if (hash !== secret) {
-      throw new BadRequestException('5006', 'Invalid secret');
-    }
+    // const date = new Date().toISOString();
+    // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    // if (hash !== secret) {
+    //   throw new BadRequestException('5006', 'Invalid secret');
+    // }
     return this.services.sharedUser.doUpsertUser({ mobile }, false);
   }
   // register mutation
@@ -53,14 +55,16 @@ export class FenceUserApisResolver {
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async login(@Args('mobile') mobile: string, @Args('secret') secret: string) {
+  async login(@Args('mobile') mobile: string,
+    // @Args('secret') secret: string
+  ) {
     //  return null;
-    const date = new Date().toISOString();
-    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
-    if (hash !== secret) {
-      throw new BadRequestException('5006', 'Invalid secret');
+    // const date = new Date().toISOString();
+    // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    // if (hash !== secret) {
+    //   throw new BadRequestException('5006', 'Invalid secret');
 
-    }
+    // }
     return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
   // login mutation
@@ -77,9 +81,11 @@ export class FenceUserApisResolver {
       },
     }),
   )
-  async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string, @Args('secret') secret: string) {
-    const date = new Date().toISOString();
-    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1]) + otp;
+  async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string,
+    //  @Args('secret') secret: string
+  ) {
+    // const date = new Date().toISOString();
+    // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1]) + otp;
     // if (hash !== secret) {
     //   throw new BadRequestException('5006', 'Invalid secret');
 

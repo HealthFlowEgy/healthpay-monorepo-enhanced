@@ -43,7 +43,7 @@ export class FenceUserApisResolver {
     const date = new Date().toISOString();
     const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
     if (hash !== secret) {
-      throw new BadRequestException(5005, 'Invalid secret');
+      throw new BadRequestException('5006', 'Invalid secret');
     }
     return this.services.sharedUser.doUpsertUser({ mobile }, false);
   }
@@ -58,7 +58,8 @@ export class FenceUserApisResolver {
     const date = new Date().toISOString();
     const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
     if (hash !== secret) {
-      throw new BadRequestException(5005, 'Invalid secret');
+      throw new BadRequestException('5006', 'Invalid secret');
+
     }
     return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
@@ -76,7 +77,13 @@ export class FenceUserApisResolver {
       },
     }),
   )
-  async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string) {
+  async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string, @Args('secret') secret: string) {
+    const date = new Date().toISOString();
+    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1]) + otp;
+    if (hash !== secret) {
+      throw new BadRequestException('5006', 'Invalid secret');
+
+    }
     const user = await this.services.sharedUser.doVerifyMobileWithOtp(
       mobile,
       otp,
@@ -163,7 +170,7 @@ export class FenceUserApisResolver {
         nationalDocBack,
       );
     if (!request) {
-      throw new BadRequestException(5005, 'Sorry can not verify your docs');
+      throw new BadRequestException('5005', 'Sorry can not verify your docs');
     }
     return {
       isSuccess: true,

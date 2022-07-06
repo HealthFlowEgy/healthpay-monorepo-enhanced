@@ -2,6 +2,11 @@
 
 ## Sword error codes
 
+
+### 2xxx (invalid app secret)
+
+- `5006`: secret: app secret is invalid for OTP
+
 ### 2xxx (invalid authentication headers)
 
 - `2001`: header: api-header is required

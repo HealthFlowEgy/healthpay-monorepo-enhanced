@@ -15,6 +15,7 @@ import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { Success } from '../models/fence-success.model';
 import { User, UserWithToken } from '../models/fence-user.model';
 import { Throttle } from '@nestjs/throttler';
+import { IAM } from '../models/fence.iam.model';
 
 @Resolver()
 export class FenceUserApisResolver {
@@ -23,6 +24,15 @@ export class FenceUserApisResolver {
     @Inject(ServicesService) private services: ServicesService,
     @Inject(AuthService) private authService: AuthService,
   ) { }
+
+  // iam query
+  @Query(() => IAM)
+  async iam() {
+    return {
+      date: new Date().toISOString(),
+    }
+  }
+
   // register mutation
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
@@ -42,6 +52,7 @@ export class FenceUserApisResolver {
     return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
   // login mutation
+
 
   // auth mutation
   @Mutation(() => UserWithToken, { nullable: true })

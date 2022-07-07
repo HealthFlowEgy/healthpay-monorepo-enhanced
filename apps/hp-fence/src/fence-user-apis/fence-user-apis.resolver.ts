@@ -39,14 +39,13 @@ export class FenceUserApisResolver {
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async register(@Args('mobile') mobile: string
-    // , @Args('secret') secret: string
+    , @Args('secret') secret: string
   ) {
-    // return null;
-    // const date = new Date().toISOString();
-    // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
-    // if (hash !== secret) {
-    //   throw new BadRequestException('5006', 'Invalid secret');
-    // }
+    const date = new Date().toISOString();
+    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    if (hash !== secret) {
+      throw new BadRequestException('5006', 'Invalid secret');
+    }
     return this.services.sharedUser.doUpsertUser({ mobile }, false);
   }
   // register mutation
@@ -56,15 +55,14 @@ export class FenceUserApisResolver {
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async login(@Args('mobile') mobile: string,
-    // @Args('secret') secret: string
+    @Args('secret') secret: string
   ) {
-    //  return null;
-    // const date = new Date().toISOString();
-    // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
-    // if (hash !== secret) {
-    //   throw new BadRequestException('5006', 'Invalid secret');
+    const date = new Date().toISOString();
+    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    if (hash !== secret) {
+      throw new BadRequestException('5006', 'Invalid secret');
 
-    // }
+    }
     return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
   // login mutation

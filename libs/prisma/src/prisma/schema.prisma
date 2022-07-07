@@ -134,6 +134,7 @@ model Merchant {
   users             UserAuthMerchant[]
   providers         ProviderAuthMerchant[]
   paymentRequests   PaymentRequest[]
+  whiteListedIps    String?                @db.Text
   apiKey            String                 @unique
   apiHeader         String                 @unique
   returnUrl         String

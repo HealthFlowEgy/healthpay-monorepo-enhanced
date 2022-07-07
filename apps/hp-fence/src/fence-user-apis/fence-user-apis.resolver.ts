@@ -80,7 +80,7 @@ export class FenceUserApisResolver {
     }),
   )
   async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string,
-    //  @Args('secret') secret: string
+    @Args('secret') secret: string
   ) {
     // const date = new Date().toISOString();
     // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1]) + otp;

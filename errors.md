@@ -26,7 +26,7 @@
 
 - `7001`: insufficient funds in payer wallet
 
-------------------------------------------------------
+---
 
 ## Fence error codes
 
@@ -35,3 +35,4 @@
 - `2001`: header: authorization is invalid
 - `2002`: user not found
 - `2003`: user already exists
+- `2009`: Api header or IP is invalid

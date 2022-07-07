@@ -37,6 +37,20 @@ export class SharedMerchantService {
     );
   }
 
+  public async isValidIpAddress(
+    apiHeader: string,
+    ip: string,
+  ): Promise<boolean> {
+    const merchant: any = await this.prisma.merchant.findMany({
+      where: { apiHeader },
+    });
+    if (merchant[0].whitelistedIps.includes(ip)) {
+      return true;
+    }
+
+    return false;
+  }
+
   public async cashInMerchant(): Promise<Merchant | null> {
     return this.prisma.merchant.findFirst({
       where: {

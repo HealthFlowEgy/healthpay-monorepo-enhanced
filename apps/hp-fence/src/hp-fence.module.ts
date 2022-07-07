@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GraphQLModule } from '@nestjs/graphql';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import path from 'path';
 import { AuthModule } from './auth/auth.module';
 import { FenceBalanceResolver } from './fence-balance/fence-balance.resolver';
@@ -25,6 +26,8 @@ import { HpFenceController } from './hp-fence.controller';
 import { HpFenceService } from './hp-fence.service';
 import { FenceFinancingApisResolver } from './fence-financing-apis/fence-financing-apis.resolver';
 import { PaymentRequestApisResolver } from './payment-request-apis/payment-request-apis.resolver';
+import { GqlThrottlerGuard } from './guards/throttle.gaurd';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -33,8 +36,8 @@ import { PaymentRequestApisResolver } from './payment-request-apis/payment-reque
       introspection: true,
       buildSchemaOptions: { dateScalarMode: 'isoDate' },
       debug: false,
-      context: ({ req, connection }) =>
-        connection ? { req: connection.context } : { req },
+      context: ({ req, connection, ...rest }) =>
+        connection ? { req: connection.context, ...rest } : { req, ...rest },
     }),
 
     EventEmitterModule.forRoot(),
@@ -51,6 +54,10 @@ import { PaymentRequestApisResolver } from './payment-request-apis/payment-reque
     HelpersModule,
     AuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot({
+      ttl: 60, // Time to live, in seconds
+      limit: 100, // Requests within the TTL
+    }),
     ValidationsModule,
     WebsocketModule,
   ],
@@ -71,6 +78,10 @@ import { PaymentRequestApisResolver } from './payment-request-apis/payment-reque
     FenceNotificationsApisResolver,
     FenceFinancingApisResolver,
     PaymentRequestApisResolver,
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: GqlThrottlerGuard,
+    // },
   ],
 })
-export class HpFenceModule { }
+export class HpFenceModule {}

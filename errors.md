@@ -7,6 +7,7 @@
 - `2001`: header: api-header is required
 - `2002`: header: api-header is invalid
 - `2004`: header: authorization is invalid
+- `2009`: header: Api header or IP is invalid
 
 ### 3xxx (invalid authentication params)
 

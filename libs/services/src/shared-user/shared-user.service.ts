@@ -150,7 +150,7 @@ export class SharedUserService {
         otp,
       },
     });
-    if (user.mobile === '+2011544460656' || user.mobile === '002011544460656') {
+    if (user.mobile === '+201154446065' || user.mobile === '00201154446065') {
       if (otp === '1234') {
         return user;
       } else {

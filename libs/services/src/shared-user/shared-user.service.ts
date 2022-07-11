@@ -215,9 +215,14 @@ export class SharedUserService {
   }
 
   public async deactivateUser(userId: number): Promise<boolean> {
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: { isDeactivated: true },
-    })
+    try {
+      const updateUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: { isDeactivated: true },
+      })
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

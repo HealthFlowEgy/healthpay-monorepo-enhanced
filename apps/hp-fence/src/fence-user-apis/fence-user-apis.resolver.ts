@@ -189,7 +189,7 @@ export class FenceUserApisResolver {
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async deactivateUser(@CurrentUser() user: User) {
     if (user.isDeactivated) {
-      throw new BadRequestException(5008, 'User already deactivated');
+      throw new BadRequestException('4001', 'User is deactivated');
     }
     try {
       await this.services.sharedUser.deactivateUser(user.id);
@@ -197,7 +197,7 @@ export class FenceUserApisResolver {
         isSuccess: true,
       };
     } catch (e) {
-      throw new BadRequestException(5008, 'Sorry can not deactivate this user');
+      throw new BadRequestException('4001', 'Sorry can not deactivate this user');
     }
   }
   // deactivate user mutation

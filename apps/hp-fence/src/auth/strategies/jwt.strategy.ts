@@ -1,5 +1,5 @@
 import { ServicesService } from '@app/services';
-import { Inject } from '@nestjs/common';
+import { Inject, BadRequestException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     const user = await this.services.sharedUser.getUserByMobile(payload.mobile)
     if (user.isDeactivated) {
-      throw new Error('4001', 'User is deactivated');
+      throw new BadRequestException('4001', 'User is deactivated');
     }
     return {
       ...(await this.services.sharedUser.getUserByMobile(payload.mobile)),

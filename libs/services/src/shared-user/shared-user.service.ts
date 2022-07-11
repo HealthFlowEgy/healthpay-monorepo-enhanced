@@ -51,7 +51,7 @@ export class SharedUserService {
       });
     }
     if (user.isDeactivated) {
-      throw new BadRequestException('4001', 'User is deactivated');
+      throw new BadRequestException('4001', 'User does not exist');
     }
     const generatedOtp = await this.doCreateOtp(user.id);
     this.logger.verbose(`[generatedOtp] ${generatedOtp}`);

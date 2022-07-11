@@ -19,9 +19,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     const user = await this.services.sharedUser.getUserByMobile(payload.mobile)
-    if (user.isDeactivated) {
-      throw new BadRequestException('4001', 'User is deactivated');
-    }
+    // if (user.isDeactivated) {
+    //   throw new BadRequestException('4001', 'User is deactivated');
+    // }
     return {
       ...(await this.services.sharedUser.getUserByMobile(payload.mobile)),
     };

@@ -182,6 +182,24 @@ export class FenceUserApisResolver {
   }
   // verify user docs mutation
 
+  // deactivate user mutation
+  @Mutation(() => Success, { nullable: true })
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  async deactivateUser(@CurrentUser() user: User) {
+    if (user.isDeactivated) {
+      throw new BadRequestException(5008, 'User already deactivated');
+    }
+    try {
+      await this.services.sharedUser.deactivateUser(user.id);
+      return {
+        isSuccess: true,
+      };
+    } catch (e) {
+      throw new BadRequestException(5008, 'Sorry can not deactivate this user');
+    }
+  }
+  // deactivate user mutation
+
   // profile query
   @Query(() => User)
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)

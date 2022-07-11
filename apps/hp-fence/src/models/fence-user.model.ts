@@ -48,6 +48,9 @@ export class User {
   isNationalVerified?: boolean | null;
 
   @Field(() => Boolean, { nullable: true })
+  isDeactivated?: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
   isVerified?: boolean | null;
 }
 

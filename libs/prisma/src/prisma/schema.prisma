@@ -51,6 +51,7 @@ model User {
   transferOps           Operation?               @relation(fields: [transferOpsId], references: [id], name: "UserTransferOps")
   transferOpsId         Int?
   financingRequest      FinancingRequest[]
+  isDeactivated         Boolean?                 @default(false)
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime?                @default(now()) @updatedAt
 

@@ -50,6 +50,9 @@ export class SharedUserService {
         email,
       });
     }
+    if (user.isDeactivated) {
+      throw new BadRequestException('4001', 'User is deactivated');
+    }
     const generatedOtp = await this.doCreateOtp(user.id);
     this.logger.verbose(`[generatedOtp] ${generatedOtp}`);
     await this.sharedNotify
@@ -182,9 +185,6 @@ export class SharedUserService {
     nationalDocBack: string,
   ): Promise<boolean> {
     try {
-
-
-
       const request = await this.prisma.userVerificationRequest.create({
         data: {
           user: {

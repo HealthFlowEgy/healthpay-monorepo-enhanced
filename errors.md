@@ -2,7 +2,9 @@
 
 ## Sword error codes
 
+### 4xxx (invalid app secret)
 
+- `4001`: user is deactivated
 ### 2xxx (invalid app secret)
 
 - `5006`: secret: app secret is invalid for OTP

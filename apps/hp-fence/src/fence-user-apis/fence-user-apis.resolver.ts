@@ -95,7 +95,6 @@ export class FenceUserApisResolver {
     const requests = await this.services.sharedFinanceService.requestsByUserId(
       user.id,
     );
-    console.log('authUser', requests);
     if (!user) {
       return;
     }
@@ -103,6 +102,9 @@ export class FenceUserApisResolver {
       user.uid,
       user.mobile,
     );
+    if (user.isDeactivated) {
+      throw new BadRequestException('4001', 'User is deactivated');
+    }
     return {
       token: this.authService.login({
         uid: user.uid,

@@ -135,6 +135,7 @@ model Merchant {
   users             UserAuthMerchant[]
   providers         ProviderAuthMerchant[]
   paymentRequests   PaymentRequest[]
+  whiteListedIps    String?                @db.Text
   apiKey            String                 @unique
   apiHeader         String                 @unique
   returnUrl         String
@@ -159,7 +160,7 @@ model MerchantAdmins {
   userId      Int
   merchant    Merchant? @relation(fields: [merchantId], references: [id])
   merchantId  Int?
-  permissions Json?
+  permissions String?   @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @default(now()) @updatedAt
 }

@@ -33,10 +33,10 @@ export class FenceCashoutRequestApisResolver {
     const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
     const cashout = await this.services.sharedWallet.cashoutSettings()
     if (wallet.total < amount) {
-      // throw new BadRequestException('7001', 'Insufficient funds');
+      throw new BadRequestException('7001', 'Insufficient funds');
     } else {
       if (!cashout.value) {
-        // throw new BadRequestException('7001', 'Insufficient funds');
+        throw new BadRequestException('7001', 'Insufficient funds');
       }
     }
     const request =
@@ -45,18 +45,18 @@ export class FenceCashoutRequestApisResolver {
         amount,
         settingsId,
       );
-    // const hpMerchant = await this.services.sharedMerchant.cashInMerchant();
-    // await this.services.sharedBalance.doTransFromUserToMerchant(
-    //   hpMerchant.id,
-    //   user.id,
-    //   amount,
-    //   'deducted due cashout request',
-    // );
+    const hpMerchant = await this.services.sharedMerchant.cashInMerchant();
+    await this.services.sharedBalance.doTransFromUserToMerchant(
+      hpMerchant.id,
+      user.id,
+      amount,
+      'deducted due cashout request',
+    );
 
     try {
       const notifyAdmin = await this.services.sharedUser.getUserByMobile(
-        // '+201097771130',
-        '+201154446065',
+        '+201097771130',
+        // '+201154446065',
       );
       await this.services.sharedNotify
         .toUser(notifyAdmin)

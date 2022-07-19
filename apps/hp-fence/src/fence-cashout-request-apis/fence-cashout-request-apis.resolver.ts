@@ -28,16 +28,16 @@ export class FenceCashoutRequestApisResolver {
     @Args('amount') amount: number,
     @Args('settingsId') settingsId: number,
   ): Promise<CashOutRequest> {
+    const allPendingRequests = await this.services.sharedCashoutRequestService.totalPendingCashoutRequests();
+    const totalAmount = allPendingRequests._sum.amount;
     const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
     const cashout = await this.services.sharedWallet.cashoutSettings()
-    console.log(cashout, "CASHOUT")
     if (wallet.total < amount) {
       throw new BadRequestException('7001', 'Insufficient funds');
     } else {
       if (!cashout.value) {
         throw new BadRequestException('7001', 'Insufficient funds');
       }
-      // throw new BadRequestException('7001', 'Insufficient funds');
     }
     const request =
       await this.services.sharedCashoutRequestService.doCreateCashOutRequest(
@@ -52,15 +52,17 @@ export class FenceCashoutRequestApisResolver {
       amount,
       'deducted due cashout request',
     );
+
     try {
       const notifyAdmin = await this.services.sharedUser.getUserByMobile(
         '+201097771130',
+        // '+201154446065',
       );
       await this.services.sharedNotify
         .toUser(notifyAdmin)
-        .compose('cashout')
+        .compose('cashout', { totalAmount: totalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), amount: amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") })
         .allChannels()
-        .send();
+        .send(true);
     } catch (e) {
       this.logger.error(
         '[FenceCashoutRequestApisResolver.createCashOutRequest.e]',

@@ -1,5 +1,5 @@
 {
   "otp": "استخدم الكود {otp} للدخول الي محفظة healthpay",
   "deduct": "{amount}EGP تم خصمها من محفظتك في healthpay للمزيد من المعلومات http://healthpay.tech",
-  "cashout": "New cashout request sent please approve"
+  "cashout": "New cashout request with amount: {amount} EGP , pending requests amount: {totalAmount} EGP"
 }

@@ -8,8 +8,8 @@ export class SharedCashoutRequestService {
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
-    
-  ) {}
+
+  ) { }
 
   public async requestsByUserId(userId: number): Promise<CashOutRequest[]> {
     const requests = this.prisma.cashOutRequest.findMany({
@@ -24,6 +24,19 @@ export class SharedCashoutRequestService {
           },
         },
       },
+    });
+    return requests;
+  }
+
+  public async totalPendingCashoutRequests(): Promise<any> {
+    const requests = await this.prisma.cashOutRequest.aggregate({
+      where: {
+        status: 'PENDING',
+      },
+      _sum: {
+        amount: true,
+      }
+
     });
     return requests;
   }

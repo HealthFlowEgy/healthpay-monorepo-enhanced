@@ -29,7 +29,7 @@ export class FenceCashoutRequestApisResolver {
     @Args('settingsId') settingsId: number,
   ): Promise<CashOutRequest> {
     const allPendingRequests = await this.services.sharedCashoutRequestService.totalPendingCashoutRequests();
-    const totalAmount = allPendingRequests._sum.amount;
+    const totalAmount = allPendingRequests._sum.amount + amount;
     const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
     const cashout = await this.services.sharedWallet.cashoutSettings()
     if (wallet.total < amount) {

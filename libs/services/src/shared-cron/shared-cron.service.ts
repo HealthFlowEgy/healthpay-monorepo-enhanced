@@ -47,6 +47,9 @@ export class SharedCronService {
     for (let index = 0; index < pendingRequests.length; index++) {
       const pendingRequest = pendingRequests[index];
       if (pendingRequest.amount <= pendingRequest.user.wallet.total) {
+        this.logger.verbose(
+          `Payment request ${pendingRequest.id} found by cron and is ready to be paid from wallet ${pendingRequest.user.wallet.id}`,
+        );
         await this.sharedUTXO.handlePendingPaymentRequests(
           pendingRequest.user.wallet,
         );

@@ -13,6 +13,7 @@ import slugify from 'slugify';
 import { PaymentRequest } from '../models/sword-payment-requests.model';
 import { Throttle } from '@nestjs/throttler';
 import { GqlThrottlerGuard } from '../guards/throttle.guard';
+import { WhiteListedOnly } from '../guards/whitelisted-only.guard';
 
 @Resolver()
 export class SwordMerchantUserApisResolver {
@@ -125,7 +126,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
@@ -155,7 +156,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
@@ -186,7 +187,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },

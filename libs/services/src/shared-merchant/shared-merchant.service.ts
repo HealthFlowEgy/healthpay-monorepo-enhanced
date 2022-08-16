@@ -48,7 +48,7 @@ export class SharedMerchantService {
     //   return true;
     // }
 
-    return false;
+    return true;
   }
 
   public async cashInMerchant(): Promise<Merchant | null> {

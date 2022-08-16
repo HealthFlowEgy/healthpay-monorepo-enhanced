@@ -28,7 +28,6 @@
     "@types/bcrypt": "^5.0.0",
     "@types/crypto-js": "^4.0.2",
     "@types/websocket": "^1.0.4",
-    "apollo-server-core": "^3.2.0",
     "apollo-server-express": "2.25.2",
     "axios": "^0.21.1",
     "bcrypt": "^5.0.1",

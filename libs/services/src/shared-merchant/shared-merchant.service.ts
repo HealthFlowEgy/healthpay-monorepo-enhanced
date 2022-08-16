@@ -44,9 +44,9 @@ export class SharedMerchantService {
     const merchant: any = await this.prisma.merchant.findMany({
       where: { apiHeader },
     });
-    if (merchant[0].whitelistedIps.includes(ip)) {
-      return true;
-    }
+    // if (merchant[0].whitelistedIps.includes(ip)) {
+    //   return true;
+    // }
 
     return false;
   }

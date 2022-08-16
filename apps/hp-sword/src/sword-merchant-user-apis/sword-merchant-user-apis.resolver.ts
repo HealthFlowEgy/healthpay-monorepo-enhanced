@@ -2,7 +2,7 @@ import { ServicesService } from '@app/services';
 import { Inject, Logger, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Merchant } from '@prisma/client';
-import NestjsGraphqlValidator from 'nestjs-graphql-validator';
+// import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { CurrentMerchant } from '../decorators/merchant.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Success } from '../models/sword-success.model';
@@ -24,17 +24,17 @@ export class SwordMerchantUserApisResolver {
   @Mutation(() => User, { nullable: true })
   @Throttle(3, 60 * 60)
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      email: { rules: ['isEmail'], orNull: true },
-      firstName: { maxLen: 255, minLen: 1 },
-      lastName: { maxLen: 255, minLen: 1 },
-      mobile: {
-        regExp:
-          /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,5})|(\(?\d{2,6}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/,
-      },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     email: { rules: ['isEmail'], orNull: true },
+  //     firstName: { maxLen: 255, minLen: 1 },
+  //     lastName: { maxLen: 255, minLen: 1 },
+  //     mobile: {
+  //       regExp:
+  //         /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,5})|(\(?\d{2,6}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/,
+  //     },
+  //   }),
+  // )
   async loginUser(
     @Args('mobile') mobile: string,
     @Args('firstName') firstName: string,
@@ -60,15 +60,15 @@ export class SwordMerchantUserApisResolver {
 
   @Mutation(() => UserWithToken, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      otp: { maxLen: 6, minLen: 1 },
-      mobile: {
-        regExp:
-          /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,5})|(\(?\d{2,6}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/,
-      },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     otp: { maxLen: 6, minLen: 1 },
+  //     mobile: {
+  //       regExp:
+  //         /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,5})|(\(?\d{2,6}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/,
+  //     },
+  //   }),
+  // )
   async authUser(
     @Args('mobile') mobile: string,
     @Args('otp') otp: string,
@@ -99,12 +99,12 @@ export class SwordMerchantUserApisResolver {
 
   @Mutation(() => Transaction, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      userToken: { minLen: 5 },
-      amount: { min: 50, max: 50000 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     userToken: { minLen: 5 },
+  //     amount: { min: 50, max: 50000 },
+  //   }),
+  // )
   async topupWalletUser(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,
@@ -127,12 +127,12 @@ export class SwordMerchantUserApisResolver {
 
   @Mutation(() => Success, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      userToken: { minLen: 5 },
-      amount: { min: 10 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     userToken: { minLen: 5 },
+  //     amount: { min: 10 },
+  //   }),
+  // )
   async deductFromUser(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,
@@ -157,12 +157,12 @@ export class SwordMerchantUserApisResolver {
 
   @Mutation(() => Success, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      userToken: { minLen: 5 },
-      amount: { min: 10 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     userToken: { minLen: 5 },
+  //     amount: { min: 10 },
+  //   }),
+  // )
   async sendPaymentRequest(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,
@@ -188,12 +188,12 @@ export class SwordMerchantUserApisResolver {
 
   @Mutation(() => Success, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      userToken: { minLen: 5 },
-      amount: { min: 10 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     userToken: { minLen: 5 },
+  //     amount: { min: 10 },
+  //   }),
+  // )
   async payToUser(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,
@@ -218,12 +218,12 @@ export class SwordMerchantUserApisResolver {
 
   @Mutation(() => Success, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      userToken: { minLen: 5 },
-      amount: { min: 1 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     userToken: { minLen: 5 },
+  //     amount: { min: 1 },
+  //   }),
+  // )
   async logoutUser(
     @Args('userToken') userToken: string,
     // induced fields
@@ -264,11 +264,11 @@ export class SwordMerchantUserApisResolver {
 
   @Query(() => [PaymentRequest], { nullable: true })
   @UseGuards(JwtAuthGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      userToken: { minLen: 1 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     userToken: { minLen: 1 },
+  //   }),
+  // )
   async userPaymentRequests(
     @Args('userToken') userToken: string,
     // induced fields
@@ -285,11 +285,11 @@ export class SwordMerchantUserApisResolver {
 
   @Query(() => Wallet, { nullable: true })
   @UseGuards(JwtAuthGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      userToken: { minLen: 1 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     userToken: { minLen: 1 },
+  //   }),
+  // )
   async userWallet(
     @Args('userToken') userToken: string,
     // induced fields

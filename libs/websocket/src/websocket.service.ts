@@ -72,16 +72,16 @@ export class WebsocketService {
    * receive message from server
    */
   onMessage(event) {
-    // const message = new WebsocketEvent();
-    // message.createFromJSON(event.data);
-    // this.logger.log(
-    //   `[onMessage] ${message.getEventType()} ${JSON.stringify(
-    //     message.getData(),
-    //   )}`,
-    // );
-    // if (message.isValid()) {
-    //   this.handleMessage(message);
-    // }
+    const message = new WebsocketEvent();
+    message.createFromJSON(event.data);
+    this.logger.log(
+      `[onMessage] ${message.getEventType()} ${JSON.stringify(
+        message.getData(),
+      )}`,
+    );
+    if (message.isValid()) {
+      this.handleMessage(message);
+    }
   }
 
   /*
@@ -119,7 +119,9 @@ export class WebsocketService {
    * handle message from server
    */
   handleMessage(wsMsg: WebsocketEvent) {
-    this.logger.verbose(`[WebsocketEvent] ${JSON.stringify(wsMsg)}`);
+    this.logger.verbose(
+      `[WebsocketEvent.handleMessage] ${JSON.stringify(wsMsg)}`,
+    );
     this.eventEmitter.emit(WEBSOCKET_EVENTS[wsMsg.getEventType()], wsMsg);
   }
 
@@ -130,7 +132,7 @@ export class WebsocketService {
    * @memberof WebsocketService
    */
   send(message: WebsocketEvent) {
-    this.logger.verbose(`[WebsocketEvent] ${JSON.stringify(message)}`);
+    this.logger.verbose(`[WebsocketEvent.send] ${JSON.stringify(message)}`);
 
     this.ws.readyState === w3cwebsocket.OPEN &&
       this.ws.send(JSON.stringify(message));

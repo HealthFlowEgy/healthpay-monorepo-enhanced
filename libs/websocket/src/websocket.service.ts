@@ -119,6 +119,7 @@ export class WebsocketService {
    * handle message from server
    */
   handleMessage(wsMsg: WebsocketEvent) {
+    this.logger.verbose(`[WebsocketEvent] ${JSON.stringify(wsMsg)}`);
     this.eventEmitter.emit(WEBSOCKET_EVENTS[wsMsg.getEventType()], wsMsg);
   }
 
@@ -129,6 +130,8 @@ export class WebsocketService {
    * @memberof WebsocketService
    */
   send(message: WebsocketEvent) {
+    this.logger.verbose(`[WebsocketEvent] ${JSON.stringify(message)}`);
+
     this.ws.readyState === w3cwebsocket.OPEN &&
       this.ws.send(JSON.stringify(message));
   }
@@ -143,6 +146,7 @@ export class WebsocketService {
 
   @OnEvent(WEBSOCKET_EVENTS.UTXO_QUERY)
   onUTXOQuery({ id }: Wallet) {
+    this.logger.verbose(`[UTXO_QUERY] ${id}`);
     const newEvent = new WebsocketEvent();
     newEvent.setEventType('UTXO_QUERY');
     let strID = `${id}`;

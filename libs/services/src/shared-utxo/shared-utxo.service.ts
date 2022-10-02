@@ -25,6 +25,7 @@ export class SharedUtxoService {
 
   @OnEvent(WEBSOCKET_EVENTS.UTXO_UPDATE)
   async onUTXOUpdate({ data }: any): Promise<boolean> {
+    this.logger.verbose(`UTXO update: ${JSON.stringify(data)}`);
     // update wallet balance
     if (data.publicKey === 'root') {
       return;

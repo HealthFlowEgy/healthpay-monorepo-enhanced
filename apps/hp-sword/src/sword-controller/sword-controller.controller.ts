@@ -2,6 +2,8 @@ import { ServicesService } from '@app/services';
 import { SharedCronService } from '@app/services/shared-cron/shared-cron.service';
 import { SharedUtxoService } from '@app/services/shared-utxo/shared-utxo.service';
 import { WebsocketService } from '@app/websocket';
+import { fromPrisma } from '@app/websocket/transaction';
+import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
 import { Controller, Get, Inject } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Throttle } from '@nestjs/throttler';
@@ -25,6 +27,26 @@ export class SwordControllerController {
   //     await this.services.sharedPaymentRequest.getPendingPaymentRequetsWhereWalletHaveMoney(),
   //   );
   // }
+
+  @Get('/init')
+  async init(): Promise<string> {
+    const wallets = await this.services.sharedWallet.getAllWallets({
+      where: { id: { gt: 0 } },
+    });
+
+    const transArr = [];
+
+    for (const wallet of wallets) {
+      let trans = undefined;
+      if (wallet.total > 0) {
+        trans = fromPrisma('root', wallet.id, wallet.total, 0, wallet.id);
+        this.eventEmitter2.emit(WEBSOCKET_EVENTS.PRISMA_NEW_TX, trans);
+        await sleep(1000);
+      }
+    }
+
+    return JSON.stringify(transArr);
+  }
 
   // @Get('/tryone')
   // async tryone(): Promise<string> {

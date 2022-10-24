@@ -28,24 +28,9 @@ export class SwordControllerController {
   //   );
   // }
 
-  @Get('/init')
+  @Get('/status-check')
   async init(): Promise<string> {
-    const wallets = await this.services.sharedWallet.getAllWallets({
-      where: { id: { gt: 0 } },
-    });
-
-    const transArr = [];
-
-    for (const wallet of wallets) {
-      let trans = undefined;
-      if (wallet.total > 0) {
-        trans = fromPrisma('root', wallet.id, wallet.total, 0, wallet.id);
-        this.eventEmitter2.emit(WEBSOCKET_EVENTS.PRISMA_NEW_TX, trans);
-        await sleep(1000);
-      }
-    }
-
-    return JSON.stringify(transArr);
+    return 'OK';
   }
 
   // @Get('/tryone')

@@ -1,4 +1,4 @@
-import get from 'lodash.get';
+import _ from 'lodash';
 import {
   PipeTransform,
   Injectable,
@@ -38,7 +38,7 @@ export default class NestjsGraphqlValidator implements PipeTransform {
     validatorValue: ValidatorRuleType,
     propertyPath?: string,
   ) {
-    const fieldToCheck = propertyPath ? get(field, propertyPath) : field;
+    const fieldToCheck = propertyPath ? _.get(field, propertyPath) : field;
     return validatorValue.includes(fieldToCheck);
   }
 
@@ -47,7 +47,7 @@ export default class NestjsGraphqlValidator implements PipeTransform {
     validatorValue: ValidatorRuleType,
     propertyPath?: string,
   ) {
-    const fieldToCheck = propertyPath ? get(field, propertyPath) : field;
+    const fieldToCheck = propertyPath ? _.get(field, propertyPath) : field;
     return fieldToCheck.length <= validatorValue;
   }
 
@@ -56,7 +56,7 @@ export default class NestjsGraphqlValidator implements PipeTransform {
     validatorValue: ValidatorRuleType,
     propertyPath?: string,
   ) {
-    const fieldToCheck = propertyPath ? get(field, propertyPath) : field;
+    const fieldToCheck = propertyPath ? _.get(field, propertyPath) : field;
     return fieldToCheck.length >= validatorValue;
   }
 
@@ -65,7 +65,7 @@ export default class NestjsGraphqlValidator implements PipeTransform {
     validatorValue: ValidatorRuleType,
     propertyPath?: string,
   ) {
-    const fieldToCheck = propertyPath ? get(field, propertyPath) : field;
+    const fieldToCheck = propertyPath ? _.get(field, propertyPath) : field;
     return fieldToCheck >= validatorValue;
   }
 
@@ -74,7 +74,7 @@ export default class NestjsGraphqlValidator implements PipeTransform {
     validatorValue: ValidatorRuleType,
     propertyPath?: string,
   ) {
-    const fieldToCheck = propertyPath ? get(field, propertyPath) : field;
+    const fieldToCheck = propertyPath ? _.get(field, propertyPath) : field;
     return fieldToCheck <= validatorValue;
   }
 
@@ -83,7 +83,7 @@ export default class NestjsGraphqlValidator implements PipeTransform {
     validatorValue: RegExp,
     propertyPath?: string,
   ) {
-    const fieldToCheck = propertyPath ? get(field, propertyPath) : field;
+    const fieldToCheck = propertyPath ? _.get(field, propertyPath) : field;
     return new RegExp(validatorValue).test(fieldToCheck);
   }
 
@@ -92,7 +92,7 @@ export default class NestjsGraphqlValidator implements PipeTransform {
     rules: string[],
     propertyPath?: string,
   ) {
-    const fieldToCheck = propertyPath ? get(field, propertyPath) : field;
+    const fieldToCheck = propertyPath ? _.get(field, propertyPath) : field;
 
     for (const rule of rules) {
       let isValidRule = false;

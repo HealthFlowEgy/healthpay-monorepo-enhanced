@@ -30,7 +30,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
       debug: false,
       driver: ApolloDriver,
-      playgroud: true,
+      playground: true,
       // introspection: true,
       context: ({ req, connection, ...rest }) =>
         connection ? { req: connection.context, ...rest } : { req, ...rest },

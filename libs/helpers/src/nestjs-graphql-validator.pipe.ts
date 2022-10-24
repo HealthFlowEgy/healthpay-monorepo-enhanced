@@ -12,7 +12,7 @@ export type ValidatorRuleType = number | RegExp | any[string | number];
 export type FieldType = number | string;
 
 @Injectable()
-export default class NestjsGraphqlValidator implements PipeTransform {
+export class NestjsGraphqlValidator implements PipeTransform {
   validators: {
     [key: string]: (
       field: any,

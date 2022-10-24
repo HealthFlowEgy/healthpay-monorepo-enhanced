@@ -13,7 +13,7 @@ import { PaymentRequest } from '../models/sword-payment-requests.model';
 import { Throttle } from '@nestjs/throttler';
 import { GqlThrottlerGuard } from '../guards/throttle.guard';
 import { WhiteListedOnly } from '../guards/whitelisted-only.guard';
-import NestjsGraphqlValidator from '@app/helpers/nestjs-graphql-validator.pipe';
+import { NestjsGraphqlValidator } from '@app/helpers/nestjs-graphql-validator.pipe';
 
 @Resolver()
 export class SwordMerchantUserApisResolver {

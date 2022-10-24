@@ -17,18 +17,20 @@ import { SwordMerchantUserApisResolver } from './sword-merchant-user-apis/sword-
 import { SwordUserWalletResolver } from './sword-user-wallet/sword-user-wallet.resolver';
 import { SwordControllerController } from './sword-controller/sword-controller.controller';
 import { ScheduleModule } from '@nestjs/schedule';
-
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
       autoSchemaFile: true,
       introspection: true,
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
       debug: false,
+      driver: ApolloDriver,
+      playgroud: true,
       // introspection: true,
       context: ({ req, connection, ...rest }) =>
         connection ? { req: connection.context, ...rest } : { req, ...rest },

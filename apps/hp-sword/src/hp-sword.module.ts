@@ -1,4 +1,6 @@
 import { HelpersModule } from '@app/helpers';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+
 import { ServicesModule } from '@app/services';
 import { WebsocketModule } from '@app/websocket';
 import { Module } from '@nestjs/common';
@@ -14,19 +16,24 @@ import { SwordMerchantWithTokenResolver } from './sword-merchant-apis/sword-merc
 import { SwordMerchantUserApisResolver } from './sword-merchant-user-apis/sword-merchant-user-apis.resolver';
 import { SwordUserWalletResolver } from './sword-user-wallet/sword-user-wallet.resolver';
 import { SwordControllerController } from './sword-controller/sword-controller.controller';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
-    GraphQLModule.forRoot({
+    ScheduleModule.forRoot(),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
       autoSchemaFile: true,
       introspection: true,
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
       debug: false,
+      driver: ApolloDriver,
+      playground: true,
       // introspection: true,
-      context: ({ req, connection }) =>
-        connection ? { req: connection.context } : { req },
+      context: ({ req, connection, ...rest }) =>
+        connection ? { req: connection.context, ...rest } : { req, ...rest },
     }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
@@ -35,6 +42,10 @@ import { SwordControllerController } from './sword-controller/sword-controller.c
         path: path.join(__dirname, '/i18n/'),
         watch: true,
       },
+    }),
+    ThrottlerModule.forRoot({
+      ttl: 60, // Time to live, in seconds
+      limit: 100, // Requests within the TTL
     }),
     ServicesModule,
     HelpersModule,
@@ -46,6 +57,14 @@ import { SwordControllerController } from './sword-controller/sword-controller.c
       provide: APP_GUARD,
       useClass: SwordMerchantsOnlyGuard,
     },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: GqlThrottlerGuard,
+    // },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: GqlThrottlerGuard,
+    // },
     SwordMerchantWithTokenResolver,
     SwordMerchantUserApisResolver,
     SwordUserWalletResolver,

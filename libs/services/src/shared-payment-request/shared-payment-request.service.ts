@@ -2,7 +2,7 @@ import { HelpersService } from '@app/helpers';
 import { OnelinkService } from '@app/helpers/onelink.service';
 import { PrismaService } from '@app/prisma';
 import { Inject, Injectable } from '@nestjs/common';
-import { Merchant, PaymentRequest, User } from '@prisma/client';
+import { Merchant, PaymentRequest, Prisma, User } from '@prisma/client';
 import { SharedTransactionService } from '../shared-transaction/shared-transaction.service';
 
 @Injectable()
@@ -57,7 +57,25 @@ export class SharedPaymentRequestService {
     });
   }
 
-  async getPendingPaymentRequests(userId: number): Promise<PaymentRequest[]> {
+  async getPaymentRequestById(id: number): Promise<PaymentRequest> {
+    return this.prisma.paymentRequest.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async getPaymentRequestsByUserId(userId: number): Promise<PaymentRequest[]> {
+    return this.prisma.paymentRequest.findMany({
+      where: {
+        userId,
+      },
+    });
+  }
+
+  async getPendingPaymentRequestsByUserId(
+    userId: number,
+  ): Promise<PaymentRequest[]> {
     return this.prisma.paymentRequest.findMany({
       where: {
         user: {
@@ -65,6 +83,22 @@ export class SharedPaymentRequestService {
         },
         status: 'PENDING',
       },
+      include: {
+        merchant: true,
+        transaction: true,
+      },
+    });
+  }
+
+  async getProcessingPaymentRequests(
+    where: Prisma.PaymentRequestFindManyArgs,
+  ): Promise<PaymentRequest[]> {
+    where.where = {
+      ...where.where,
+      status: 'CANCELLED',
+    };
+    return this.prisma.paymentRequest.findMany({
+      ...where,
     });
   }
 
@@ -83,7 +117,7 @@ export class SharedPaymentRequestService {
         },
       },
       orderBy: {
-        id: 'asc',
+        amount: 'asc',
       },
     });
   }
@@ -97,6 +131,55 @@ export class SharedPaymentRequestService {
       },
       data: {
         status: 'APPROVED',
+      },
+    });
+  }
+
+  async markPaymentRequestAsProcessing(
+    paymentRequest: PaymentRequest,
+  ): Promise<PaymentRequest> {
+    return this.prisma.paymentRequest.update({
+      where: {
+        id: paymentRequest.id,
+      },
+      data: {
+        status: 'CANCELLED',
+      },
+    });
+  }
+  async markPaymentRequestAsPending(
+    paymentRequest: PaymentRequest,
+  ): Promise<PaymentRequest> {
+    return this.prisma.paymentRequest.update({
+      where: {
+        id: paymentRequest.id,
+      },
+      data: {
+        status: 'PENDING',
+      },
+    });
+  }
+
+  async getPendingPaymentRequetsWhereWalletHaveMoney() {
+    return this.prisma.paymentRequest.findMany({
+      where: {
+        status: 'PENDING',
+        user: {
+          wallet: {
+            is: {
+              total: {
+                gt: 5,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        user: {
+          include: {
+            wallet: true,
+          },
+        },
       },
     });
   }

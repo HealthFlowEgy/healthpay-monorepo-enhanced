@@ -11,11 +11,11 @@ export class CashOutUserSettings {
   creditorNo: string;
 
   @Field(() => Date)
-  createdAt: Date;
+  createdAt: Date | null;
 
   @Field(() => Date)
-  updatedAt: Date;
+  updatedAt: Date | null;
 
   @Field(() => CashOutMethod, { nullable: true })
-  method: CashOutMethod | null;
+  method?: CashOutMethod | null;
 }

@@ -3,4 +3,9 @@ export interface SendNotifyResults {
   success: string[];
 }
 
-export type AvailableMessages = 'otp' | 'login' | 'charge' | 'deduct';
+export type AvailableMessages =
+  | 'otp'
+  | 'login'
+  | 'charge'
+  | 'deduct'
+  | 'cashout';

@@ -11,17 +11,20 @@ export class CashOutMethod {
   name: string;
 
   @Field(() => String)
-  abbreviation: string;
+  abbreviation: string | null;
 
   @Field(() => String)
-  bic: string;
+  bic: string | null;
+
+  @Field(() => String)
+  notes: string | null;
 
   @Field(() => Date)
-  createdAt: Date;
+  createdAt: Date | null;
 
   @Field(() => Date)
-  updatedAt: Date;
+  updatedAt: Date | null;
 
   @Field(() => [CashOutMethodLength])
-  length: [CashOutMethodLength];
+  length: CashOutMethodLength[] | null;
 }

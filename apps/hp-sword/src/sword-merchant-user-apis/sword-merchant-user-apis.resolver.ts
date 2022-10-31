@@ -1,21 +1,29 @@
 import { ServicesService } from '@app/services';
-import { Inject, UseGuards, UsePipes } from '@nestjs/common';
+import { Inject, Logger, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Merchant } from '@prisma/client';
-import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { CurrentMerchant } from '../decorators/merchant.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Success } from '../models/sword-success.model';
 import { Transaction } from '../models/sword-transaction.model';
 import { User, UserWithToken } from '../models/sword-user.model';
 import { Wallet } from '../models/sword-wallet.model';
+import slugify from 'slugify';
+import { PaymentRequest } from '../models/sword-payment-requests.model';
+import { Throttle } from '@nestjs/throttler';
+import { GqlThrottlerGuard } from '../guards/throttle.guard';
+import { WhiteListedOnly } from '../guards/whitelisted-only.guard';
+import { NestjsGraphqlValidator } from '@app/helpers/nestjs-graphql-validator.pipe';
 
 @Resolver()
 export class SwordMerchantUserApisResolver {
+  private readonly logger = new Logger(SwordMerchantUserApisResolver.name);
+
   constructor(@Inject(ServicesService) private services: ServicesService) {}
 
   @Mutation(() => User, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @Throttle(3, 60 * 60)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       email: { rules: ['isEmail'], orNull: true },
@@ -35,7 +43,10 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     // @CurrentMerchant() merchant: Merchant,
   ) {
-    console.log('[loginUser]', mobile, firstName, lastName, email);
+    this.logger.verbose(
+      `[loginUser], ${mobile}, ${firstName}, ${lastName}, ${email}`,
+    );
+
     return this.services.sharedUser.doUpsertUser(
       {
         mobile,
@@ -48,7 +59,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => UserWithToken, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       otp: { maxLen: 6, minLen: 1 },
@@ -65,7 +76,7 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
-    console.log('[authUser]', mobile, otp, isProvider);
+    this.logger.verbose(`[authUser], ${mobile}, ${otp}, ${isProvider}`);
 
     const user = await this.services.sharedUser.doVerifyMobileWithOtp(
       mobile,
@@ -87,10 +98,11 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Transaction, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
+      amount: { min: 50, max: 50000 },
     }),
   )
   async topupWalletUser(
@@ -99,12 +111,13 @@ export class SwordMerchantUserApisResolver {
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
-    console.log('[topupWalletUser]', userToken, amount);
-
     const user = await this.services.sharedMerchant.getUserFromLink(
       merchant,
       userToken,
     );
+
+    this.logger.verbose(`[topupWalletUser], ${amount}, ${user.id}`);
+
     return this.services.sharedTransaction.doCreateTransaction(
       user,
       amount,
@@ -113,15 +126,17 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
+      amount: { min: 10 },
     }),
   )
   async deductFromUser(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,
+    @Args('description', { nullable: true }) description: string,
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
@@ -135,16 +150,17 @@ export class SwordMerchantUserApisResolver {
         merchant.id,
         user.id,
         amount,
-        '_',
+        slugify(description || 'no-description'),
       )),
     };
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
+      amount: { min: 10 },
     }),
   )
   async sendPaymentRequest(
@@ -157,6 +173,9 @@ export class SwordMerchantUserApisResolver {
       merchant,
       userToken,
     );
+
+    const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
+
     return {
       isSuccess:
         !!(await this.services.sharedPaymentRequest.createPaymentRequest(
@@ -168,15 +187,17 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
+      amount: { min: 10 },
     }),
   )
   async payToUser(
     @Args('userToken') userToken: string,
     @Args('amount') amount: number,
+    @Args('description', { nullable: true }) description: string,
     // induced fields
     @CurrentMerchant() merchant: Merchant,
   ) {
@@ -190,9 +211,76 @@ export class SwordMerchantUserApisResolver {
         user.id,
         merchant.id,
         amount,
-        '_',
+        slugify(description || 'no-description'),
       )),
     };
+  }
+
+  @Mutation(() => Success, { nullable: true })
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  @UsePipes(
+    new NestjsGraphqlValidator({
+      userToken: { minLen: 5 },
+      amount: { min: 1 },
+    }),
+  )
+  async logoutUser(
+    @Args('userToken') userToken: string,
+    // induced fields
+    @CurrentMerchant() merchant: Merchant,
+  ) {
+    const user = await this.services.sharedMerchant.getUserFromLink(
+      merchant,
+      userToken,
+    );
+    this.logger.verbose(`[logoutUser], ${user.id} ${user.mobile}`);
+    let providerConnected = null;
+    const userConnected =
+      await this.services.sharedMerchant.getUserAuthMerchant(
+        merchant.id,
+        userToken,
+      );
+    if (userConnected) {
+      await this.services.sharedMerchant.deleteUserAuthMerchant(
+        userConnected.id,
+      );
+    } else {
+      providerConnected =
+        await this.services.sharedMerchant.getProviderAuthMerchant(
+          merchant.id,
+          userToken,
+        );
+      if (providerConnected) {
+        await this.services.sharedMerchant.deleteProverAuthMerchant(
+          providerConnected.id,
+        );
+      }
+    }
+
+    return {
+      isSuccess: !!userConnected || !!providerConnected,
+    };
+  }
+
+  @Query(() => [PaymentRequest], { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    new NestjsGraphqlValidator({
+      userToken: { minLen: 1 },
+    }),
+  )
+  async userPaymentRequests(
+    @Args('userToken') userToken: string,
+    // induced fields
+    @CurrentMerchant() merchant: Merchant,
+  ) {
+    const user = await this.services.sharedMerchant.getUserFromLink(
+      merchant,
+      userToken,
+    );
+    return this.services.sharedPaymentRequest.getPaymentRequestsByUserId(
+      user.id,
+    );
   }
 
   @Query(() => Wallet, { nullable: true })

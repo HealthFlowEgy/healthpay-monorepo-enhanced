@@ -2,16 +2,19 @@
   "search.exclude": {
     "**/dist": true,
     "**/apps/healthpay": true,
-    "**/apps/hp-sword": false,
+    "**/apps/hp-fence": true,
+    "**/apps/hp-nodejs": true,
   },
   "files.exclude": {
     "***/dist": true,
-    "**/apps/hp-sword": false
+    "**/apps/hp-fence": true,
+    "**/apps/hp-nodejs": true,
   },
   "files.watcherExclude": {
     "**/dist": true,
     "**/apps/healthpay": true,
-    "**/apps/hp-sword": false,
+    "**/apps/hp-fence": true,
+    "**/apps/hp-nodejs": true,
   },
   "cSpell.words": [
     "CASHIN",

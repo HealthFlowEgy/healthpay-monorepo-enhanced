@@ -1,31 +1,74 @@
 import { ServicesService } from '@app/services';
-import { Inject, UseGuards, UsePipes } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  BadRequestException,
+  Inject,
+  UseGuards,
+  UsePipes,
+  Logger,
+} from '@nestjs/common';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
+import { Success } from '../models/fence-success.model';
 import { User, UserWithToken } from '../models/fence-user.model';
+import { Throttle } from '@nestjs/throttler';
+import { IAM } from '../models/fence.iam.model';
+const md5 = require('md5');
 
 @Resolver()
 export class FenceUserApisResolver {
+  private readonly logger = new Logger(FenceUserApisResolver.name);
   constructor(
     @Inject(ServicesService) private services: ServicesService,
     @Inject(AuthService) private authService: AuthService,
-  ) {}
+  ) { }
+
+  // iam query
+  @Query(() => IAM)
+  async iam() {
+    return {
+      date: new Date().toISOString(),
+    }
+  }
+
   // register mutation
+  @Throttle(3, 60 * 60)
+  @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async register(@Args('mobile') mobile: string) {
+  async register(@Args('mobile') mobile: string
+    // , @Args('secret') secret: string
+  ) {
+    // return null;
+    // const date = new Date().toISOString();
+    // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    // if (hash !== secret) {
+    //   throw new BadRequestException('5006', 'Invalid secret');
+    // }
     return this.services.sharedUser.doUpsertUser({ mobile }, false);
   }
   // register mutation
 
   // login mutation
+  @Throttle(3, 60 * 60)
+  @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async login(@Args('mobile') mobile: string) {
+  async login(@Args('mobile') mobile: string,
+    // @Args('secret') secret: string
+  ) {
+    //  return null;
+    // const date = new Date().toISOString();
+    // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    // if (hash !== secret) {
+    //   throw new BadRequestException('5006', 'Invalid secret');
+
+    // }
     return this.services.sharedUser.doUpsertUser({ mobile }, true);
   }
   // login mutation
+
 
   // auth mutation
   @Mutation(() => UserWithToken, { nullable: true })
@@ -38,12 +81,23 @@ export class FenceUserApisResolver {
       },
     }),
   )
-  async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string) {
+  async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string,
+    //  @Args('secret') secret: string
+  ) {
+    // const date = new Date().toISOString();
+    // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1]) + otp;
+    // if (hash !== secret) {
+    //   throw new BadRequestException('5006', 'Invalid secret');
+
+    // }
     const user = await this.services.sharedUser.doVerifyMobileWithOtp(
       mobile,
       otp,
     );
-
+    const requests = await this.services.sharedFinanceService.requestsByUserId(
+      user.id,
+    );
+    console.log('authUser', requests);
     if (!user) {
       return;
     }
@@ -66,7 +120,7 @@ export class FenceUserApisResolver {
 
   // update profile mutation
   @Mutation(() => User, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   @UsePipes(
     new NestjsGraphqlValidator({
       firstName: { maxLen: 10, minLen: 1 },
@@ -97,9 +151,42 @@ export class FenceUserApisResolver {
   }
   // update profile mutation
 
+  // verify user docs mutation
+  @Mutation(() => Success, { nullable: true })
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  @UsePipes(
+    new NestjsGraphqlValidator({
+      nationalId: { maxLen: 14, minLen: 14 },
+    }),
+  )
+  async verifyUserDocs(
+    @Args('nationalId', { nullable: true }) nationalId: string,
+    @Args('nationalDocFront', { nullable: true }) nationalDocFront: string,
+    @Args('nationalDocBack', { nullable: true }) nationalDocBack: string,
+    @CurrentUser() user: User,
+  ) {
+    if (user.nationalId && user.nationalDocFront && user.nationalDocBack) {
+      throw new BadRequestException(5005, 'User already uploaded docs');
+    }
+    const request =
+      await this.services.sharedUser.createVerificationUserRequest(
+        user.id,
+        nationalId,
+        nationalDocFront,
+        nationalDocBack,
+      );
+    if (!request) {
+      throw new BadRequestException('5005', 'Sorry can not verify your docs');
+    }
+    return {
+      isSuccess: true,
+    };
+  }
+  // verify user docs mutation
+
   // profile query
   @Query(() => User)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async profile(@CurrentUser() user: User) {
     return user;
   }

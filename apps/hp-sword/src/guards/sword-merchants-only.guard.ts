@@ -23,7 +23,6 @@ export class SwordMerchantsOnlyGuard implements CanActivate {
    * @returns
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (context.getType() === 'http') return true;
     const ctx = GqlExecutionContext.create(context);
     const { req } = ctx.getContext();
     const apiHeader = req.headers['api-header'];

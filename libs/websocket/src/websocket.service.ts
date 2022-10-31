@@ -1,5 +1,5 @@
 import { Wallet } from '@prisma/client';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { w3cwebsocket } from 'websocket';
@@ -10,6 +10,8 @@ import { WEBSOCKET_EVENTS } from './websocket-events';
 @Injectable()
 export class WebsocketService {
   // constractor init websocket
+  private readonly logger = new Logger(WebsocketService.name);
+
   ws: w3cwebsocket;
   retryMS: number;
   retryTO: any;
@@ -49,7 +51,7 @@ export class WebsocketService {
    * send message to server
    */
   onOpen() {
-    console.log('[HP_LEDGER] CONNECTED');
+    this.logger.verbose('[HP_LEDGER] CONNECTED');
   }
 
   /*
@@ -62,7 +64,7 @@ export class WebsocketService {
    * close websocket
    */
   onClose() {
-    console.log('[HP_LEDGER] CLOSED');
+    this.logger.error('[HP_LEDGER] CLOSED');
     this.reconnect();
   }
 
@@ -76,9 +78,13 @@ export class WebsocketService {
    * receive message from server
    */
   onMessage(event) {
-    console.log('[LEDGER_EVENT]', event.data);
     const message = new WebsocketEvent();
     message.createFromJSON(event.data);
+    this.logger.log(
+      `[onMessage] ${message.getEventType()} ${JSON.stringify(
+        message.getData(),
+      )}`,
+    );
     if (message.isValid()) {
       this.handleMessage(message);
     }
@@ -92,8 +98,6 @@ export class WebsocketService {
    * @private
    */
   onError(event) {
-    console.log(event.type);
-    console.log('[HP_LEDGER] ERROR');
     this.reconnect();
   }
 
@@ -106,7 +110,7 @@ export class WebsocketService {
    * reconnect websocket
    */
   reconnect() {
-    console.log(`reconnect in ${this.retryMS}`);
+    this.logger.verbose(`reconnect in ${this.retryMS}`);
     clearTimeout(this.retryTO);
     this.retryTO = setTimeout(() => this.init(), this.retryMS);
   }
@@ -121,6 +125,9 @@ export class WebsocketService {
    * handle message from server
    */
   handleMessage(wsMsg: WebsocketEvent) {
+    this.logger.verbose(
+      `[WebsocketEvent.handleMessage] ${JSON.stringify(wsMsg)}`,
+    );
     this.eventEmitter.emit(WEBSOCKET_EVENTS[wsMsg.getEventType()], wsMsg);
   }
 
@@ -131,6 +138,8 @@ export class WebsocketService {
    * @memberof WebsocketService
    */
   send(message: WebsocketEvent) {
+    this.logger.verbose(`[WebsocketEvent.send] ${JSON.stringify(message)}`);
+
     this.ws.readyState === w3cwebsocket.OPEN &&
       this.ws.send(JSON.stringify(message));
   }
@@ -145,6 +154,7 @@ export class WebsocketService {
 
   @OnEvent(WEBSOCKET_EVENTS.UTXO_QUERY)
   onUTXOQuery({ id }: Wallet) {
+    this.logger.verbose(`[UTXO_QUERY] ${id}`);
     const newEvent = new WebsocketEvent();
     newEvent.setEventType('UTXO_QUERY');
     let strID = `${id}`;

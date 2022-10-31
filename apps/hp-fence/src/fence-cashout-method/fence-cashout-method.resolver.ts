@@ -7,13 +7,5 @@ import { CashOutUserSettings } from '../models/fence-cashout-user-settings.model
 
 @Resolver(CashOutMethod)
 export class FenceCashoutMethodResolver {
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
-  @ResolveField()
-  async length(
-    @Parent() method: CashOutMethod,
-  ): Promise<CashOutMethodLength[]> {
-    return this.services.sharedCashoutMethod.cashOutMethodLengthsById(
-      method.id,
-    );
-  }
+
 }

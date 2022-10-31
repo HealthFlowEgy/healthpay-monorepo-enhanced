@@ -7,13 +7,10 @@ import { Wallet } from '../models/fence-wallet.model';
 @Resolver(Wallet)
 export class FenceWalletResolver {
   constructor(@Inject(ServicesService) private services: ServicesService) {}
-  @ResolveField()
-  async balance(@Parent() wallet: Wallet): Promise<SortedBalance[]> {
-    const test =
-      await this.services.sharedBalance.getUserWalletWithBalanceWithMerchantsUsers(
-        wallet.id,
-      );
-
-    return test;
-  }
+  // @ResolveField()
+  // async balance(@Parent() wallet: Wallet): Promise<SortedBalance[]> {
+  //   return await this.services.sharedBalance.getUserWalletWithBalanceWithMerchantsUsers(
+  //     wallet.id,
+  //   );
+  // }
 }

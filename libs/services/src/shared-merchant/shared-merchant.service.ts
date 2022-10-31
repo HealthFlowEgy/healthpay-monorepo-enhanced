@@ -1,6 +1,11 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -15,6 +20,8 @@ import { SharedUserService } from '../shared-user/shared-user.service';
 
 @Injectable()
 export class SharedMerchantService {
+  private readonly logger = new Logger(SharedMerchantService.name);
+
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(SharedUserService) private sharedUser: SharedUserService,
@@ -28,6 +35,28 @@ export class SharedMerchantService {
     return !!(
       (await this.prisma.merchant.findMany({ where: { apiHeader } })).length > 0
     );
+  }
+
+  public async isValidIpAddress(
+    apiHeader: string,
+    ip: string,
+  ): Promise<boolean> {
+    const merchant: any = await this.prisma.merchant.findMany({
+      where: { apiHeader },
+    });
+    // if (merchant[0].whitelistedIps.includes(ip)) {
+    //   return true;
+    // }
+
+    return true;
+  }
+
+  public async cashInMerchant(): Promise<Merchant | null> {
+    return this.prisma.merchant.findFirst({
+      where: {
+        isHp: 'CASHIN',
+      },
+    });
   }
 
   async getMerchantByApiHeader(apiHeader: string): Promise<Merchant | null> {
@@ -127,6 +156,22 @@ export class SharedMerchantService {
     });
   }
 
+  async deleteUserAuthMerchant(id): Promise<UserAuthMerchant> {
+    return this.prisma.userAuthMerchant.delete({
+      where: {
+        id: id,
+      },
+    });
+  }
+
+  async deleteProverAuthMerchant(id): Promise<ProviderAuthMerchant> {
+    return this.prisma.providerAuthMerchant.delete({
+      where: {
+        id: id,
+      },
+    });
+  }
+
   async doLinkUserOrProviderToMerchant(
     merchant: Merchant,
     user: User,
@@ -159,8 +204,10 @@ export class SharedMerchantService {
     const merchantLink =
       (await this.getUserAuthMerchant(merchant.id, token)) ||
       (await this.getProviderAuthMerchant(merchant.id, token));
-    if (!merchantLink)
+    if (!merchantLink) {
+      this.logger.error(`[getUserFromLink] 3002 ${merchant.id} ${token}`);
       throw new UnauthorizedException(`3002`, 'param: userToken is invalid');
+    }
 
     return this.sharedUser.getUserById(merchantLink.userId);
   }

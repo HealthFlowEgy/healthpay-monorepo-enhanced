@@ -1,4 +1,5 @@
 {
   "otp": "Use {otp} to login your healthpay",
-  "deduct": "{amount}EGP has been deducted from your healthpay wallet for more info visit http://healthpay.tech"
+  "deduct": "{amount}EGP has been deducted from your healthpay wallet for more info visit http://healthpay.tech",
+  "cashout": "New cashout request sent please approve"
 }

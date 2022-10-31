@@ -13,19 +13,17 @@ export class SharedCashoutMethodService {
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
   ) {}
-  public async cashOutMethods(): Promise<CashOutTypes[]> {
-    return await this.prisma.cashOutTypes.findMany({
-      include: { length: true },
+  public async cashOutMethods(): Promise<any[]> {
+    return this.prisma.cashOutTypes.findMany({
+         include: {
+        length: true,
+      },
     });
   }
   public async cashOutMethodBySettingsId(settingsId: number): Promise<any> {
     const data = await this.prisma.cashOutTypes.findFirst({
       where: {
-        cashOutSettings: {
-          every: {
-            id: settingsId,
-          },
-        },
+        id: settingsId,
       },
       include: {
         length: true,

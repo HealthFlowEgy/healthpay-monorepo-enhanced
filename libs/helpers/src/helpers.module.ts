@@ -3,11 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import { HelpersService } from './helpers.service';
 import { SmsService } from './sms.service';
 import { OnelinkService } from './onelink.service';
-import { ValuService } from './valu.service';
+import { NestjsGraphqlValidator } from './nestjs-graphql-validator.pipe';
 
 @Module({
   imports: [ConfigModule],
-  providers: [HelpersService, SmsService, OnelinkService, ValuService],
-  exports: [HelpersService, SmsService, OnelinkService, ValuService],
+  providers: [HelpersService, SmsService, OnelinkService],
+  exports: [HelpersService, SmsService, OnelinkService],
 })
 export class HelpersModule {}

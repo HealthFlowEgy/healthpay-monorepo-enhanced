@@ -23,13 +23,19 @@ export class WebsocketService {
   }
 
   init() {
-    this.ws = new w3cwebsocket(
+    console.log(
+      '[ws.init]',
       this.configService.get('HP_LEDGER', 'ws://localhost:3000/updates'),
     );
-    this.ws.onopen = this.onOpen.bind(this);
-    this.ws.onerror = this.onError.bind(this);
-    this.ws.onclose = this.onClose.bind(this);
-    this.ws.onmessage = this.onMessage.bind(this);
+    if (this.configService.get('HP_LEDGER', 'ws://localhost:3000/updates')) {
+      this.ws = new w3cwebsocket(
+        this.configService.get('HP_LEDGER', 'ws://localhost:3000/updates'),
+      );
+      this.ws.onopen = this.onOpen.bind(this);
+      this.ws.onerror = this.onError.bind(this);
+      this.ws.onclose = this.onClose.bind(this);
+      this.ws.onmessage = this.onMessage.bind(this);
+    }
   }
 
   /*

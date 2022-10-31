@@ -34,9 +34,5 @@ export class SwordControllerController {
   //   return JSON.stringify(transArr);
   // }
 
-  @Get('/tryone')
-  async tryone(): Promise<string> {
-    this.services.sharedBalance.doTransFromUserToUser(4, 3, 10, 'LEDGERTX');
-    return '';
-  }
+
 }

@@ -34,7 +34,7 @@ export class SmsService {
         'user': 'HealthPay',
         'pwd': '91ujmb_e',
         'senderid': 'Health%20Pay',
-        'mobileno': '+201154446065',
+        'mobileno': mobileno,
         'msgtext': messageText,
         'priority': 'High',
         'CountryCode': 'ALL'

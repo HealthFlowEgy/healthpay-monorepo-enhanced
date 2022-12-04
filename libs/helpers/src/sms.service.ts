@@ -40,6 +40,7 @@ export class SmsService {
         'CountryCode': 'ALL'
       }
     })
+    console.log(response.data, "MOBISHASTRA")
     return true
   }
 
@@ -48,8 +49,8 @@ export class SmsService {
     recipients: string,
     confirmed?: boolean,
   ) {
+    await this.mshastra(messageText, recipients)
     // try {
-    //   await this.mshastra(messageText, recipients)
     //   const msgObject = {
     //     senderName: this.configService.get<string>('SMS_SENDERID'),
     //     messageType: 'text',

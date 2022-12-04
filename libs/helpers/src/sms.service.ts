@@ -48,47 +48,47 @@ export class SmsService {
     recipients: string,
     confirmed?: boolean,
   ) {
-    try {
-      await this.mshastra(messageText, recipients)
-      const msgObject = {
-        senderName: this.configService.get<string>('SMS_SENDERID'),
-        messageType: 'text',
-        messageText,
-        recipients,
-      };
-      if (!this.access_token) {
-        await this.getAccessToken();
-      }
+    // try {
+    //   await this.mshastra(messageText, recipients)
+    //   const msgObject = {
+    //     senderName: this.configService.get<string>('SMS_SENDERID'),
+    //     messageType: 'text',
+    //     messageText,
+    //     recipients,
+    //   };
+    //   if (!this.access_token) {
+    //     await this.getAccessToken();
+    //   }
 
-      const messageResponse = await this.instance.post(
-        '/messaging?access_token=' + this.access_token,
-        msgObject,
-      );
-      this.logger.verbose(`[sendMessage]  ${messageText}`);
-    } catch (e) {
-      this.logger.error(`[sendMessageError] ${JSON.stringify(e)}`);
-    }
+    //   const messageResponse = await this.instance.post(
+    //     '/messaging?access_token=' + this.access_token,
+    //     msgObject,
+    //   );
+    //   this.logger.verbose(`[sendMessage]  ${messageText}`);
+    // } catch (e) {
+    //   this.logger.error(`[sendMessageError] ${JSON.stringify(e)}`);
+    // }
 
-    if (confirmed) {
-      try {
-        this.tClinet = Twilio(
-          this.configService.get<string>('TWILIO_SID'),
-          this.configService.get<string>('TWILIO_AUTH_TOKEN'),
-        );
-        this.tClinet.messages
-          .create({
-            body: messageText,
-            to: recipients, // Text this number
-            from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
-          })
-          .then((message) => this.logger.verbose(message.sid))
-          .catch((e) => {
-            this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
-          });
-      } catch (e) {
-        this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
-      }
-    }
+    // if (confirmed) {
+    //   try {
+    //     this.tClinet = Twilio(
+    //       this.configService.get<string>('TWILIO_SID'),
+    //       this.configService.get<string>('TWILIO_AUTH_TOKEN'),
+    //     );
+    //     this.tClinet.messages
+    //       .create({
+    //         body: messageText,
+    //         to: recipients, // Text this number
+    //         from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
+    //       })
+    //       .then((message) => this.logger.verbose(message.sid))
+    //       .catch((e) => {
+    //         this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+    //       });
+    //   } catch (e) {
+    //     this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+    //   }
+    // }
     return {};
   }
 }

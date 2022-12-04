@@ -6,11 +6,12 @@ import { CashOutUserSettings } from '../models/fence-cashout-user-settings.model
 import { User } from '../models/fence-user.model';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CashOutMethod } from '../models/fence-cashout-method.model';
+import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 @Resolver()
 export class FenceCashOutApisResolver {
   constructor(@Inject(ServicesService) private services: ServicesService) {}
   @Query(() => [CashOutUserSettings])
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async cashOutUserSettings(
     @CurrentUser() user: User,
   ): Promise<CashOutUserSettings[]> {
@@ -36,13 +37,12 @@ export class FenceCashOutApisResolver {
   }
 
   @Query(() => [CashOutMethod])
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async cashOutMethods(): Promise<CashOutMethod[]> {
-
-    return  this.services.sharedCashoutMethod.cashOutMethods();;
+    return this.services.sharedCashoutMethod.cashOutMethods();
   }
   @Mutation(() => CashOutUserSettings)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async createCashOutUserSettings(
     @CurrentUser() user: User,
     @Args('creditorNo') creditorNo: string,

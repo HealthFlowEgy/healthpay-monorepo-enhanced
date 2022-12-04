@@ -2,6 +2,8 @@ import { ServicesService } from '@app/services';
 import { SharedCronService } from '@app/services/shared-cron/shared-cron.service';
 import { SharedUtxoService } from '@app/services/shared-utxo/shared-utxo.service';
 import { WebsocketService } from '@app/websocket';
+import { fromPrisma } from '@app/websocket/transaction';
+import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
 import { Controller, Get, Inject } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Throttle } from '@nestjs/throttler';
@@ -25,6 +27,11 @@ export class SwordControllerController {
   //     await this.services.sharedPaymentRequest.getPendingPaymentRequetsWhereWalletHaveMoney(),
   //   );
   // }
+
+  @Get('/status-check')
+  async init(): Promise<string> {
+    return 'OK';
+  }
 
   // @Get('/tryone')
   // async tryone(): Promise<string> {

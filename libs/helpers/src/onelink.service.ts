@@ -43,7 +43,7 @@ export class OnelinkService {
 
       const data = {
         first_name: ' ' + user.firstName + ' ',
-        last_name: user.lastName ?? " ",
+        last_name: user.lastName ?? ' ',
         mobile: user.mobile.replace('+2', ''),
         email: user.email || 'info@cloudx9.io',
         amount,

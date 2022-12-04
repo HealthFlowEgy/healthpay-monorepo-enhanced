@@ -11,7 +11,7 @@ export class SmsService {
 
   constructor(private configService: ConfigService) {
     this.instance = axios.create({
-      baseURL: this.configService.get<string>('SMS_BASEURL'),
+      baseURL: this.configService.get<string>('MOBISHASTRA_BASEURL'),
       timeout: 20000,
       headers: {
         'Content-Type': 'application/json',
@@ -28,12 +28,28 @@ export class SmsService {
     this.access_token = response.data.data.access_token;
   }
 
+  async mshastra(messageText: string, mobileno: string): Promise<boolean> {
+    const response = await this.instance.get('', {
+      params: {
+        'user': 'HealthPay',
+        'pwd': '91ujmb_e',
+        'senderid': 'Health%20Pay',
+        'mobileno': '+201154446065',
+        'msgtext': messageText,
+        'priority': 'High',
+        'CountryCode': 'ALL'
+      }
+    })
+    return true
+  }
+
   async sendMessage(
     messageText: string,
     recipients: string,
     confirmed?: boolean,
   ) {
     try {
+      await this.mshastra(messageText, recipients)
       const msgObject = {
         senderName: this.configService.get<string>('SMS_SENDERID'),
         messageType: 'text',

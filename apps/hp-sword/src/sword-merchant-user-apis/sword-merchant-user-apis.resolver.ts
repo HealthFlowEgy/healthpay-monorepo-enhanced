@@ -2,7 +2,6 @@ import { ServicesService } from '@app/services';
 import { Inject, Logger, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Merchant } from '@prisma/client';
-import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { CurrentMerchant } from '../decorators/merchant.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Success } from '../models/sword-success.model';
@@ -13,6 +12,8 @@ import slugify from 'slugify';
 import { PaymentRequest } from '../models/sword-payment-requests.model';
 import { Throttle } from '@nestjs/throttler';
 import { GqlThrottlerGuard } from '../guards/throttle.guard';
+import { WhiteListedOnly } from '../guards/whitelisted-only.guard';
+import { NestjsGraphqlValidator } from '@app/helpers/nestjs-graphql-validator.pipe';
 
 @Resolver()
 export class SwordMerchantUserApisResolver {
@@ -125,7 +126,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
@@ -155,7 +156,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },
@@ -186,7 +187,7 @@ export class SwordMerchantUserApisResolver {
   }
 
   @Mutation(() => Success, { nullable: true })
-  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard, WhiteListedOnly)
   @UsePipes(
     new NestjsGraphqlValidator({
       userToken: { minLen: 5 },

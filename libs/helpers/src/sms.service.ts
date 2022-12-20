@@ -90,26 +90,26 @@ export class SmsService {
         this.logger.error(`[sendMessageError] ${JSON.stringify(e)}`);
       }
 
-      if (confirmed) {
-        try {
-          this.tClinet = Twilio(
-            this.configService.get<string>('TWILIO_SID'),
-            this.configService.get<string>('TWILIO_AUTH_TOKEN'),
-          );
-          this.tClinet.messages
-            .create({
-              body: messageText,
-              to: recipients, // Text this number
-              from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
-            })
-            .then((message) => this.logger.verbose(message.sid))
-            .catch((e) => {
-              this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
-            });
-        } catch (e) {
-          this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
-        }
-      }
+      // if (confirmed) {
+      //   try {
+      //     this.tClinet = Twilio(
+      //       this.configService.get<string>('TWILIO_SID'),
+      //       this.configService.get<string>('TWILIO_AUTH_TOKEN'),
+      //     );
+      //     this.tClinet.messages
+      //       .create({
+      //         body: messageText,
+      //         to: recipients, // Text this number
+      //         from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
+      //       })
+      //       .then((message) => this.logger.verbose(message.sid))
+      //       .catch((e) => {
+      //         this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+      //       });
+      //   } catch (e) {
+      //     this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+      //   }
+      // }
 
     }
 

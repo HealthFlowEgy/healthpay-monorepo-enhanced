@@ -1,4 +1,4 @@
 {
-  "otp": "Masrpay LLc: this is your OTP {otp} for Healthpay app. valid for 10 minutes",
-  "deduct": "{amount}EGP has been deducted from your healthpay wallet for more info visit https://masrpay.com"
+  "otp": "Healthpay LLc: please use {otp} for Healthpay app. valid for 10 minutes",
+  "deduct": "{amount}EGP has been deducted from your healthpay wallet for more info visit https://healthbay.tech"
 }

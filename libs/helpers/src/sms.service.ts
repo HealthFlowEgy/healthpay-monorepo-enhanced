@@ -5,12 +5,25 @@ import Twilio from 'twilio';
 @Injectable()
 export class SmsService {
   instance: AxiosInstance | null = null;
+  mobi_instance: AxiosInstance | null = null;
+
   access_token: string | null = null;
   tClinet: Twilio.Twilio;
   private readonly logger = new Logger(SmsService.name);
 
   constructor(private configService: ConfigService) {
+
+
     this.instance = axios.create({
+      baseURL: this.configService.get<string>('SMS_BASEURL'),
+      timeout: 20000,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+
+    this.mobi_instance = axios.create({
       baseURL: this.configService.get<string>('MOBISHASTRA_BASEURL'),
       timeout: 20000,
       headers: {
@@ -18,6 +31,8 @@ export class SmsService {
         Accept: 'application/json',
       },
     });
+
+
   }
 
   async getAccessToken() {
@@ -29,7 +44,7 @@ export class SmsService {
   }
 
   async mshastra(messageText: string, mobileno: string): Promise<boolean> {
-    const response = await this.instance.get('', {
+    const response = await this.mobi_instance.get('', {
       params: {
         'user': 'HealthPay',
         'pwd': '91ujmb_e',
@@ -50,8 +65,11 @@ export class SmsService {
     recipients: string,
     confirmed?: boolean,
   ) {
-    const mobiShastra = await this.mshastra(messageText, recipients)
-    if (!mobiShastra) {
+
+
+    if (recipients.startsWith('+2011')) {
+      const mobiShastra = await this.mshastra(messageText, recipients)
+    } else {
       try {
         const msgObject = {
           senderName: this.configService.get<string>('SMS_SENDERID'),
@@ -92,7 +110,10 @@ export class SmsService {
           this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
         }
       }
+
     }
+
+
 
     return {};
   }

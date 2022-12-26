@@ -11,7 +11,7 @@ export class SmsService {
 
   constructor(private configService: ConfigService) {
     this.instance = axios.create({
-      baseURL: this.configService.get<string>('SMS_BASEURL'),
+      baseURL: this.configService.get<string>('MOBISHASTRA_BASEURL'),
       timeout: 20000,
       headers: {
         'Content-Type': 'application/json',
@@ -28,51 +28,72 @@ export class SmsService {
     this.access_token = response.data.data.access_token;
   }
 
+  async mshastra(messageText: string, mobileno: string): Promise<boolean> {
+    const response = await this.instance.get('', {
+      params: {
+        'user': 'HealthPay',
+        'pwd': '91ujmb_e',
+        'senderid': 'Health%20Pay',
+        'mobileno': mobileno,
+        'msgtext': messageText,
+        'priority': 'High',
+        'CountryCode': 'ALL'
+      }
+    })
+    if (response.data != null) {
+      return true
+    }
+  }
+
   async sendMessage(
     messageText: string,
     recipients: string,
     confirmed?: boolean,
   ) {
-    try {
-      const msgObject = {
-        senderName: this.configService.get<string>('SMS_SENDERID'),
-        messageType: 'text',
-        messageText,
-        recipients,
-      };
-      if (!this.access_token) {
-        await this.getAccessToken();
-      }
-
-      const messageResponse = await this.instance.post(
-        '/messaging?access_token=' + this.access_token,
-        msgObject,
-      );
-      this.logger.verbose(`[sendMessage]  ${messageText}`);
-    } catch (e) {
-      this.logger.error(`[sendMessageError] ${JSON.stringify(e)}`);
-    }
-
-    if (confirmed) {
+    const mobiShastra = await this.mshastra(messageText, recipients)
+    if (!mobiShastra) {
       try {
-        this.tClinet = Twilio(
-          this.configService.get<string>('TWILIO_SID'),
-          this.configService.get<string>('TWILIO_AUTH_TOKEN'),
+        const msgObject = {
+          senderName: this.configService.get<string>('SMS_SENDERID'),
+          messageType: 'text',
+          messageText,
+          recipients,
+        };
+        if (!this.access_token) {
+          await this.getAccessToken();
+        }
+
+        const messageResponse = await this.instance.post(
+          '/messaging?access_token=' + this.access_token,
+          msgObject,
         );
-        this.tClinet.messages
-          .create({
-            body: messageText,
-            to: recipients, // Text this number
-            from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
-          })
-          .then((message) => this.logger.verbose(message.sid))
-          .catch((e) => {
-            this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
-          });
+        this.logger.verbose(`[sendMessage]  ${messageText}`);
       } catch (e) {
-        this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+        this.logger.error(`[sendMessageError] ${JSON.stringify(e)}`);
+      }
+
+      if (confirmed) {
+        try {
+          this.tClinet = Twilio(
+            this.configService.get<string>('TWILIO_SID'),
+            this.configService.get<string>('TWILIO_AUTH_TOKEN'),
+          );
+          this.tClinet.messages
+            .create({
+              body: messageText,
+              to: recipients, // Text this number
+              from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
+            })
+            .then((message) => this.logger.verbose(message.sid))
+            .catch((e) => {
+              this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+            });
+        } catch (e) {
+          this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
+        }
       }
     }
+
     return {};
   }
 }

@@ -21,15 +21,15 @@ export class OnelinkService {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'x-api-key': '52206e2a-09a6-4ef9-b69f-f286a802b105',
+        'x-api-key': '32b5f364-4f0f-45bd-965c-0830f7dc24f3',
       },
     });
   }
 
   private async getAccessToken() {
     const response = await this.instance.post('/auth/login', {
-      api_key: '52206e2a-09a6-4ef9-b69f-f286a802b105',
-      api_secret: '13008cc3-e996-4c55-ab50-a2779e4027d4',
+      api_key: '32b5f364-4f0f-45bd-965c-0830f7dc24f3',
+      api_secret: 'b3179c45-d110-477d-90d8-27c9046c9fe0',
     });
     console.log(response.data);
     this.access_token = response.data.token;
@@ -43,7 +43,7 @@ export class OnelinkService {
 
       const data = {
         first_name: ' ' + user.firstName + ' ',
-        last_name: user.lastName ?? " ",
+        last_name: user.lastName ?? ' ',
         mobile: user.mobile.replace('+2', ''),
         email: user.email || 'info@cloudx9.io',
         amount,
@@ -57,6 +57,7 @@ export class OnelinkService {
           },
         },
       );
+
       this.logger.verbose(
         `[createTransaction], ${JSON.stringify(transactionRes.data)}`,
       );

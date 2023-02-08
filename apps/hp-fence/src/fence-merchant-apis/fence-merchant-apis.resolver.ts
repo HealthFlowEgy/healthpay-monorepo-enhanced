@@ -1,7 +1,7 @@
 import { ServicesService } from '@app/services';
 import { HttpException, Inject, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import NestjsGraphqlValidator from 'nestjs-graphql-validator';
+// import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
@@ -19,11 +19,11 @@ export class FenceMerchantApisResolver {
 
   @Mutation(() => Success, { nullable: true })
   @UseGuards(JwtAuthGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      userToken: { minLen: 5 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     userToken: { minLen: 5 },
+  //   }),
+  // )
   async transferToMerchant(
     @Args('merchantUID') merchantUID: string,
     @Args('amount') amount: number,

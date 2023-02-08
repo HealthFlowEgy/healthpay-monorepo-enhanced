@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import NestjsGraphqlValidator from 'nestjs-graphql-validator';
+// import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -70,15 +70,15 @@ export class FenceUserApisResolver {
 
   // auth mutation
   @Mutation(() => UserWithToken, { nullable: true })
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      otp: { maxLen: 6, minLen: 1 },
-      mobile: {
-        regExp:
-          /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,5})|(\(?\d{2,6}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/,
-      },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     otp: { maxLen: 6, minLen: 1 },
+  //     mobile: {
+  //       regExp:
+  //         /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,5})|(\(?\d{2,6}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/,
+  //     },
+  //   }),
+  // )
   async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string,
     @Args('secret') secret: string
   ) {
@@ -121,12 +121,12 @@ export class FenceUserApisResolver {
   // update profile mutation
   @Mutation(() => User, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      firstName: { maxLen: 10, minLen: 1 },
-      lastName: { maxLen: 10, minLen: 1 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     firstName: { maxLen: 10, minLen: 1 },
+  //     lastName: { maxLen: 10, minLen: 1 },
+  //   }),
+  // )
   async updateProfile(
     @Args('firstName') firstName: string,
     @Args('lastName') lastName: string,
@@ -154,11 +154,11 @@ export class FenceUserApisResolver {
   // verify user docs mutation
   @Mutation(() => Success, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
-  @UsePipes(
-    new NestjsGraphqlValidator({
-      nationalId: { maxLen: 14, minLen: 14 },
-    }),
-  )
+  // @UsePipes(
+  //   new NestjsGraphqlValidator({
+  //     nationalId: { maxLen: 14, minLen: 14 },
+  //   }),
+  // )
   async verifyUserDocs(
     @Args('nationalId', { nullable: true }) nationalId: string,
     @Args('nationalDocFront', { nullable: true }) nationalDocFront: string,

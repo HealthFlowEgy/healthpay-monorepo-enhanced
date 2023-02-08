@@ -28,14 +28,18 @@ import { FenceFinancingApisResolver } from './fence-financing-apis/fence-financi
 import { PaymentRequestApisResolver } from './payment-request-apis/payment-request-apis.resolver';
 import { GqlThrottlerGuard } from './guards/throttle.gaurd';
 import { APP_GUARD } from '@nestjs/core';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
       autoSchemaFile: true,
       introspection: true,
-      buildSchemaOptions: { dateScalarMode: 'isoDate' },
+      buildSchemaOptions: { dateScalarMode: 'timestamp' },
       debug: false,
+      driver: ApolloDriver,
+      playground: true,
+      // introspection: true,
       context: ({ req, connection, ...rest }) =>
         connection ? { req: connection.context, ...rest } : { req, ...rest },
     }),

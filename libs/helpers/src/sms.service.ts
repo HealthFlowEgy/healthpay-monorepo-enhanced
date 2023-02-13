@@ -36,6 +36,7 @@ export class SmsService {
       apiKey: this.configService.get<string>('SMS_APIKEY'),
       userName: this.configService.get<string>('SMS_APIUSER'),
     });
+    this.logger.verbose('[getAccessToken] response', JSON.stringify(response));
     this.access_token = response.data.data.access_token;
   }
 
@@ -66,32 +67,32 @@ export class SmsService {
     confirmed?: boolean,
   ) {
     this.logger.verbose('[sendMessage] recipients', recipients);
-    if (recipients.startsWith('+2011')) {
-      const mobiShastra = await this.mshastra(messageText, recipients);
-      this.logger.verbose('[mobiShastra] ' + mobiShastra);
-    } else {
-      try {
-        const msgObject = {
-          senderName: this.configService.get<string>('SMS_SENDERID'),
-          messageType: 'text',
-          messageText,
-          recipients,
-        };
-        if (!this.access_token) {
-          await this.getAccessToken();
-        }
-
-        const messageResponse = await this.instance.post(
-          '/messaging?access_token=' + this.access_token,
-          msgObject,
-        );
-        this.logger.verbose(`[sendMessage]  ${messageText}`);
-      } catch (e) {
-        this.logger.error({
-          message: `[sendMessage] ${JSON.stringify(e)}`,
-          error: e,
-        });
+    // if (recipients.startsWith('+2011')) {
+    const mobiShastra = await this.mshastra(messageText, recipients);
+    this.logger.verbose('[mobiShastra] ' + mobiShastra);
+    // } else {
+    try {
+      const msgObject = {
+        senderName: this.configService.get<string>('SMS_SENDERID'),
+        messageType: 'text',
+        messageText,
+        recipients,
+      };
+      if (!this.access_token) {
+        await this.getAccessToken();
       }
+
+      const messageResponse = await this.instance.post(
+        '/messaging?access_token=' + this.access_token,
+        msgObject,
+      );
+      this.logger.verbose(`[sendMessage]  ${messageText}`);
+    } catch (e) {
+      this.logger.error({
+        message: `[sendMessage] ${JSON.stringify(e)}`,
+        error: e,
+      });
+      // }
 
       // if (confirmed) {
       //   try {

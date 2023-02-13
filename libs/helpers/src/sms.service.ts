@@ -51,7 +51,10 @@ export class SmsService {
         CountryCode: 'ALL',
       },
     });
-    this.logger.verbose('[mobiShastra] response' ,  JSON.stringify(response.data));
+    this.logger.verbose(
+      '[mobiShastra] response',
+      JSON.stringify(response.data),
+    );
     if (response.data != null) {
       return true;
     }
@@ -62,10 +65,10 @@ export class SmsService {
     recipients: string,
     confirmed?: boolean,
   ) {
-    this.logger.verbose("[sendMessage] recipients" , recipients);
+    this.logger.verbose('[sendMessage] recipients', recipients);
     if (recipients.startsWith('+2011')) {
       const mobiShastra = await this.mshastra(messageText, recipients);
-      this.logger.verbose("[mobiShastra] " + mobiShastra);
+      this.logger.verbose('[mobiShastra] ' + mobiShastra);
     } else {
       try {
         const msgObject = {
@@ -84,7 +87,10 @@ export class SmsService {
         );
         this.logger.verbose(`[sendMessage]  ${messageText}`);
       } catch (e) {
-        this.logger.error(`[sendMessageError] ${JSON.stringify(e)}`);
+        this.logger.error({
+          message: `[sendMessage] ${JSON.stringify(e)}`,
+          error: e,
+        });
       }
 
       // if (confirmed) {

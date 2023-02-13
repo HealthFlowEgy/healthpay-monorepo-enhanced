@@ -2,7 +2,6 @@ import { ServicesService } from '@app/services';
 import { Inject, Logger, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Merchant } from '@prisma/client';
-// import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { CurrentMerchant } from '../decorators/merchant.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Success } from '../models/sword-success.model';
@@ -14,15 +13,16 @@ import { PaymentRequest } from '../models/sword-payment-requests.model';
 import { Throttle } from '@nestjs/throttler';
 import { GqlThrottlerGuard } from '../guards/throttle.guard';
 import { WhiteListedOnly } from '../guards/whitelisted-only.guard';
+import { NestjsGraphqlValidator } from '@app/helpers/nestjs-graphql-validator.pipe';
 
 @Resolver()
 export class SwordMerchantUserApisResolver {
   private readonly logger = new Logger(SwordMerchantUserApisResolver.name);
 
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
 
   @Mutation(() => User, { nullable: true })
-  @Throttle(3, 60 * 60)
+  // @Throttle(3, 60 * 60)
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   // @UsePipes(
   //   new NestjsGraphqlValidator({

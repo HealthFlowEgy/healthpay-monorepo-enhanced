@@ -25,13 +25,19 @@ export class WebsocketService {
   }
 
   init() {
-    this.ws = new w3cwebsocket(
+    console.log(
+      '[ws.init]',
       this.configService.get('HP_LEDGER', 'ws://localhost:3000/updates'),
     );
-    this.ws.onopen = this.onOpen.bind(this);
-    this.ws.onerror = this.onError.bind(this);
-    this.ws.onclose = this.onClose.bind(this);
-    this.ws.onmessage = this.onMessage.bind(this);
+    if (this.configService.get('HP_LEDGER', 'ws://localhost:3000/updates')) {
+      this.ws = new w3cwebsocket(
+        this.configService.get('HP_LEDGER', 'ws://localhost:3000/updates'),
+      );
+      this.ws.onopen = this.onOpen.bind(this);
+      this.ws.onerror = this.onError.bind(this);
+      this.ws.onclose = this.onClose.bind(this);
+      this.ws.onmessage = this.onMessage.bind(this);
+    }
   }
 
   /*
@@ -72,16 +78,16 @@ export class WebsocketService {
    * receive message from server
    */
   onMessage(event) {
-    // const message = new WebsocketEvent();
-    // message.createFromJSON(event.data);
-    // this.logger.log(
-    //   `[onMessage] ${message.getEventType()} ${JSON.stringify(
-    //     message.getData(),
-    //   )}`,
-    // );
-    // if (message.isValid()) {
-    //   this.handleMessage(message);
-    // }
+    const message = new WebsocketEvent();
+    message.createFromJSON(event.data);
+    this.logger.log(
+      `[onMessage] ${message.getEventType()} ${JSON.stringify(
+        message.getData(),
+      )}`,
+    );
+    if (message.isValid()) {
+      this.handleMessage(message);
+    }
   }
 
   /*
@@ -119,6 +125,9 @@ export class WebsocketService {
    * handle message from server
    */
   handleMessage(wsMsg: WebsocketEvent) {
+    this.logger.verbose(
+      `[WebsocketEvent.handleMessage] ${JSON.stringify(wsMsg)}`,
+    );
     this.eventEmitter.emit(WEBSOCKET_EVENTS[wsMsg.getEventType()], wsMsg);
   }
 
@@ -129,6 +138,8 @@ export class WebsocketService {
    * @memberof WebsocketService
    */
   send(message: WebsocketEvent) {
+    this.logger.verbose(`[WebsocketEvent.send] ${JSON.stringify(message)}`);
+
     this.ws.readyState === w3cwebsocket.OPEN &&
       this.ws.send(JSON.stringify(message));
   }
@@ -143,6 +154,7 @@ export class WebsocketService {
 
   @OnEvent(WEBSOCKET_EVENTS.UTXO_QUERY)
   onUTXOQuery({ id }: Wallet) {
+    this.logger.verbose(`[UTXO_QUERY] ${id}`);
     const newEvent = new WebsocketEvent();
     newEvent.setEventType('UTXO_QUERY');
     let strID = `${id}`;

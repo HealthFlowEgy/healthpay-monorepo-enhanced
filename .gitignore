@@ -8,10 +8,14 @@ logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
+<<<<<<< HEAD
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 yarn.lock
+=======
+
+>>>>>>> d67df9634c6ed76700aef926dee0ca7d5f9f4f74
 # OS
 .DS_Store
 

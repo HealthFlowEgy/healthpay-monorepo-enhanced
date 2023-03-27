@@ -1,34 +1,35 @@
-import { HelpersModule } from '@app/helpers';
-import { ServicesModule } from '@app/services';
-import { ValidationsModule } from '@app/validations';
-import { WebsocketModule } from '@app/websocket';
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import path from 'path';
+
+import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { FenceBalanceResolver } from './fence-balance/fence-balance.resolver';
 import { FenceCashOutApisResolver } from './fence-cashout-apis/fence-cashout-apis.resolver';
 import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout-method.resolver';
 import { FenceCashoutRequestApisResolver } from './fence-cashout-request-apis/fence-cashout-request-apis.resolver';
 import { FenceCashoutRequestResolver } from './fence-cashout-request/fence-cashout-request.resolver';
 import { FenceCashoutUserSettingsResolver } from './fence-cashout-user-settings/fence-cashout-user-settings.resolver';
+import { FenceFinancingApisResolver } from './fence-financing-apis/fence-financing-apis.resolver';
 import { FenceMerchantApisResolver } from './fence-merchant-apis/fence-merchant-apis.resolver';
 import { FenceNotificationsApisResolver } from './fence-notifications-apis/fence-notifications-apis.resolver';
 import { FenceUserApisResolver } from './fence-user-apis/fence-user-apis.resolver';
 import { FenceUserResolver } from './fence-user/fence-user.resolver';
 import { FenceWalletApisResolver } from './fence-wallet-apis/fence-wallet-apis.resolver';
 import { FenceWalletResolver } from './fence-wallet/fence-wallet.resolver';
+import { GqlThrottlerGuard } from './guards/throttle.guard';
+import { GraphQLModule } from '@nestjs/graphql';
+import { HelpersModule } from '@app/helpers';
 import { HpFenceController } from './hp-fence.controller';
 import { HpFenceService } from './hp-fence.service';
-import { FenceFinancingApisResolver } from './fence-financing-apis/fence-financing-apis.resolver';
+import { Module } from '@nestjs/common';
 import { PaymentRequestApisResolver } from './payment-request-apis/payment-request-apis.resolver';
-import { GqlThrottlerGuard } from './guards/throttle.gaurd';
-import { APP_GUARD } from '@nestjs/core';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ServicesModule } from '@app/services';
+import { ValidationsModule } from '@app/validations';
+import { WebsocketModule } from '@app/websocket';
+import path from 'path';
 
 @Module({
   imports: [

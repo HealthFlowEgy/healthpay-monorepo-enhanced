@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 import { Merchant } from './fence-merchant.model';
+import { PaymentRequestConsent } from '@prisma/client';
 import { Transaction } from './fence-transaction.model';
 import { User } from './fence-user.model';
 
@@ -27,11 +28,11 @@ export class PaymentRequest {
   @Field(() => User)
   user: User | null;
 
-  @Field(() => String)
-  consent: string;
+  @Field(() => PaymentRequestConsent)
+  consent: PaymentRequestConsent;
 
   @Field(() => String, { nullable: true })
-  notes: string;
+  note: string;
 
   @Field(() => Date)
   createdAt: Date | null;
@@ -39,3 +40,14 @@ export class PaymentRequest {
   @Field(() => Date)
   updatedAt: Date | null;
 }
+
+registerEnumType(PaymentRequestConsent, {
+  name: 'PaymentRequestConsent',
+});
+
+export const UpdatablePaymentRequestConsent = (({ FORCED, PENDING, ...o }) =>
+  o)(PaymentRequestConsent);
+
+registerEnumType(UpdatablePaymentRequestConsent, {
+  name: 'UpdatablePaymentRequestConsent',
+});

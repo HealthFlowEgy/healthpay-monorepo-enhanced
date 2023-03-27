@@ -3,7 +3,7 @@ import { Inject, UseGuards } from '@nestjs/common';
 import { Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
+import { GqlThrottlerGuard } from '../guards/throttle.guard';
 import { Notification } from '../models/fence-notification.model';
 import { User } from '../models/fence-user.model';
 @Resolver()

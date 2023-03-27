@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
+import { GqlThrottlerGuard } from '../guards/throttle.guard';
 import { CashOutRequest } from '../models/fence-cashout-request.model';
 import { Success } from '../models/fence-success.model';
 import { User } from '../models/fence-user.model';

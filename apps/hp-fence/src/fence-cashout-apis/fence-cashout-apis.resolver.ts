@@ -6,7 +6,7 @@ import { CashOutUserSettings } from '../models/fence-cashout-user-settings.model
 import { User } from '../models/fence-user.model';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CashOutMethod } from '../models/fence-cashout-method.model';
-import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
+import { GqlThrottlerGuard } from '../guards/throttle.guard';
 @Resolver()
 export class FenceCashOutApisResolver {
   constructor(@Inject(ServicesService) private services: ServicesService) {}

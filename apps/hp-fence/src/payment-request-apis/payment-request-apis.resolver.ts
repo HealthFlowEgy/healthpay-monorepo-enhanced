@@ -1,17 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ServicesService } from '@app/services';
-import { Inject, UseGuards, BadRequestException } from '@nestjs/common';
+import { Inject, UseGuards, BadRequestException, Logger } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { FinancingRequest } from '../models/fence-financing-request.model';
-import { PaymentRequest } from '../models/fence-payment-request.model';
+import {
+  PaymentRequest,
+  UpdatablePaymentRequestConsent,
+} from '../models/fence-payment-request.model';
 import { User } from '../models/fence-user.model';
 import { Success } from '../models/fence-success.model';
-import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
+import { GqlThrottlerGuard } from '../guards/throttle.guard';
 import { PaymentRequestConsent } from '@prisma/client';
+
+
 @Resolver()
 export class PaymentRequestApisResolver {
+  private readonly logger = new Logger(PaymentRequestApisResolver.name);
+
   constructor(@Inject(ServicesService) private services: ServicesService) {}
   @Query(() => [PaymentRequest])
   @UseGuards(JwtAuthGuard)
@@ -67,18 +74,18 @@ export class PaymentRequestApisResolver {
   @Mutation(() => Success, { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async updatePaymentRequest(
-    @Args('id') paymentRequestId: number,
+    @Args('id') paymentRequestUID: string,
     @Args({
       name: 'status',
       description: "Required Status to Update to, 'ACCEPTED' or 'REJECTED'",
-      type: () => String,
+      type: () => UpdatablePaymentRequestConsent,
     })
     consent: PaymentRequestConsent,
     @CurrentUser() user: User,
   ) {
     const paymentRequest =
-      await this.services.sharedPaymentRequest.getPaymentRequestById(
-        paymentRequestId,
+      await this.services.sharedPaymentRequest.getPaymentRequest(
+        paymentRequestUID,
       );
 
     if (!paymentRequest) {
@@ -93,12 +100,29 @@ export class PaymentRequestApisResolver {
       throw new BadRequestException('8005', 'Invalid payment request status');
     }
 
-    const updated =
+    this.logger.verbose(
+      '[updatePaymentRequest] paymentRequest: ' + paymentRequest.id,
+      paymentRequest,
+    );
+    const transfer = await this.services.sharedBalance.doTransFromUserToUser(
+      paymentRequest.senderId,
+      paymentRequest.userId,
+      paymentRequest.amount,
+      'due-to-payment-requests-id-' +
+        paymentRequest.id +
+        ' ' +
+        paymentRequest.note,
+    );
+
+    if (transfer && transfer.id) {
       await this.services.sharedPaymentRequest.updatePaymentRequestConsent(
         paymentRequest,
         consent,
       );
-
-    return updated && updated.id ? { isSuccess: true } : { isSuccess: false };
+      await this.services.sharedPaymentRequest.resolvePaymentRequest(
+        paymentRequest,
+      );
+    }
+    return transfer && transfer.id ? { isSuccess: true } : { isSuccess: false };
   }
 }

@@ -16,7 +16,7 @@ import { Success } from '../models/fence-success.model';
 import { User, UserWithToken } from '../models/fence-user.model';
 import { Throttle } from '@nestjs/throttler';
 import { IAM } from '../models/fence.iam.model';
-const md5 = require('md5');
+import md5 from 'md5'
 
 @Resolver()
 export class FenceUserApisResolver {
@@ -46,7 +46,7 @@ export class FenceUserApisResolver {
     if (hash !== secret) {
       throw new BadRequestException('5006', 'Invalid secret');
     }
-    return this.services.sharedUser.doUpsertUser({ mobile }, false);
+    return this.services.sharedUser.doUpsertUser({ mobile, firstName: null, lastName:null, email: null }, false);
   }
   // register mutation
 
@@ -63,7 +63,7 @@ export class FenceUserApisResolver {
       throw new BadRequestException('5006', 'Invalid secret');
 
     }
-    return this.services.sharedUser.doUpsertUser({ mobile }, true);
+    return this.services.sharedUser.doUpsertUser({ mobile , firstName: null, lastName:null, email: null}, true);
   }
   // login mutation
 
@@ -147,6 +147,8 @@ export class FenceUserApisResolver {
     };
     return this.services.sharedUser.doUpdateUser({
       ...updateUserInput,
+      nationalDocFront: undefined,
+      nationalDocBack: undefined
     });
   }
   // update profile mutation

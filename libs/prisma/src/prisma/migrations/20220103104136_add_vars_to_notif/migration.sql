@@ -92,7 +92,7 @@ ALTER TABLE `User` ADD CONSTRAINT `User_transferOpsId_fkey` FOREIGN KEY (`transf
 ALTER TABLE `ValuHmac` ADD CONSTRAINT `ValuHmac_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `UserNotifyTokens` ADD CONSTRAINT `UserNotifyTokens_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `UserNotifyTokens` ADD CONSTRAINT `UserNotifyTouserIdkens_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Notification` ADD CONSTRAINT `Notification_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

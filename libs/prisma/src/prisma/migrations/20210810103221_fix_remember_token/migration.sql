@@ -97,7 +97,7 @@ CREATE TABLE `Balance` (
     `receivableWalletId` INTEGER,
     `type` ENUM('M2M', 'M2P', 'P2M', 'U2M', 'P2U', 'M2U', 'U2U', 'CASH_IN', 'CASH_OUT', 'REFUND') NOT NULL DEFAULT 'U2U',
     `amount` DOUBLE NOT NULL,
-    `notes` VARCHAR(191),
+    `notes` VARCHAR(101),
     `createdAt` DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3),
 

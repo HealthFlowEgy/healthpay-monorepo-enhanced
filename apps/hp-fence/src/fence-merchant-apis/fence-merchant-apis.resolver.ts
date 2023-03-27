@@ -19,11 +19,6 @@ export class FenceMerchantApisResolver {
 
   @Mutation(() => Success, { nullable: true })
   @UseGuards(JwtAuthGuard)
-  // @UsePipes(
-  //   new NestjsGraphqlValidator({
-  //     userToken: { minLen: 5 },
-  //   }),
-  // )
   async transferToMerchant(
     @Args('merchantUID') merchantUID: string,
     @Args('amount') amount: number,

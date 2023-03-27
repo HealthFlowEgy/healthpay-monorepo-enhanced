@@ -25,6 +25,7 @@ export class WebsocketService {
   }
 
   init() {
+    this.logger.verbose('[HP_LEDGER] INIT' , this.configService.get('HP_LEDGER', 'ws://localhost:3000/updates'));
     this.ws = new w3cwebsocket(
       this.configService.get('HP_LEDGER', 'ws://localhost:3000/updates'),
     );

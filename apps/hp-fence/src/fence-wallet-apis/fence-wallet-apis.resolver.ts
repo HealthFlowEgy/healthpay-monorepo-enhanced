@@ -4,7 +4,7 @@ import { Inject, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { GqlThrottlerGuard } from '../guards/throttle.guard';
+import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { Success } from '../models/fence-success.model';
 import { Transaction } from '../models/fence-transaction.model';
 import { User } from '../models/fence-user.model';

@@ -11,7 +11,7 @@ import {
 } from '../models/fence-payment-request.model';
 import { User } from '../models/fence-user.model';
 import { Success } from '../models/fence-success.model';
-import { GqlThrottlerGuard } from '../guards/throttle.guard';
+import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { PaymentRequestConsent } from '@prisma/client';
 
 

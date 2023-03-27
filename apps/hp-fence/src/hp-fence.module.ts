@@ -19,7 +19,7 @@ import { FenceUserApisResolver } from './fence-user-apis/fence-user-apis.resolve
 import { FenceUserResolver } from './fence-user/fence-user.resolver';
 import { FenceWalletApisResolver } from './fence-wallet-apis/fence-wallet-apis.resolver';
 import { FenceWalletResolver } from './fence-wallet/fence-wallet.resolver';
-import { GqlThrottlerGuard } from './guards/throttle.guard';
+import { GqlThrottlerGuard } from './guards/throttle.gaurd';
 import { GraphQLModule } from '@nestjs/graphql';
 import { HelpersModule } from '@app/helpers';
 import { HpFenceController } from './hp-fence.controller';

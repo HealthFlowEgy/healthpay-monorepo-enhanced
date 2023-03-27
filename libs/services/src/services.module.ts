@@ -46,7 +46,7 @@ import { SharedFinanceService } from './shared-finance/shared-finance.service';
     SharedUtxoService,
     SharedCronService,
     SharedNotificationsService,
-    SharedFinanceService
+    SharedFinanceService,
   ],
   exports: [ServicesService],
 })

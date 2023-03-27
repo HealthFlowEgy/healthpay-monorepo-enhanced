@@ -3,7 +3,10 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import moment from 'moment';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
-
+import { SharedUtxoService } from '../shared-utxo/shared-utxo.service';
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 @Injectable()
 export class SharedCronService {
   private readonly logger = new Logger(SharedCronService.name);
@@ -13,7 +16,47 @@ export class SharedCronService {
     private sharedBalance: SharedBalanceService,
     @Inject(SharedPaymentRequestService)
     private sharedPaymentRequests: SharedPaymentRequestService,
+
+    @Inject(SharedUtxoService)
+    private sharedUTXO: SharedUtxoService,
   ) {}
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async revertPendingRequests() {
+    const pendingRequests =
+      await this.sharedPaymentRequests.getProcessingPaymentRequests({
+        where: {
+          status: 'CANCELLED',
+          updatedAt: {
+            lt: moment().subtract(1, 'hour').toISOString(),
+          },
+        },
+      });
+    for (let index = 0; index < pendingRequests.length; index++) {
+      const pendingStaleRequest = pendingRequests[index];
+      await this.sharedPaymentRequests.markPaymentRequestAsPending(
+        pendingStaleRequest,
+      );
+    }
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async payPendingPaymentRequests() {
+    const pendingRequests =
+      await this.sharedPaymentRequests.getPendingPaymentRequestWhereWalletHaveMoney();
+    for (let index = 0; index < pendingRequests.length; index++) {
+      const pendingRequest = pendingRequests[index];
+      if (pendingRequest.amount <= pendingRequest.user.wallet.total) {
+        this.logger.verbose(
+          `Payment request ${pendingRequest.id} found by cron and is ready to be paid from wallet ${pendingRequest.user.wallet.id}`,
+        );
+        await this.sharedUTXO.handlePendingPaymentRequests(
+          pendingRequest.user.wallet,
+        );
+        await sleep(5000);
+      }
+    }
+  }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleCron() {

@@ -1,7 +1,7 @@
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import { WEBSOCKET_EVENTS } from '@app/websocket/websocket-events';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Wallet } from '@prisma/client';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
@@ -10,6 +10,8 @@ import { SharedPaymentRequestService } from '../shared-payment-request/shared-pa
 
 @Injectable()
 export class SharedUtxoService {
+  private readonly logger = new Logger(SharedUtxoService.name);
+
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
@@ -23,6 +25,7 @@ export class SharedUtxoService {
 
   @OnEvent(WEBSOCKET_EVENTS.UTXO_UPDATE)
   async onUTXOUpdate({ data }: any): Promise<boolean> {
+    this.logger.verbose(`UTXO update: ${JSON.stringify(data)}`);
     // update wallet balance
     if (data.publicKey === 'root') {
       return;
@@ -32,7 +35,10 @@ export class SharedUtxoService {
       data.publicKey,
       data.amount,
     );
-    // await this.handlePendingPaymentRequests(userWallet);
+
+    if (data.amount > 0) {
+      await this.handlePendingPaymentRequests(userWallet);
+    }
 
     return true;
   }
@@ -56,6 +62,10 @@ export class SharedUtxoService {
       userWallet.total,
     );
     if (pending.length > 0) {
+      this.logger.verbose(
+        `Found ${pending.length} pending payment requests for user ${userWallet.userId}`,
+      );
+
       const firstPaymentRequest = pending[0];
 
       const confirmedBalances = await this.sharedBalance.getAllBalances({
@@ -65,12 +75,15 @@ export class SharedUtxoService {
       });
       if (confirmedBalances.length > 0) {
         if (confirmedBalances[0].confirmedAt) {
+          this.logger.error(
+            `Payment request ${firstPaymentRequest.id} already confirmed mark as resolved`,
+          );
           await this.sharedPaymentRequests.resolvePaymentRequest(
             firstPaymentRequest,
           );
           await this.handlePendingPaymentRequests(userWallet);
+          return;
         }
-        return;
       }
 
       this.sharedBalance.doTransFromUserToMerchant(

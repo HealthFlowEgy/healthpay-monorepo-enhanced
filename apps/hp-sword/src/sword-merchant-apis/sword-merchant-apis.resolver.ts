@@ -1,11 +1,11 @@
-import { Inject, Logger, UseGuards, UsePipes } from '@nestjs/common';
+import { Inject, Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { AuthService } from '../auth/auth.service';
 import { ApiHeader } from '../decorators/api-header.decorator';
-import { CurrentMerchant } from '../decorators/merchant.decorator';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { UserIp } from '../decorators/user-ip.decorator';
 import { Merchant, MerchantWithToken } from '../models/sword-merchant.model';
+import { Throttle } from '@nestjs/throttler';
+import { GqlThrottlerGuard } from '../guards/throttle.guard';
 
 @Resolver()
 export class SwordMerchantWithTokenResolver {
@@ -22,11 +22,13 @@ export class SwordMerchantWithTokenResolver {
 
   // merchant login
   @Mutation(() => MerchantWithToken, { nullable: true })
+  @UseGuards(GqlThrottlerGuard)
   async authMerchant(
     @Args('apiKey') apiKey: string,
     @ApiHeader() apiHeader: string,
+    @UserIp() userIp: any,
   ) {
-    this.logger.verbose(`[authMerchant], ${apiKey}`);
+    this.logger.verbose(`[authMerchant], ${apiKey} ${userIp}`);
     const merchant = await this.authService.validateUser(apiHeader, apiKey);
     return {
       token: this.authService.login({

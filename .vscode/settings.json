@@ -2,7 +2,6 @@
   "search.exclude": {
     "**/dist": true,
     "**/apps/healthpay": true,
-    "**/apps/hp-sword": true,
     "**/apps/hp-nodejs": true,
   },
   "files.exclude": {

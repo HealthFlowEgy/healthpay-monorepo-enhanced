@@ -2,7 +2,13 @@ import { HelpersService } from '@app/helpers';
 import { OnelinkService } from '@app/helpers/onelink.service';
 import { PrismaService } from '@app/prisma';
 import { Inject, Injectable } from '@nestjs/common';
-import { Merchant, PaymentRequest, Prisma, User } from '@prisma/client';
+import {
+  Merchant,
+  PaymentRequest,
+  PaymentRequestConsent,
+  Prisma,
+  User,
+} from '@prisma/client';
 import { SharedTransactionService } from '../shared-transaction/shared-transaction.service';
 
 @Injectable()
@@ -13,39 +19,46 @@ export class SharedPaymentRequestService {
     @Inject(OnelinkService) private onelink: OnelinkService,
     @Inject(SharedTransactionService)
     private transaction: SharedTransactionService,
-  ) { }
+  ) {}
 
   async createPaymentRequest(
     user: User,
-    merchant: Merchant,
     amount: number,
+    note: string | null = 'new_payment_request',
+    merchant: Merchant | null = null,
+    sender: User | null = null,
+    consent: PaymentRequestConsent | null = 'FORCED',
   ): Promise<PaymentRequest> {
-    // const transaction = await this.transaction.doCreateTransaction(
-    //   user,
-    //   amount,
-    //   merchant,
-    // );
-    return this.prisma.paymentRequest.create({
-      data: {
-        uid: this.helpers.doCreateUUID('paymentRequest'),
-        amount,
-        status: 'PENDING',
-        // transaction: {
-        //   connect: {
-        //     id: transaction.id,
-        //   },
-        // },
-        merchant: {
-          connect: {
-            id: merchant.id,
-          },
-        },
-        user: {
-          connect: {
-            id: user.id,
-          },
+    const data: Prisma.PaymentRequestCreateInput = {
+      uid: this.helpers.doCreateUUID('paymentRequest'),
+      amount,
+      status: 'PENDING',
+      consent: consent,
+      note,
+      user: {
+        connect: {
+          id: user.id,
         },
       },
+    };
+
+    if (merchant) {
+      data.merchant = {
+        connect: {
+          id: merchant.id,
+        },
+      };
+    }
+    if (sender) {
+      data.sender = {
+        connect: {
+          id: sender.id,
+        },
+      };
+    }
+
+    return this.prisma.paymentRequest.create({
+      data,
     });
   }
 
@@ -65,20 +78,39 @@ export class SharedPaymentRequestService {
     });
   }
 
+  async getPaymentRequestsByUserId(userId: number): Promise<PaymentRequest[]> {
+    return this.prisma.paymentRequest.findMany({
+      where: {
+        userId,
+      },
+    });
+  }
+
   async getPendingPaymentRequestsByUserId(
     userId: number,
   ): Promise<PaymentRequest[]> {
     return this.prisma.paymentRequest.findMany({
       where: {
-        user: {
-          id: userId,
-        },
+        OR: [
+          {
+            user: {
+              id: userId,
+            },
+          },
+          {
+            sender: {
+              id: userId,
+            },
+          },
+        ],
         status: 'PENDING',
       },
       include: {
         merchant: true,
         transaction: true,
-      }
+        sender: true,
+        user: true,
+      },
     });
   }
 
@@ -104,12 +136,15 @@ export class SharedPaymentRequestService {
           id: userId,
         },
         status: 'PENDING',
+        consent: {
+          in: ['FORCED', 'ACCEPTED'],
+        },
         amount: {
           lte: amount,
         },
       },
       orderBy: {
-        id: 'asc',
+        amount: 'asc',
       },
     });
   }
@@ -148,6 +183,47 @@ export class SharedPaymentRequestService {
       },
       data: {
         status: 'PENDING',
+      },
+    });
+  }
+
+  async getPendingPaymentRequestWhereWalletHaveMoney() {
+    return this.prisma.paymentRequest.findMany({
+      where: {
+        status: 'PENDING',
+        consent: {
+          in: ['FORCED', 'ACCEPTED'],
+        },
+        user: {
+          wallet: {
+            is: {
+              total: {
+                gt: 5,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        user: {
+          include: {
+            wallet: true,
+          },
+        },
+      },
+    });
+  }
+
+  async updatePaymentRequestConsent(
+    paymentRequest: PaymentRequest,
+    consent: PaymentRequestConsent,
+  ): Promise<PaymentRequest> {
+    return this.prisma.paymentRequest.update({
+      where: {
+        id: paymentRequest.id,
+      },
+      data: {
+        consent,
       },
     });
   }

@@ -1,22 +1,17 @@
 import { ServicesService } from '@app/services';
-import {
-  BadRequestException,
-  Inject,
-  UseGuards,
-  UsePipes,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 // import NestjsGraphqlValidator from 'nestjs-graphql-validator';
+import md5 from 'md5';
 import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { Success } from '../models/fence-success.model';
 import { User, UserWithToken } from '../models/fence-user.model';
-import { Throttle } from '@nestjs/throttler';
 import { IAM } from '../models/fence.iam.model';
-import md5 from 'md5'
+import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 
 @Resolver()
 export class FenceUserApisResolver {
@@ -24,29 +19,34 @@ export class FenceUserApisResolver {
   constructor(
     @Inject(ServicesService) private services: ServicesService,
     @Inject(AuthService) private authService: AuthService,
-  ) { }
+    private readonly configService: ConfigService,
+  ) {}
 
   // iam query
   @Query(() => IAM)
   async iam() {
     return {
       date: new Date().toISOString(),
-    }
+    };
   }
 
   // register mutation
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async register(@Args('mobile') mobile: string
-    , @Args('secret') secret: string
+  async register(
+    @Args('mobile') mobile: string,
+    @Args('secret') secret: string,
   ) {
     const date = new Date().toISOString();
-    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
+    const hash = md5(date.split(':')[0] + mobile + date.split(':')[1]);
     if (hash !== secret) {
       throw new BadRequestException('5006', 'Invalid secret');
     }
-    return this.services.sharedUser.doUpsertUser({ mobile, firstName: null, lastName:null, email: null }, false);
+    return this.services.sharedUser.doUpsertUser(
+      { mobile, firstName: null, lastName: null, email: null },
+      false,
+    );
   }
   // register mutation
 
@@ -54,19 +54,21 @@ export class FenceUserApisResolver {
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async login(@Args('mobile') mobile: string,
-    @Args('secret') secret: string
-  ) {
+  async login(@Args('mobile') mobile: string, @Args('secret') secret: string) {
     const date = new Date().toISOString();
-    const hash = md5(date.split(":")[0] + mobile + date.split(":")[1])
-    if (hash !== secret) {
+    const hash = md5(date.split(':')[0] + mobile + date.split(':')[1]);
+    if (
+      hash !== secret &&
+      this.configService.get('NODE_ENV') === 'production'
+    ) {
       throw new BadRequestException('5006', 'Invalid secret');
-
     }
-    return this.services.sharedUser.doUpsertUser({ mobile , firstName: null, lastName:null, email: null}, true);
+    return this.services.sharedUser.doUpsertUser(
+      { mobile, firstName: null, lastName: null, email: null },
+      true,
+    );
   }
   // login mutation
-
 
   // auth mutation
   @Mutation(() => UserWithToken, { nullable: true })
@@ -79,8 +81,10 @@ export class FenceUserApisResolver {
   //     },
   //   }),
   // )
-  async authUser(@Args('mobile') mobile: string, @Args('otp') otp: string,
-    @Args('secret') secret: string
+  async authUser(
+    @Args('mobile') mobile: string,
+    @Args('otp') otp: string,
+    @Args('secret') secret: string,
   ) {
     // const date = new Date().toISOString();
     // const hash = md5(date.split(":")[0] + mobile + date.split(":")[1]) + otp;
@@ -148,7 +152,7 @@ export class FenceUserApisResolver {
     return this.services.sharedUser.doUpdateUser({
       ...updateUserInput,
       nationalDocFront: undefined,
-      nationalDocBack: undefined
+      nationalDocBack: undefined,
     });
   }
   // update profile mutation

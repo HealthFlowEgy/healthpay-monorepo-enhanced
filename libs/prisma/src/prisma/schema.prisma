@@ -51,7 +51,8 @@ model User {
   MerchantAdmins        MerchantAdmins[]
   notifications         Notification[]
   otp                   OTP[]
-  paymentRequests       PaymentRequest[]
+  paymentRequests       PaymentRequest[]         @relation("UserPaymentRequests")
+  sentPaymentRequests   PaymentRequest[]         @relation("UserSentPaymentRequests")
   providersAuthMerchant ProviderAuthMerchant[]
   transactions          Transaction[]
   usersAuthMerchant     UserAuthMerchant[]
@@ -385,18 +386,19 @@ model PaymentRequest {
   status        PaymentRequest_status @default(PENDING)
   note          String?               @db.LongText
   consent       PaymentRequestConsent @default(FORCED)
-  userId        Int
-  merchantId    Int
+  userId        Int?
+  merchantId    Int?
+  senderId      Int?
   transactionId Int?                  @unique
   createdAt     DateTime              @default(now())
   updatedAt     DateTime?             @default(now()) @updatedAt
-  merchant      Merchant              @relation(fields: [merchantId], references: [id])
+  merchant      Merchant?             @relation(fields: [merchantId], references: [id])
   transaction   Transaction?          @relation(fields: [transactionId], references: [id])
-  user          User                  @relation(fields: [userId], references: [id])
+  user          User?                 @relation("UserPaymentRequests", fields: [userId], references: [id])
+  sender        User?                 @relation("UserSentPaymentRequests", fields: [senderId], references: [id])
 }
 
-
-enum PaymentRequestConsent{
+enum PaymentRequestConsent {
   FORCED
   ACCEPTED
   PENDING

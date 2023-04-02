@@ -14,7 +14,6 @@ import { Success } from '../models/fence-success.model';
 import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { PaymentRequestConsent } from '@prisma/client';
 
-
 @Resolver()
 export class PaymentRequestApisResolver {
   private readonly logger = new Logger(PaymentRequestApisResolver.name);
@@ -104,25 +103,33 @@ export class PaymentRequestApisResolver {
       '[updatePaymentRequest] paymentRequest: ' + paymentRequest.id,
       paymentRequest,
     );
-    const transfer = await this.services.sharedBalance.doTransFromUserToUser(
-      paymentRequest.senderId,
-      paymentRequest.userId,
-      paymentRequest.amount,
-      'due-to-payment-requests-id-' +
-        paymentRequest.id +
-        ' ' +
-        paymentRequest.note,
-    );
+    if (consent === 'ACCEPTED') {
+      const transfer = await this.services.sharedBalance.doTransFromUserToUser(
+        paymentRequest.senderId,
+        paymentRequest.userId,
+        paymentRequest.amount,
+        'due-to-payment-requests-id-' +
+          paymentRequest.id +
+          ' ' +
+          paymentRequest.note,
+      );
 
-    if (transfer && transfer.id) {
+      if (transfer && transfer.id) {
+        await this.services.sharedPaymentRequest.updatePaymentRequestConsent(
+          paymentRequest,
+          consent,
+        );
+        await this.services.sharedPaymentRequest.resolvePaymentRequest(
+          paymentRequest,
+        );
+      }
+    } else {
       await this.services.sharedPaymentRequest.updatePaymentRequestConsent(
         paymentRequest,
-        consent,
-      );
-      await this.services.sharedPaymentRequest.resolvePaymentRequest(
-        paymentRequest,
+        'DECLINED',
       );
     }
-    return transfer && transfer.id ? { isSuccess: true } : { isSuccess: false };
+
+    return { isSuccess: true };
   }
 }

@@ -88,10 +88,10 @@ export class SharedPaymentRequestService {
 
   async getPendingPaymentRequestsByUserId(
     userId: number,
+    includeSentByMe = false,
   ): Promise<PaymentRequest[]> {
-    return this.prisma.paymentRequest.findMany({
-      where: {
-        OR: [
+    const OR = includeSentByMe
+      ? [
           {
             user: {
               id: userId,
@@ -102,7 +102,17 @@ export class SharedPaymentRequestService {
               id: userId,
             },
           },
-        ],
+        ]
+      : [
+          {
+            user: {
+              id: userId,
+            },
+          },
+        ];
+    return this.prisma.paymentRequest.findMany({
+      where: {
+        OR,
         status: 'PENDING',
       },
       include: {

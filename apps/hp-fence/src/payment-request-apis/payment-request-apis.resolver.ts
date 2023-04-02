@@ -24,6 +24,7 @@ export class PaymentRequestApisResolver {
   async paymentRequests(@CurrentUser() user: User): Promise<any> {
     return this.services.sharedPaymentRequest.getPendingPaymentRequestsByUserId(
       user.id,
+      true,
     );
   }
 

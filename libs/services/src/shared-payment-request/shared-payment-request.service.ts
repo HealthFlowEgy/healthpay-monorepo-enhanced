@@ -228,12 +228,14 @@ export class SharedPaymentRequestService {
     paymentRequest: PaymentRequest,
     consent: PaymentRequestConsent,
   ): Promise<PaymentRequest> {
+    const status = consent === 'DECLINED' ? 'DECLINED' : 'PENDING';
     return this.prisma.paymentRequest.update({
       where: {
         id: paymentRequest.id,
       },
       data: {
         consent,
+        status,
       },
     });
   }

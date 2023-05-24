@@ -48,10 +48,10 @@ export class SmsService {
         senderid: 'Health%20Pay',
         mobileno: mobileno,
         msgtext: messageText,
-        priority: 'High',
-        CountryCode: 'ALL',
+        CountryCode: '20',
       },
     });
+    // https://mshastra.com/sendurl.aspx?user=HealthPay&pwd=91ujmb_e&senderid=Health%20Pay&mobileno=+201060205932&msgtext=TestedSuccessfully&CountryCode=20
     this.logger.verbose(
       '[mobiShastra] response',
       JSON.stringify(response.data),

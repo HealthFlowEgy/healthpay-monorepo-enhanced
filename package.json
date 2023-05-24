@@ -7,7 +7,7 @@
   "license": "PRIVATE",
   "scripts": {
     "prebuild": "rimraf dist",
-    "postinstall": "npx prisma generate --schema=./libs/prisma/src/prisma/schema.prisma && nest build hp-fence",
+    "postinstall": "npx prisma migrate deploy --schema=./libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=./libs/prisma/src/prisma/schema.prisma && nest build hp-fence",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "DEBUG=false node dist/apps/hp-fence/main.js",
     "start:dev-hp-fence": "export $(cat .env | xargs) && nest start hp-fence --watch"

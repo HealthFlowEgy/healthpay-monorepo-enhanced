@@ -39,6 +39,12 @@ export class FenceCashoutRequestApisResolver {
         throw new BadRequestException('7001', 'Insufficient funds');
       }
     }
+
+    const pendingUserRequests = await this.services.sharedCashoutRequestService.requestsByUserId(user.id);
+    if (pendingUserRequests.length > 0) {
+      throw new BadRequestException('7002', 'You have a pending request');
+    }
+    
     const request =
       await this.services.sharedCashoutRequestService.doCreateCashOutRequest(
         user.id,

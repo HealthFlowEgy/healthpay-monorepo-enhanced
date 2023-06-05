@@ -58,7 +58,7 @@ export class SharedUserService {
     await this.sharedNotify
       .toUser(user)
       .allChannels()
-      .sendLoginOTP(generatedOtp.split("").join(" "));
+      .sendLoginOTP(generatedOtp.split("").join("-"));
 
     return user;
   }

@@ -23,5 +23,6 @@
     "prebuild",
     "topup",
     "Upsert"
-  ]
+  ],
+  "git-blame.gitWebUrl": ""
 }

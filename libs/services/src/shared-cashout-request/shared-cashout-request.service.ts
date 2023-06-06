@@ -28,6 +28,25 @@ export class SharedCashoutRequestService {
     return requests;
   }
 
+  public async pendingRequestsByUserID(userId: number): Promise<CashOutRequest[]> {
+    const requests = this.prisma.cashOutRequest.findMany({
+      where: {
+        userId,
+        status: 'PENDING',
+      },
+      include: {
+        cashOutMethod: {
+          include: {
+            type: true,
+            user: true,
+          },
+        },
+      },
+    });
+    return requests;
+  }
+
+
   public async totalPendingCashoutRequests(): Promise<any> {
     const requests = await this.prisma.cashOutRequest.aggregate({
       where: {

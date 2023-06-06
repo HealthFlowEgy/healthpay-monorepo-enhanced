@@ -40,7 +40,7 @@ export class FenceCashoutRequestApisResolver {
       }
     }
 
-    const pendingUserRequests = await this.services.sharedCashoutRequestService.requestsByUserId(user.id);
+    const pendingUserRequests = await this.services.sharedCashoutRequestService.pendingRequestsByUserID(user.id);
     if (pendingUserRequests.length > 0) {
       throw new BadRequestException('7002', 'You have a pending request');
     }

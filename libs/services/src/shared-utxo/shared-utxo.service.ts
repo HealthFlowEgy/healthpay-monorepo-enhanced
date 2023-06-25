@@ -27,17 +27,26 @@ export class SharedUtxoService {
   async onUTXOUpdate({ data }: any): Promise<boolean> {
     this.logger.verbose(`UTXO update: ${JSON.stringify(data)}`);
     // update wallet balance
+
+    if (!data || Number.isNaN(data.amount) || data.amount === undefined || data.amount === null || data.amount < 0 ){
+      return;
+    }
+
     if (data.publicKey === 'root') {
       return;
     }
 
-    const userWallet = await this.updateWalletUsingPublicKey(
+    try {
+          const userWallet = await this.updateWalletUsingPublicKey(
       data.publicKey,
       data.amount,
     );
 
     if (data.amount > 0) {
       await this.handlePendingPaymentRequests(userWallet);
+    }
+    }catch(e){
+      this.logger.error(`UTXO update error: ${JSON.stringify(e)}`);
     }
 
     return true;

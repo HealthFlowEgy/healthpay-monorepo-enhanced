@@ -249,6 +249,12 @@ export class SharedBalanceService {
     const balance = await this.prisma.balance.findFirst({
       where: { uid: balanceId },
     });
+    if (!balance) {
+      this.logger.verbose(
+        `[mark_tx_as_confirmed] balance not found ${balanceId}`,
+      );
+      return;
+    }
     this.markBalanceAsPaid(balance);
     return;
   }

@@ -16,49 +16,54 @@ model SiteSettings {
 }
 
 model User {
-  id                    Int                      @id @default(autoincrement())
-  uid                   String                   @unique
-  nationalId            String?
-  avatar                String?
-  isNationalVerified    Boolean                  @default(false)
-  email                 String?                  @unique
-  firstName             String?
-  lastName              String?
-  mobile                String                   @unique
-  password              String?
-  loginFrom             String?                  @default("HEALTH_PAY")
-  lastLogin             DateTime?                @default(now())
-  isVerified            Boolean                  @default(false)
-  createdFrom           String?                  @default("HEALTH_PAY")
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime?                @default(now()) @updatedAt
-  prefLang              String?                  @default("en")
-  cashInOpsId           Int?
-  cashOutOpsId          Int?
-  transferOpsId         Int?
-  remember_token        String?                  @db.Text
-  nationalDocBack       String?
-  nationalDocFront      String?
-  nationalDoc           String?                  @db.VarChar(101)
-  isDeactivated         Boolean?                 @default(false)
-  cashInOps             Operation?               @relation("UserCashInOps", fields: [cashInOpsId], references: [id])
-  cashOutOps            Operation?               @relation("UserCashOutOps", fields: [cashOutOpsId], references: [id])
-  transferOps           Operation?               @relation("UserTransferOps", fields: [transferOpsId], references: [id])
-  cashOutRequest        CashOutRequest[]
-  cashOutSettings       CashOutSettings[]
-  financingRequest      FinancingRequest[]
-  merchants             Merchant[]
-  MerchantAdmins        MerchantAdmins[]
-  notifications         Notification[]
-  otp                   OTP[]
-  paymentRequests       PaymentRequest[]         @relation("UserPaymentRequests")
-  sentPaymentRequests   PaymentRequest[]         @relation("UserSentPaymentRequests")
-  providersAuthMerchant ProviderAuthMerchant[]
-  transactions          Transaction[]
-  usersAuthMerchant     UserAuthMerchant[]
-  notifyTokens          UserNotifyTokens[]
-  verificationRequest   UserVerificationRequest?
-  wallet                Wallet?
+  id                        Int                      @id @default(autoincrement())
+  uid                       String                   @unique
+  nationalId                String?
+  avatar                    String?
+  isNationalVerified        Boolean                  @default(false)
+  email                     String?                  @unique
+  firstName                 String?
+  lastName                  String?
+  mobile                    String                   @unique
+  password                  String?
+  loginFrom                 String?                  @default("HEALTH_PAY")
+  lastLogin                 DateTime?                @default(now())
+  isVerified                Boolean                  @default(false)
+  createdFrom               String?                  @default("HEALTH_PAY")
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime?                @default(now()) @updatedAt
+  prefLang                  String?                  @default("en")
+  cashInOpsId               Int?
+  cashOutOpsId              Int?
+  transferOpsId             Int?
+  remember_token            String?                  @db.Text
+  nationalDocBack           String?
+  nationalDocFront          String?
+  nationalDoc               String?                  @db.VarChar(101)
+  isDeactivated             Boolean?                 @default(false)
+  isAgent                   Boolean?                 @default(false)
+  two_factor_secret         String?                  @db.Text
+  two_factor_recovery_codes String?                  @db.Text
+  cashInOps                 Operation?               @relation("UserCashInOps", fields: [cashInOpsId], references: [id])
+  cashOutOps                Operation?               @relation("UserCashOutOps", fields: [cashOutOpsId], references: [id])
+  transferOps               Operation?               @relation("UserTransferOps", fields: [transferOpsId], references: [id])
+  cashOutRequest            CashOutRequest[]
+  cashOutSettings           CashOutSettings[]
+  financingRequest          FinancingRequest[]
+  merchants                 Merchant[]
+  MerchantAdmins            MerchantAdmins[]
+  notifications             Notification[]
+  otp                       OTP[]
+  paymentRequests           PaymentRequest[]         @relation("UserPaymentRequests")
+  sentPaymentRequests       PaymentRequest[]         @relation("UserSentPaymentRequests")
+  agentPaymentRequests      PaymentRequest[]         @relation("AgentPaymentRequests")
+  agentActivityLogs         ActivityLogs[]
+  providersAuthMerchant     ProviderAuthMerchant[]
+  transactions              Transaction[]
+  usersAuthMerchant         UserAuthMerchant[]
+  notifyTokens              UserNotifyTokens[]
+  verificationRequest       UserVerificationRequest?
+  wallet                    Wallet?
 }
 
 model IpActivity {
@@ -141,6 +146,7 @@ model Merchant {
   payableBalance    Balance[]              @relation("PayableMerchantBalance")
   receivableBalance Balance[]              @relation("ReceivableMerchantBalance")
   ipActivity        IpActivity[]
+  activityLogs      ActivityLogs[]
   admins            MerchantAdmins[]
   paymentRequests   PaymentRequest[]
   providers         ProviderAuthMerchant[]
@@ -251,7 +257,7 @@ model Balance {
   receivableWalletId   Int?
   type                 BALANCE_TYPE @default(U2U)
   amount               Float
-  notes                String?      @db.VarChar(101)
+  notes                String?      @db.Text
   createdAt            DateTime?    @default(now())
   updatedAt            DateTime?    @updatedAt
   confirmedAt          DateTime?
@@ -339,6 +345,7 @@ model Admin {
   id                        Int       @id @default(autoincrement())
   name                      String
   email                     String    @unique
+  mobile                     String?   
   email_verified_at         DateTime? @default(now())
   password                  String
   remember_token            String?   @db.Text
@@ -347,7 +354,6 @@ model Admin {
   two_factor_recovery_codes String?   @db.Text
   created_at                DateTime  @default(now())
   updated_at                DateTime? @default(now()) @updatedAt
-  mobile                    String?
   last_login                DateTime? @default(now())
 }
 
@@ -390,12 +396,25 @@ model PaymentRequest {
   merchantId    Int?
   senderId      Int?
   transactionId Int?                  @unique
+  agentId       Int?
   createdAt     DateTime              @default(now())
   updatedAt     DateTime?             @default(now()) @updatedAt
   merchant      Merchant?             @relation(fields: [merchantId], references: [id])
   transaction   Transaction?          @relation(fields: [transactionId], references: [id])
   user          User?                 @relation("UserPaymentRequests", fields: [userId], references: [id])
   sender        User?                 @relation("UserSentPaymentRequests", fields: [senderId], references: [id])
+  agent         User?                 @relation("AgentPaymentRequests", fields: [agentId], references: [id])
+}
+
+model ActivityLogs {
+  id            Int       @id @default(autoincrement())
+  userId        Int?
+  merchantId    Int?
+  activity_json String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @default(now()) @updatedAt
+  user          User?     @relation(fields: [userId], references: [id])
+  merchant      Merchant? @relation(fields: [merchantId], references: [id])
 }
 
 enum PaymentRequestConsent {

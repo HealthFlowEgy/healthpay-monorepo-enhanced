@@ -31,7 +31,8 @@ export class FenceUserMedCardsResolver {
     };
   }
 
-  @Query(() => MedCard)
+  @Query(() => [MedCard])
+  @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async getMyMedCards(@CurrentUser() user: User) {
     return this.services.sharedUser.getMedCards(user.id);
   }

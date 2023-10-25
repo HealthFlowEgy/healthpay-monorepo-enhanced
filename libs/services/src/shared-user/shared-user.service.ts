@@ -8,7 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Prisma, User } from '@prisma/client';
+import { MedCard, Prisma, User } from '@prisma/client';
 import moment from 'moment';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
@@ -58,7 +58,7 @@ export class SharedUserService {
     await this.sharedNotify
       .toUser(user)
       .allChannels()
-      .sendLoginOTP(generatedOtp.split("").join("-"));
+      .sendLoginOTP(generatedOtp.split('').join('-'));
 
     return user;
   }
@@ -225,5 +225,13 @@ export class SharedUserService {
     } catch (e) {
       return false;
     }
+  }
+
+  public async getMedCards(userId: number): Promise<MedCard[]> {
+    return this.prisma.medCard.findMany({
+      where: {
+        userId,
+      },
+    });
   }
 }

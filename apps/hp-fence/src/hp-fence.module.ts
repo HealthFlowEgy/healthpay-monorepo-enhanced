@@ -30,6 +30,7 @@ import { ServicesModule } from '@app/services';
 import { ValidationsModule } from '@app/validations';
 import { WebsocketModule } from '@app/websocket';
 import path from 'path';
+import { FenceUserMedCardsResolver } from './fence-user-med-cards/fence-user-med-cards.resolver';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import path from 'path';
     FenceNotificationsApisResolver,
     FenceFinancingApisResolver,
     PaymentRequestApisResolver,
+    FenceUserMedCardsResolver,
     // {
     //   provide: APP_GUARD,
     //   useClass: GqlThrottlerGuard,

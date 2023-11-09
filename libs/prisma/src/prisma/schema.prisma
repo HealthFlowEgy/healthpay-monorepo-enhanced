@@ -44,6 +44,8 @@ model User {
   isAgent                   Boolean?                 @default(false)
   two_factor_secret         String?                  @db.Text
   two_factor_recovery_codes String?                  @db.Text
+  attachedMerchantId        Int?
+  attachedMerchants         Merchant?                @relation("UserAttachedToMerchant", fields: [attachedMerchantId], references: [id])
   cashInOps                 Operation?               @relation("UserCashInOps", fields: [cashInOpsId], references: [id])
   cashOutOps                Operation?               @relation("UserCashOutOps", fields: [cashOutOpsId], references: [id])
   transferOps               Operation?               @relation("UserTransferOps", fields: [transferOpsId], references: [id])
@@ -169,6 +171,7 @@ model Merchant {
   providers         ProviderAuthMerchant[]
   Transaction       Transaction[]
   users             UserAuthMerchant[]
+  attachedAgents    User[]                 @relation("UserAttachedToMerchant")
 
   @@unique([name, ownerId], name: "name_ownerId_unique")
 }

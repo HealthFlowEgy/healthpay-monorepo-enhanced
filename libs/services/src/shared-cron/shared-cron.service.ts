@@ -4,6 +4,7 @@ import moment from 'moment';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
 import { SharedUtxoService } from '../shared-utxo/shared-utxo.service';
+import { SharedKhadamatyService } from '../shared-khadamaty/shared-khadamaty.service';
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -14,11 +15,15 @@ export class SharedCronService {
   constructor(
     @Inject(forwardRef(() => SharedBalanceService))
     private sharedBalance: SharedBalanceService,
+
     @Inject(SharedPaymentRequestService)
     private sharedPaymentRequests: SharedPaymentRequestService,
 
     @Inject(SharedUtxoService)
     private sharedUTXO: SharedUtxoService,
+
+    @Inject(SharedKhadamatyService)
+    private sharedKhadamaty: SharedKhadamatyService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -95,5 +100,20 @@ export class SharedCronService {
     }
 
     this.logger.debug(`${pendingBalances.length} pending balances`);
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleKhadamatySync() {
+    const khadamatyServices = await this.sharedKhadamaty.Services();
+    const khadamatyCataLog = await this.sharedKhadamaty.Catalog();
+    if (khadamatyServices) {
+      this.sharedKhadamaty.updateKhadamatyServices(
+        'services',
+        khadamatyServices,
+      );
+    }
+    if (khadamatyCataLog) {
+      this.sharedKhadamaty.updateKhadamatyServices('catalog', khadamatyCataLog);
+    }
   }
 }

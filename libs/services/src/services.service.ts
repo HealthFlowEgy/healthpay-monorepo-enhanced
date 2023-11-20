@@ -12,6 +12,7 @@ import { SharedPaymentRequestService } from './shared-payment-request/shared-pay
 import { SharedTransactionService } from './shared-transaction/shared-transaction.service';
 import { SharedUserService } from './shared-user/shared-user.service';
 import { SharedWalletService } from './shared-wallet/shared-wallet.service';
+import { SharedKhadamatyService } from './shared-khadamaty/shared-khadamaty.service';
 
 @Injectable()
 export class ServicesService {
@@ -37,5 +38,8 @@ export class ServicesService {
     public sharedFinanceService: SharedFinanceService,
     @Inject(SharedCronService)
     public sharedCronService: SharedCronService,
+
+    @Inject(SharedKhadamatyService)
+    public sharedKhadamatyService: SharedKhadamatyService,
   ) {}
 }

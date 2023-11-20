@@ -34,4 +34,8 @@ export class HelpersService {
   public async encryptTxt(): Promise<string> {
     return this.generateUUID() + this.generateUUID();
   }
+
+  public async handlebarHelpers() {
+
+  }
 }

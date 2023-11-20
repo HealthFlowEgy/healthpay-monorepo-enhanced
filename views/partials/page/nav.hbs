@@ -1,0 +1,17 @@
+<nav class="navbar navbar-dark bg-hp">
+    <div class="container-fluid d-flex w-100 align-items-center">
+        {{#unless hideback}}
+        <button class="btn btn-lg" onclick="window.history.back()">
+            <i class="bi bi-arrow-right-circle text-white"></i>
+        </button>
+        {{/unless}}
+        
+        <div class="col text-center">
+            <span class="text-center">
+                <strong>
+                   {{ param }}
+                </strong>
+            </span>
+        </div>
+    </div>
+</nav>

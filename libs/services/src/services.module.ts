@@ -19,6 +19,8 @@ import { SharedCronService } from './shared-cron/shared-cron.service';
 import { SharedCashoutRequestService } from './shared-cashout-request/shared-cashout-request.service';
 import { SharedNotificationsService } from './shared-notifications/shared-notifications.service';
 import { SharedFinanceService } from './shared-finance/shared-finance.service';
+import { SharedKhadamatyService } from './shared-khadamaty/shared-khadamaty.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -28,6 +30,10 @@ import { SharedFinanceService } from './shared-finance/shared-finance.service';
       signOptions: { expiresIn: '1y' },
     }),
     ConfigModule,
+    HttpModule.register({
+      timeout: 500000,
+      maxRedirects: 5,
+    }),
   ],
   providers: [
     SharedCashoutRequestService,
@@ -47,6 +53,7 @@ import { SharedFinanceService } from './shared-finance/shared-finance.service';
     SharedCronService,
     SharedNotificationsService,
     SharedFinanceService,
+    SharedKhadamatyService,
   ],
   exports: [ServicesService],
 })

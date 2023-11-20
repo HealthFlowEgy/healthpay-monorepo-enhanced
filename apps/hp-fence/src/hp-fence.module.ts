@@ -31,6 +31,7 @@ import { ValidationsModule } from '@app/validations';
 import { WebsocketModule } from '@app/websocket';
 import path from 'path';
 import { FenceUserMedCardsResolver } from './fence-user-med-cards/fence-user-med-cards.resolver';
+import { KhadamatyController } from './khadamaty/khadamaty.controller';
 
 @Module({
   imports: [
@@ -67,7 +68,7 @@ import { FenceUserMedCardsResolver } from './fence-user-med-cards/fence-user-med
     ValidationsModule,
     WebsocketModule,
   ],
-  controllers: [HpFenceController],
+  controllers: [HpFenceController, KhadamatyController],
   providers: [
     HpFenceService,
     FenceUserApisResolver,

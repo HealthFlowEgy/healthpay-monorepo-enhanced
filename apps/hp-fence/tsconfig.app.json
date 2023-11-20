@@ -2,8 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": false,
-    "outDir": "../../dist/apps/hp-fence"
+    "outDir": "../../dist/apps/hp-fence",
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../public/**/*", "../../views/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }

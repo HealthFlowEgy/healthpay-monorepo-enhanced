@@ -7,7 +7,8 @@
     "webpack": true,
     "tsConfigPath": "apps/healthpay/tsconfig.app.json",
     "assets": [
-      "i18n/**/*"
+      "i18n/**/*",
+      "**/*.hbs"
     ]
   },
   "projects": {

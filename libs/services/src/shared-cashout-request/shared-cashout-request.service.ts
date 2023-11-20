@@ -8,8 +8,7 @@ export class SharedCashoutRequestService {
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
-
-  ) { }
+  ) {}
 
   public async requestsByUserId(userId: number): Promise<CashOutRequest[]> {
     const requests = this.prisma.cashOutRequest.findMany({
@@ -28,7 +27,9 @@ export class SharedCashoutRequestService {
     return requests;
   }
 
-  public async pendingRequestsByUserID(userId: number): Promise<CashOutRequest[]> {
+  public async pendingRequestsByUserID(
+    userId: number,
+  ): Promise<CashOutRequest[]> {
     const requests = this.prisma.cashOutRequest.findMany({
       where: {
         userId,
@@ -46,7 +47,6 @@ export class SharedCashoutRequestService {
     return requests;
   }
 
-
   public async totalPendingCashoutRequests(): Promise<any> {
     const requests = await this.prisma.cashOutRequest.aggregate({
       where: {
@@ -54,8 +54,7 @@ export class SharedCashoutRequestService {
       },
       _sum: {
         amount: true,
-      }
-
+      },
     });
     return requests;
   }
@@ -65,7 +64,6 @@ export class SharedCashoutRequestService {
     amount: number,
     settingsId: number,
   ): Promise<CashOutRequest> {
-
     const request = await this.prisma.cashOutRequest.create({
       data: {
         uid: this.helpers.doCreateUUID('cashOutRequest'),

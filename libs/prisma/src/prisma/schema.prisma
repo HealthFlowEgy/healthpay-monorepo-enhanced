@@ -437,6 +437,25 @@ model ActivityLogs {
   merchant      Merchant? @relation(fields: [merchantId], references: [id])
 }
 
+model KhadamatyServices {
+  id        Int       @id @default(autoincrement())
+  data      Json      @db.Json
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
+}
+
+model UserPayoutServiceRequest {
+  id        Int          @id @default(autoincrement())
+  uid       String       @unique
+  userId    Int?
+  status    TRANS_STATUS @default(PENDING)
+  serviceId Int?
+  fields    Json?        @db.Json
+  createdAt DateTime     @default(now())
+  updatedAt DateTime?    @default(now()) @updatedAt
+}
+
 enum PaymentRequestConsent {
   FORCED
   ACCEPTED

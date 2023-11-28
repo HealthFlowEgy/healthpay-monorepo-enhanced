@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { UserPayoutServiceRequest } from '@prisma/client';
+import { KhadamatyServicePaymentRequest } from './khadamaty-service-request';
 
 @Injectable()
 export class SharedKhadamatyService {

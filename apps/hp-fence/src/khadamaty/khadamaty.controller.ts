@@ -170,7 +170,7 @@ export class KhadamatyController {
     const nBody = {
       ...body,
       service: this.serviceService.sharedKhadamatyService.parseBodyObject(
-        body.service,
+        body?.service ?? {},
       ),
     };
 
@@ -221,7 +221,7 @@ export class KhadamatyController {
             serviceFields: filledFields.map(
               (el) => ({ Value: el.Value, SFId: el.SFId } as any),
             ),
-            amount: parseFloat(payable),
+            amount: parseFloat(serviceFees.Amount),
           },
         );
 

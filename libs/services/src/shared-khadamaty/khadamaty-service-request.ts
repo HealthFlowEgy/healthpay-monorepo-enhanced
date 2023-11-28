@@ -1,9 +1,9 @@
-type serviceField = {
+export type serviceField = {
   SFId: string;
   Value: string;
 };
 
-type KhadamatyServicePaymentRequest = {
+export type KhadamatyServicePaymentRequest = {
   serviceFields: serviceField[];
   serviceId: number;
   amount: number;

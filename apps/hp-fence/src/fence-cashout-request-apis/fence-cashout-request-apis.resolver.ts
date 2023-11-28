@@ -5,8 +5,9 @@ import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { CashOutRequest } from '../models/fence-cashout-request.model';
-import { Success } from '../models/fence-success.model';
+import { Success, SuccessWithMessage } from '../models/fence-success.model';
 import { User } from '../models/fence-user.model';
+import { KhadamatyServicePaymentRequest } from '@app/services/shared-khadamaty/khadamaty-service-request';
 
 @Resolver()
 export class FenceCashoutRequestApisResolver {
@@ -89,12 +90,12 @@ export class FenceCashoutRequestApisResolver {
     return request;
   }
 
-  @Mutation(() => Success)
+  @Mutation(() => SuccessWithMessage)
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async confirmServicePayoutRequest(
     @CurrentUser() user: User,
     @Args('payoutRequestId') payoutRequestId: string,
-  ): Promise<Success> {
+  ): Promise<SuccessWithMessage> {
     const payoutRequest =
       await this.services.sharedKhadamatyService.getUserPayoutServiceRequest(
         payoutRequestId,
@@ -107,6 +108,8 @@ export class FenceCashoutRequestApisResolver {
     const requestDetails: KhadamatyServicePaymentRequest = JSON.parse(
       payoutRequest.fields.toString(),
     );
+
+    console.log('requestDetails', requestDetails);
 
     const paymentResponse = await this.services.sharedKhadamatyService.Payment(
       payoutRequest,
@@ -124,24 +127,29 @@ export class FenceCashoutRequestApisResolver {
       );
     }
 
+    const calulcatedAmount = parseFloat(`${requestDetails.amount}`) * 1.02 + 2;
+
     const hpMerchant = await this.services.sharedMerchant.cashInMerchant();
     await this.services.sharedBalance.doTransFromUserToMerchant(
       hpMerchant.id,
       user.id,
-      requestDetails.amount,
+      calulcatedAmount,
       'deducted due service payout request ' + payoutRequestId,
     );
 
     await this.services.sharedKhadamatyService.updateUserPayoutServiceRequest(
       payoutRequestId,
       {
-        status: 'SUCCESS',
+        status: 'COMPLETED',
         userId: user.id,
+        response: JSON.stringify(paymentResponse),
       },
     );
 
     return {
       isSuccess: true,
+      Receipt: paymentResponse.Reciept,
+      amount: calulcatedAmount.toString(),
     };
   }
 }

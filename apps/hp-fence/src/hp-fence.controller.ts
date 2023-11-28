@@ -10,10 +10,26 @@ export class HpFenceController {
     private serviceService: ServicesService,
   ) {}
 
-  // @Get('/test')
-  // async getHello(): Promise<any> {
-  //   return this.serviceService.sharedKhadamatyService.getKhadamatyServices(
-  //     'catalog',
-  //   );
-  // }
+  @Get('/test')
+  async getHello(): Promise<any> {
+    const khadamatyServices =
+      await this.serviceService.sharedKhadamatyService.Services();
+    const khadamatyCataLog =
+      await this.serviceService.sharedKhadamatyService.Catalog();
+    if (khadamatyServices) {
+      this.serviceService.sharedKhadamatyService.updateKhadamatyServices(
+        'services',
+        khadamatyServices,
+      );
+    }
+
+    if (khadamatyCataLog) {
+      this.serviceService.sharedKhadamatyService.updateKhadamatyServices(
+        'catalog',
+        khadamatyCataLog,
+      );
+    }
+
+    return {};
+  }
 }

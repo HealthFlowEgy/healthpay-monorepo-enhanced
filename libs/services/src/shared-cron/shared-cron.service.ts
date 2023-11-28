@@ -112,6 +112,7 @@ export class SharedCronService {
         khadamatyServices,
       );
     }
+    
     if (khadamatyCataLog) {
       this.sharedKhadamaty.updateKhadamatyServices('catalog', khadamatyCataLog);
     }

@@ -213,7 +213,7 @@ export class KhadamatyController {
           nBody.service,
         );
 
-      const payable = parseFloat(`${serviceFees.Amount + 1.02 + 2}`).toFixed(2);
+      const payable = parseFloat(`${serviceFees.Amount * 1.02 + 2}`).toFixed(2);
       const UserPayoutServiceRequest: UserPayoutServiceRequest =
         await this.serviceService.sharedKhadamatyService.createUserPayoutServiceRequest(
           {

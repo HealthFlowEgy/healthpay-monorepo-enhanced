@@ -115,5 +115,18 @@ export class SharedCronService {
     if (khadamatyCataLog) {
       this.sharedKhadamaty.updateKhadamatyServices('catalog', khadamatyCataLog);
     }
+
+    const depericatedServices =
+      await this.sharedKhadamaty.getDepericatedServiceRequests();
+    this.logger.debug(
+      '[handleKhadamatySync] depericatedServices',
+      depericatedServices.length,
+    );
+    for (let index = 0; index < depericatedServices.length; index++) {
+      const depericatedService = depericatedServices[index];
+      await this.sharedKhadamaty.deleteUserPayoutServiceRequest(
+        depericatedService,
+      );
+    }
   }
 }

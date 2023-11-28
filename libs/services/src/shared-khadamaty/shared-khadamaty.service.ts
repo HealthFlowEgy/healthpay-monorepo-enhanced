@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { UserPayoutServiceRequest } from '@prisma/client';
 import { KhadamatyServicePaymentRequest } from './khadamaty-service-request';
+import moment from 'moment';
 
 @Injectable()
 export class SharedKhadamatyService {
@@ -276,6 +277,28 @@ export class SharedKhadamatyService {
     return this.prisma.userPayoutServiceRequest.findFirst({
       where: {
         uid: requestId,
+      },
+    });
+  }
+
+  public async getDepericatedServiceRequests(): Promise<
+    UserPayoutServiceRequest[]
+  > {
+    return this.prisma.userPayoutServiceRequest.findMany({
+      where: {
+        updatedAt: {
+          lt: moment().subtract(1, 'week').toISOString(),
+        },
+      },
+    });
+  }
+
+  public async deleteUserPayoutServiceRequest(
+    serviceRequest: UserPayoutServiceRequest,
+  ) {
+    return this.prisma.userPayoutServiceRequest.delete({
+      where: {
+        uid: serviceRequest.uid,
       },
     });
   }

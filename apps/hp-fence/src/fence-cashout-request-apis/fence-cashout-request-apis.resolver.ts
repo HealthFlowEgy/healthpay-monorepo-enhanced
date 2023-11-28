@@ -108,6 +108,13 @@ export class FenceCashoutRequestApisResolver {
     const requestDetails: KhadamatyServicePaymentRequest = JSON.parse(
       payoutRequest.fields.toString(),
     );
+    const calulcatedAmount = parseFloat(`${requestDetails.amount}`) * 1.02 + 2;
+
+    const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
+
+    if (wallet.total < calulcatedAmount) {
+      throw new BadRequestException('7001', 'Insufficient funds');
+    }
 
     console.log('requestDetails', requestDetails);
 
@@ -126,8 +133,6 @@ export class FenceCashoutRequestApisResolver {
         'Payment failed ' + paymentResponse.StatusDescription,
       );
     }
-
-    const calulcatedAmount = parseFloat(`${requestDetails.amount}`) * 1.02 + 2;
 
     const hpMerchant = await this.services.sharedMerchant.cashInMerchant();
     await this.services.sharedBalance.doTransFromUserToMerchant(

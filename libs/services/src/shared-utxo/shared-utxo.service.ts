@@ -98,10 +98,12 @@ export class SharedUtxoService {
 
       const firstPaymentRequest = pending[0];
 
-      // check of already confirmed balances for this payment request
       const confirmedBalances = await this.sharedBalance.getAllBalances({
         where: {
           notes: 'pending-payment-request-' + firstPaymentRequest.id,
+          confirmedAt: {
+            not: null,
+          },
         },
       });
       if (confirmedBalances.length > 0) {
@@ -112,19 +114,18 @@ export class SharedUtxoService {
           await this.sharedPaymentRequests.resolvePaymentRequest(
             firstPaymentRequest,
           );
-          sleep(5000);
           await this.handlePendingPaymentRequests(userWallet);
           return;
         }
       }
 
+      await sleep(5000);
       await this.sharedBalance.doTransFromUserToMerchant(
         firstPaymentRequest.merchantId,
         userWallet.userId,
         firstPaymentRequest.amount,
-        'pending-payment-request-' + pending[0].id,
+        'pending-payment-request-' + firstPaymentRequest.id,
       );
-
       await this.sharedPaymentRequests.markPaymentRequestAsProcessing(
         firstPaymentRequest,
       );

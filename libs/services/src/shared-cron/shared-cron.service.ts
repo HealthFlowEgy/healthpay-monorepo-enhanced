@@ -27,14 +27,16 @@ export class SharedCronService {
     private sharedKhadamaty: SharedKhadamatyService,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async revertPendingRequests() {
+    this.logger.verbose('EVERY_5_MINUTES: revertPendingRequests');
+
     const pendingRequests =
       await this.sharedPaymentRequests.getProcessingPaymentRequests({
         where: {
           status: 'CANCELLED',
-          updatedAt: {
-            lt: moment().subtract(1, 'hour').toISOString(),
+          createdAt: {
+            lte: moment().subtract(5, 'minutes').toISOString(),
           },
         },
       });

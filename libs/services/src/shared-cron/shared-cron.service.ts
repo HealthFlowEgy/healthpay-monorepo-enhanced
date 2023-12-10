@@ -5,9 +5,10 @@ import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
 import { SharedUtxoService } from '../shared-utxo/shared-utxo.service';
 import { SharedKhadamatyService } from '../shared-khadamaty/shared-khadamaty.service';
-function sleep(ms) {
+export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
 @Injectable()
 export class SharedCronService {
   private readonly logger = new Logger(SharedCronService.name);
@@ -112,7 +113,7 @@ export class SharedCronService {
         khadamatyServices,
       );
     }
-    
+
     if (khadamatyCataLog) {
       this.sharedKhadamaty.updateKhadamatyServices('catalog', khadamatyCataLog);
     }

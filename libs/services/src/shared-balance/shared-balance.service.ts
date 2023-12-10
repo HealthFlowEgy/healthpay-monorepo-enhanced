@@ -38,11 +38,6 @@ export class SharedBalanceService {
     });
   }
 
-
-
-
-
-
   async doTransFromMerchantToUser(
     rUserId: number,
     pMerchantId: number,
@@ -207,11 +202,6 @@ export class SharedBalanceService {
       },
     });
   }
-
-
-
-
-
 
   // TODO: Make wallet return with start and end date with balance arr
   // TODO: first

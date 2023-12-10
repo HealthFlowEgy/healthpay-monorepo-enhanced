@@ -7,6 +7,7 @@ import { Wallet } from '@prisma/client';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
+import { sleep } from '../shared-cron/shared-cron.service';
 
 @Injectable()
 export class SharedUtxoService {
@@ -28,7 +29,13 @@ export class SharedUtxoService {
     this.logger.verbose(`UTXO update: ${JSON.stringify(data)}`);
     // update wallet balance
 
-    if (!data || Number.isNaN(data.amount) || data.amount === undefined || data.amount === null || data.amount < 0 ){
+    if (
+      !data ||
+      Number.isNaN(data.amount) ||
+      data.amount === undefined ||
+      data.amount === null ||
+      data.amount < 0
+    ) {
       return;
     }
 
@@ -37,15 +44,15 @@ export class SharedUtxoService {
     }
 
     try {
-          const userWallet = await this.updateWalletUsingPublicKey(
-      data.publicKey,
-      data.amount,
-    );
+      const userWallet = await this.updateWalletUsingPublicKey(
+        data.publicKey,
+        data.amount,
+      );
 
-    if (data.amount > 0) {
-      await this.handlePendingPaymentRequests(userWallet);
-    }
-    }catch(e){
+      if (data.amount > 0) {
+        await this.handlePendingPaymentRequests(userWallet);
+      }
+    } catch (e) {
       this.logger.error(`UTXO update error: ${JSON.stringify(e)}`);
     }
 
@@ -77,6 +84,10 @@ export class SharedUtxoService {
 
       const firstPaymentRequest = pending[0];
 
+      this.sharedPaymentRequests.markPaymentRequestAsProcessing(
+        firstPaymentRequest,
+      );
+
       const confirmedBalances = await this.sharedBalance.getAllBalances({
         where: {
           notes: 'pending-payment-request-' + firstPaymentRequest.id,
@@ -95,14 +106,11 @@ export class SharedUtxoService {
         }
       }
 
-      this.sharedBalance.doTransFromUserToMerchant(
+      await this.sharedBalance.doTransFromUserToMerchant(
         firstPaymentRequest.merchantId,
         userWallet.userId,
         firstPaymentRequest.amount,
         'pending-payment-request-' + pending[0].id,
-      );
-      this.sharedPaymentRequests.markPaymentRequestAsProcessing(
-        firstPaymentRequest,
       );
     }
     return !!userWallet.id;

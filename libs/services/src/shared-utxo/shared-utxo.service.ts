@@ -73,6 +73,20 @@ export class SharedUtxoService {
   }
 
   async handlePendingPaymentRequests(userWallet: Wallet): Promise<boolean> {
+    const pendingBalances = await this.sharedBalance.getAllBalances({
+      where: {
+        rejectedAt: null,
+        confirmedAt: null,
+        payableWalletId: userWallet.id,
+      },
+    });
+    // solve race condition
+    if (pendingBalances.length > 0) {
+      await sleep(5000);
+      await this.handlePendingPaymentRequests(userWallet);
+      return;
+    }
+
     const pending = await this.sharedPaymentRequests.getPayablePendingRequests(
       userWallet.userId,
       userWallet.total,
@@ -84,10 +98,7 @@ export class SharedUtxoService {
 
       const firstPaymentRequest = pending[0];
 
-      this.sharedPaymentRequests.markPaymentRequestAsProcessing(
-        firstPaymentRequest,
-      );
-
+      // check of already confirmed balances for this payment request
       const confirmedBalances = await this.sharedBalance.getAllBalances({
         where: {
           notes: 'pending-payment-request-' + firstPaymentRequest.id,
@@ -101,6 +112,7 @@ export class SharedUtxoService {
           await this.sharedPaymentRequests.resolvePaymentRequest(
             firstPaymentRequest,
           );
+          sleep(5000);
           await this.handlePendingPaymentRequests(userWallet);
           return;
         }
@@ -111,6 +123,10 @@ export class SharedUtxoService {
         userWallet.userId,
         firstPaymentRequest.amount,
         'pending-payment-request-' + pending[0].id,
+      );
+
+      await this.sharedPaymentRequests.markPaymentRequestAsProcessing(
+        firstPaymentRequest,
       );
     }
     return !!userWallet.id;

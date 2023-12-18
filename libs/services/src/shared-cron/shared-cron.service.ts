@@ -35,6 +35,7 @@ export class SharedCronService {
       await this.sharedPaymentRequests.getProcessingPaymentRequests({
         where: {
           status: 'CANCELLED',
+          
           createdAt: {
             lte: moment().subtract(5, 'minutes').toISOString(),
           },

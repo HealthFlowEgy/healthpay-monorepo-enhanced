@@ -73,63 +73,64 @@ export class SharedUtxoService {
   }
 
   async handlePendingPaymentRequests(userWallet: Wallet): Promise<boolean> {
-    const pendingBalances = await this.sharedBalance.getAllBalances({
-      where: {
-        rejectedAt: null,
-        confirmedAt: null,
-        payableWalletId: userWallet.id,
-      },
-    });
-    // solve race condition
-    if (pendingBalances.length > 0) {
-      await sleep(5000);
-      await this.handlePendingPaymentRequests(userWallet);
-      return;
-    }
+    return true;
+    // const pendingBalances = await this.sharedBalance.getAllBalances({
+    //   where: {
+    //     rejectedAt: null,
+    //     confirmedAt: null,
+    //     payableWalletId: userWallet.id,
+    //   },
+    // });
+    // // solve race condition
+    // if (pendingBalances.length > 0) {
+    //   await sleep(5000);
+    //   await this.handlePendingPaymentRequests(userWallet);
+    //   return;
+    // }
 
-    const pending = await this.sharedPaymentRequests.getPayablePendingRequests(
-      userWallet.userId,
-      userWallet.total,
-    );
-    if (pending.length > 0) {
-      this.logger.verbose(
-        `Found ${pending.length} pending payment requests for user ${userWallet.userId}`,
-      );
+    // const pending = await this.sharedPaymentRequests.getPayablePendingRequests(
+    //   userWallet.userId,
+    //   userWallet.total,
+    // );
+    // if (pending.length > 0) {
+    //   this.logger.verbose(
+    //     `Found ${pending.length} pending payment requests for user ${userWallet.userId}`,
+    //   );
 
-      const firstPaymentRequest = pending[0];
+    //   const firstPaymentRequest = pending[0];
 
-      const confirmedBalances = await this.sharedBalance.getAllBalances({
-        where: {
-          notes: 'pending-payment-request-' + firstPaymentRequest.id,
-          confirmedAt: {
-            not: null,
-          },
-        },
-      });
-      if (confirmedBalances.length > 0) {
-        if (confirmedBalances[0].confirmedAt) {
-          this.logger.error(
-            `Payment request ${firstPaymentRequest.id} already confirmed mark as resolved`,
-          );
-          await this.sharedPaymentRequests.resolvePaymentRequest(
-            firstPaymentRequest,
-          );
-          await this.handlePendingPaymentRequests(userWallet);
-          return;
-        }
-      }
+    //   const confirmedBalances = await this.sharedBalance.getAllBalances({
+    //     where: {
+    //       notes: 'pending-payment-request-' + firstPaymentRequest.id,
+    //       confirmedAt: {
+    //         not: null,
+    //       },
+    //     },
+    //   });
+    //   if (confirmedBalances.length > 0) {
+    //     if (confirmedBalances[0].confirmedAt) {
+    //       this.logger.error(
+    //         `Payment request ${firstPaymentRequest.id} already confirmed mark as resolved`,
+    //       );
+    //       await this.sharedPaymentRequests.resolvePaymentRequest(
+    //         firstPaymentRequest,
+    //       );
+    //       await this.handlePendingPaymentRequests(userWallet);
+    //       return;
+    //     }
+    //   }
 
-      await sleep(5000);
-      await this.sharedBalance.doTransFromUserToMerchant(
-        firstPaymentRequest.merchantId,
-        userWallet.userId,
-        firstPaymentRequest.amount,
-        'pending-payment-request-' + firstPaymentRequest.id,
-      );
-      await this.sharedPaymentRequests.markPaymentRequestAsProcessing(
-        firstPaymentRequest,
-      );
-    }
-    return !!userWallet.id;
+    //   await sleep(5000);
+    //   await this.sharedBalance.doTransFromUserToMerchant(
+    //     firstPaymentRequest.merchantId,
+    //     userWallet.userId,
+    //     firstPaymentRequest.amount,
+    //     'pending-payment-request-' + firstPaymentRequest.id,
+    //   );
+    //   await this.sharedPaymentRequests.markPaymentRequestAsProcessing(
+    //     firstPaymentRequest,
+    //   );
+    // }
+    // return !!userWallet.id;
   }
 }

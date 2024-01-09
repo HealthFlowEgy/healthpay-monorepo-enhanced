@@ -130,7 +130,10 @@ export class FenceCashoutRequestApisResolver {
     if (!paymentResponse || paymentResponse.StatusCode != 1) {
       throw new BadRequestException(
         '1004',
-        'Payment failed ' + paymentResponse.StatusDescription,
+        'Payment failed ' +
+          paymentResponse.StatusDescription +
+          ' ' +
+          paymentResponse.BillerStatus,
       );
     }
 

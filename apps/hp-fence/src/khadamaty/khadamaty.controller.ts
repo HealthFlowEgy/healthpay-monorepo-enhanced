@@ -197,7 +197,10 @@ export class KhadamatyController {
       if (serviceFees.StatusCode != 1) {
         return {
           service,
-          error: serviceFees.StatusDescription || 'خطأ في الخدمة',
+          error:
+            serviceFees.BillerStatus ||
+            serviceFees.StatusDescription ||
+            'خطأ في الخدمة',
         };
       }
 

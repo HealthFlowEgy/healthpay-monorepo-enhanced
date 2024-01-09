@@ -195,8 +195,10 @@ export class SharedKhadamatyService {
   }
 
   getFieldValue(field: any): any {
-    if (this.isNumber(field)) {
+    if (this.isNumber(field) && field.includes('.')) {
       return parseFloat(field).toFixed(2);
+    } else {
+      return field;
     }
 
     return field;

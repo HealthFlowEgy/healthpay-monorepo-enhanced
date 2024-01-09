@@ -96,6 +96,8 @@ export class SharedKhadamatyService {
       InqFields: this.parseBodyInqFields(body),
     };
 
+    this.logger.verbose('[Inquiry] inquryBody', inquryBody);
+
     const response = await this.khadamatyHttpRequest('Inquiry', inquryBody);
 
     if (response && response.ServiceId > 0) {
@@ -120,6 +122,8 @@ export class SharedKhadamatyService {
       Fees: 0.0,
       Fields: requestDetails.serviceFields,
     };
+
+    this.logger.verbose('[Inquiry] paymentBody', paymentBody);
 
     const response = await this.khadamatyHttpRequest('Payment', paymentBody);
 

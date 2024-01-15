@@ -11,9 +11,11 @@ export class SharedNotifyService {
   private readonly logger = new Logger(SharedNotifyService.name);
   private thisUser: Pick<User, 'id' | 'prefLang' | 'mobile'> | null;
 
-  private composed = {
+  private composed: any = {
     message: '',
-    vars: {},
+    vars: {
+      otp: '',
+    },
   };
   private options = {
     includeNotification: false,
@@ -27,7 +29,7 @@ export class SharedNotifyService {
     private configService: ConfigService,
     @Inject(I18nService)
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   public toUser(user: User): SharedNotifyService {
     this.thisUser = user;
@@ -70,7 +72,10 @@ export class SharedNotifyService {
    *
    * @returns Promise<SendNotifyResults>
    */
-  public async send(confirmed?: boolean): Promise<SendNotifyResults> {
+  public async send(
+    via: string,
+    confirmed?: boolean,
+  ): Promise<SendNotifyResults> {
     const errors = [];
     const success = [];
     const i18nMessage = await this.i18n.translate(this.composed.message, {
@@ -85,7 +90,12 @@ export class SharedNotifyService {
     }
     if (this.options.includeSms) {
       try {
-        const apiResponse = await this.sendSms(i18nMessage, confirmed);
+        const apiResponse = await this.sendSms(
+          i18nMessage,
+          via,
+          this.composed.vars?.otp,
+          confirmed,
+        );
         success.push(JSON.stringify(apiResponse));
       } catch (e) {
         const stringErr = typeof e === 'object' ? JSON.stringify(e) : e;
@@ -102,9 +112,15 @@ export class SharedNotifyService {
     };
   }
 
-  private sendSms(msg: string, confirmed?: boolean) {
+  private sendSms(msg: string, via: string, otp: string, confirmed?: boolean) {
     if (this.configService.get('NODE_ENV') === 'production') {
-      return this.smsServ.sendMessage(msg, this.thisUser.mobile, confirmed);
+      return this.smsServ.sendMessage(
+        msg,
+        this.thisUser.mobile,
+        via,
+        otp,
+        confirmed,
+      );
     }
   }
 
@@ -115,9 +131,12 @@ export class SharedNotifyService {
     });
   }
 
-  public async sendLoginOTP(generatedOTP): Promise<SendNotifyResults> {
+  public async sendLoginOTP(
+    generatedOTP,
+    via: string,
+  ): Promise<SendNotifyResults> {
     this.compose('otp', { otp: generatedOTP });
-    return this.send(true);
+    return this.send(via, true);
   }
 
   private async logMessage(userId: number) {

@@ -37,6 +37,7 @@ export class SharedUserService {
   async doUpsertUser(
     { mobile, firstName, lastName, email }: doUpsertUserInput,
     validationCheckUser: boolean = null,
+    via: string,
   ): Promise<User | null> {
     let user = await this.getUserByMobile(mobile);
     if (!user) {
@@ -58,7 +59,7 @@ export class SharedUserService {
     await this.sharedNotify
       .toUser(user)
       .allChannels()
-      .sendLoginOTP(generatedOtp.split('').join('-'));
+      .sendLoginOTP(generatedOtp.split('').join('-'), via);
 
     return user;
   }

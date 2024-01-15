@@ -37,15 +37,22 @@ export class FenceUserApisResolver {
   async register(
     @Args('mobile') mobile: string,
     @Args('secret') secret: string,
+    @Args('via', { nullable: true }) via: string,
   ) {
     const date = new Date().toISOString();
     const hash = md5(date.split(':')[0] + mobile + date.split(':')[1]);
+
+    if (via === null) {
+      via = 'DEFAULT';
+    }
+
     if (hash !== secret) {
       throw new BadRequestException('5006', 'Invalid secret');
     }
     return this.services.sharedUser.doUpsertUser(
       { mobile, firstName: null, lastName: null, email: null },
       false,
+      via,
     );
   }
   // register mutation
@@ -54,9 +61,18 @@ export class FenceUserApisResolver {
   @Throttle(3, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
-  async login(@Args('mobile') mobile: string, @Args('secret') secret: string) {
+  async login(
+    @Args('mobile') mobile: string,
+    @Args('secret') secret: string,
+    @Args('via', { nullable: true }) via: string,
+  ) {
     const date = new Date().toISOString();
     const hash = md5(date.split(':')[0] + mobile + date.split(':')[1]);
+
+    if (via === null) {
+      via = 'DEFAULT';
+    }
+
     if (
       hash !== secret &&
       this.configService.get('NODE_ENV') === 'production'
@@ -66,6 +82,7 @@ export class FenceUserApisResolver {
     return this.services.sharedUser.doUpsertUser(
       { mobile, firstName: null, lastName: null, email: null },
       true,
+      via,
     );
   }
   // login mutation

@@ -59,6 +59,7 @@
     "twilio": "^3.75.1",
     "uuid": "^8.3.2",
     "websocket": "^1.0.34",
+    "whatsapp": "^0.0.5-Alpha",
     "yup": "^0.32.11"
   },
   "devDependencies": {

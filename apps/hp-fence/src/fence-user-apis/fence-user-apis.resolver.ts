@@ -31,7 +31,7 @@ export class FenceUserApisResolver {
   }
 
   // register mutation
-  @Throttle(3, 60 * 60)
+  @Throttle(33, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async register(
@@ -58,7 +58,7 @@ export class FenceUserApisResolver {
   // register mutation
 
   // login mutation
-  @Throttle(3, 60 * 60)
+  @Throttle(33, 60 * 60)
   @UseGuards(GqlThrottlerGuard)
   @Mutation(() => User, { nullable: true })
   async login(

@@ -88,6 +88,7 @@ export class SharedNotifyService {
     if (this.options.includeEmail) {
       // TODO: Send email to user;
     }
+
     if (this.options.includeSms) {
       try {
         const apiResponse = await this.sendSms(
@@ -113,15 +114,15 @@ export class SharedNotifyService {
   }
 
   private sendSms(msg: string, via: string, otp: string, confirmed?: boolean) {
-    if (this.configService.get('NODE_ENV') === 'production') {
-      return this.smsServ.sendMessage(
-        msg,
-        this.thisUser.mobile,
-        via,
-        otp,
-        confirmed,
-      );
-    }
+    // if (this.configService.get('NODE_ENV') === 'production') {
+    return this.smsServ.sendMessage(
+      msg,
+      this.thisUser.mobile,
+      via,
+      otp,
+      confirmed,
+    );
+    // }
   }
 
   public async getTranslatedMessage() {

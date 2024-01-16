@@ -79,7 +79,7 @@ export class FenceCashoutRequestApisResolver {
           amount: amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','),
         })
         .allChannels()
-        .send(true);
+        .send('DEFAULT');
     } catch (e) {
       this.logger.error(
         '[FenceCashoutRequestApisResolver.createCashOutRequest.e]',

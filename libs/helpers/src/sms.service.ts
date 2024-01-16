@@ -31,17 +31,20 @@ export class SmsService {
       },
     });
 
+    this.logger.verbose(
+      '[SMS_BASEURL] ' + this.configService.get<string>('SMS_BASEURL'),
+    );
+    this.logger.verbose(
+      '[WA_BASE_URL] Bearer ' +
+        this.configService.get<string>('WA_ACCESS_TOKEN'),
+    );
+
     this.whatsapp_instance = axios.create({
-      baseURL:
-        this.configService.get<string>('WA_BASE_URL') ??
-        'https://graph.facebook.com/v17.0/183954578141914',
+      baseURL: 'https://graph.facebook.com',
       timeout: 20000,
       headers: {
         'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization:
-          'bearer ' + this.configService.get('WA_ACCESS_TOKEN') ??
-          'EAAPvbWS11vEBO05fIZAQL5juBD9rGiA8WXALvNEibLJwvwLswWBz32UnZBcSXyVlbwsutsh6jbSIiWVVt2MsIpoZB7T8NTUKfCUbXLlmsITHkwwBMeGOjaCR2ys3Sif5N412odR4ZBm4KihlOPBgikpe3pxdODC7qLOsKFP3S92phsyXgwIuaINpndpirGxgboFx40k1yJYqkw0ai4D5ZAJifZA5yZBzYJKRu3K0wBV7n4ZD',
+        Authorization: 'Bearer ' + this.configService.get('WA_ACCESS_TOKEN'),
       },
     });
   }
@@ -77,44 +80,55 @@ export class SmsService {
   }
 
   async whatsapp(otp: string, recipient: number): Promise<boolean> {
-    const response = await this.whatsapp_instance.post('/messages', {
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      to: recipient,
-      type: 'template',
-      template: {
-        name: this.configService.get('WA_TEMPLATE_NAME'),
-        language: {
-          code: 'en_US',
+    try {
+      const response = await this.whatsapp_instance.post(
+        this.configService.get('WA_POST_URL'),
+        {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: recipient,
+          type: 'template',
+          template: {
+            name: 'healthpay',
+            language: {
+              code: 'ar',
+            },
+            components: [
+              {
+                type: 'body',
+                parameters: [
+                  {
+                    type: 'text',
+                    text: otp.replace(/[^a-zA-Z0-9 ]/g, '').replace('/', ''),
+                  },
+                ],
+              },
+              {
+                type: 'button',
+                sub_type: 'url',
+                index: '0',
+                parameters: [
+                  {
+                    type: 'text',
+                    text: otp.replace(/[^a-zA-Z0-9 ]/g, '').replace('/', ''),
+                  },
+                ],
+              },
+            ],
+          },
         },
-        components: [
-          {
-            type: 'body',
-            parameters: [
-              {
-                type: 'text',
-                text: otp.replace('-', '').replace('/', ''),
-              },
-            ],
-          },
-          {
-            type: 'button',
-            sub_type: 'url',
-            index: '0',
-            parameters: [
-              {
-                type: 'text',
-                text: otp,
-              },
-            ],
-          },
-        ],
-      },
-    });
+      );
 
-    this.logger.verbose('[WHATSAPP_RESPONSE] response', response);
+      this.logger.verbose('[WHATSAPP_RESPONSE] response', response.data);
 
-    return response.status === 200;
+      return response.status === 200;
+    } catch (e) {
+      this.logger.error('[WHATSAPP_RESPONSE] error', {
+        e: e,
+        error: e.response.data,
+        whatsapp_instance: this.whatsapp_instance,
+      });
+    }
   }
 
   async sendMessage(
@@ -124,6 +138,18 @@ export class SmsService {
     otp: string,
     confirmed?: boolean,
   ) {
+    this.logger.verbose(
+      '[sendMessage] messageText',
+      messageText,
+      'recipients',
+      recipients,
+      'via',
+      via,
+      'otp',
+      otp,
+      'confirmed',
+      confirmed,
+    );
     if (via == null || via === 'DEFAULT') {
       this.logger.verbose('[sendMessage] recipients', recipients);
       // if (recipients.startsWith('+2011')) {

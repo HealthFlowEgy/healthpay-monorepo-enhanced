@@ -89,15 +89,6 @@ export class FenceUserApisResolver {
 
   // auth mutation
   @Mutation(() => UserWithToken, { nullable: true })
-  // @UsePipes(
-  //   new NestjsGraphqlValidator({
-  //     otp: { maxLen: 6, minLen: 1 },
-  //     mobile: {
-  //       regExp:
-  //         /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,5})|(\(?\d{2,6}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/,
-  //     },
-  //   }),
-  // )
   async authUser(
     @Args('mobile') mobile: string,
     @Args('otp') otp: string,
@@ -151,6 +142,7 @@ export class FenceUserApisResolver {
   async updateProfile(
     @Args('firstName') firstName: string,
     @Args('lastName') lastName: string,
+    @Args('deviceToken', { nullable: true }) deviceToken: string,
     @Args('email', { nullable: true }) email: string,
     @Args('avatar', { nullable: true }) avatar: string,
     @Args('nationalId', { nullable: true }) nationalId: string,
@@ -166,8 +158,22 @@ export class FenceUserApisResolver {
       nationalDoc: nationalDoc,
       uid: user.uid,
     };
+
     return this.services.sharedUser.doUpdateUser({
       ...updateUserInput,
+      deviceTokens: {
+        connectOrCreate: {
+          where: {
+            user_id_token_unique: {
+              user_id: user.id,
+              token: deviceToken,
+            },
+          },
+          create: {
+            token: deviceToken,
+          },
+        },
+      },
       nationalDocFront: undefined,
       nationalDocBack: undefined,
     });

@@ -56,6 +56,7 @@ model User {
   MerchantAdmins            MerchantAdmins[]
   notifications             Notification[]
   otp                       OTP[]
+  cards                     Card[]
   medCards                  MedCard[]
   paymentRequests           PaymentRequest[]         @relation("UserPaymentRequests")
   sentPaymentRequests       PaymentRequest[]         @relation("UserSentPaymentRequests")
@@ -67,6 +68,27 @@ model User {
   notifyTokens              UserNotifyTokens[]
   verificationRequest       UserVerificationRequest?
   wallet                    Wallet?
+  deviceTokens              DeviceTokens[]
+}
+
+model Card {
+  id        Int       @id @default(autoincrement())
+  user_id   Int       @unique
+  user      User      @relation(fields: [user_id], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
+}
+
+model DeviceTokens {
+  id        Int       @id @default(autoincrement())
+  token     String?   @unique @db.VarChar(200)
+  user_id   Int
+  user      User      @relation(fields: [user_id], references: [id])
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
+
+  @@unique([user_id, token], name: "user_id_token_unique")
 }
 
 model IpActivity {

@@ -92,6 +92,7 @@ export class SharedUserService {
       | 'nationalDocFront'
       | 'nationalDocBack'
       | 'uid'
+      | 'deviceTokens'
     >,
   ): Promise<User> {
     return this.prisma.user.update({

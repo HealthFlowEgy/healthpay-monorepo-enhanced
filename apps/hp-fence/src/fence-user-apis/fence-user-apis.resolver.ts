@@ -159,24 +159,29 @@ export class FenceUserApisResolver {
       uid: user.uid,
     };
 
-    return this.services.sharedUser.doUpdateUser({
+    const response = await this.services.sharedUser.doUpdateUser({
       ...updateUserInput,
-      deviceTokens: {
-        connectOrCreate: {
-          where: {
-            user_id_token_unique: {
-              user_id: user.id,
-              token: deviceToken,
-            },
-          },
-          create: {
-            token: deviceToken,
-          },
-        },
-      },
+      deviceTokens:
+        deviceToken != null
+          ? {
+              connectOrCreate: {
+                where: {
+                  user_id_token_unique: {
+                    user_id: user.id,
+                    token: deviceToken,
+                  },
+                },
+                create: {
+                  token: deviceToken,
+                },
+              },
+            }
+          : undefined,
       nationalDocFront: undefined,
       nationalDocBack: undefined,
     });
+
+    return response;
   }
   // update profile mutation
 

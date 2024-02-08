@@ -95,6 +95,12 @@ export class SharedUserService {
       | 'deviceTokens'
     >,
   ): Promise<User> {
+
+    // ignore device token if null
+    if (user.deviceTokens === null) {
+      delete user.deviceTokens;
+    }
+
     return this.prisma.user.update({
       where: { uid: user.uid as string },
       data: { ...user },

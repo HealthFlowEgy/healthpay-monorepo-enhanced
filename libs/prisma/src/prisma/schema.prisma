@@ -239,15 +239,21 @@ model ProviderAuthMerchant {
 }
 
 model Wallet {
-  id                Int       @id @default(autoincrement())
-  userId            Int       @unique
-  total             Float
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime? @default(now()) @updatedAt
-  financingAmount   Float?    @default(0)
-  user              User      @relation(fields: [userId], references: [id])
-  payableBalance    Balance[] @relation("PayableBalance")
-  receivableBalance Balance[] @relation("ReceivableBalance")
+  id              Int       @id @default(autoincrement())
+  userId          Int       @unique
+  total           Float
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime? @default(now()) @updatedAt
+  financingAmount Float?    @default(0)
+
+  isSubscribable Boolean @default(false)
+  isSubscribed   Boolean @default(false)
+
+  user              User                 @relation(fields: [userId], references: [id])
+  payableBalance    Balance[]            @relation("PayableBalance")
+  receivableBalance Balance[]            @relation("ReceivableBalance")
+  subscribedWallets WalletSubscription[] @relation("walletToPayerWallet")
+  parentWallets     WalletSubscription[] @relation("walletToPayeeWallet")
 }
 
 model FinancingCompany {
@@ -304,6 +310,7 @@ model Balance {
   updatedAt            DateTime?    @updatedAt
   confirmedAt          DateTime?
   rejectedAt           DateTime?
+  isDueToWalletSub     Boolean?     @default(false) // if true, then it's due to wallet subscription 
   payableMerchant      Merchant?    @relation("PayableMerchantBalance", fields: [payableMerchantId], references: [id])
   payableWallet        Wallet?      @relation("PayableBalance", fields: [payableWalletId], references: [id])
   receivableMerchant   Merchant?    @relation("ReceivableMerchantBalance", fields: [receivableMerchantId], references: [id])
@@ -479,6 +486,25 @@ model UserPayoutServiceRequest {
   updatedAt DateTime?    @default(now()) @updatedAt
 }
 
+model WalletSubscription {
+  id            Int @id @default(autoincrement())
+  payerWalletId Int
+  payeeWalletId Int
+
+  payerWallet Wallet? @relation("walletToPayerWallet", fields: [payerWalletId], references: [id])
+  payeeWallet Wallet? @relation("walletToPayeeWallet", fields: [payeeWalletId], references: [id])
+
+  activeFrom DateTime
+  activeTo   DateTime?
+  status     WalletSubscriptionStatus @default(INVITED)
+  isDefault  Boolean                  @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
+
+  @@unique([payerWalletId, payeeWalletId], name: "walletToSubWallet_unique")
+}
+
 enum PaymentRequestConsent {
   FORCED
   ACCEPTED
@@ -547,4 +573,12 @@ enum PaymentRequest_status {
   CANCELLED
   APPROVED
   DECLINED
+}
+
+enum WalletSubscriptionStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  CANCELLED
 }

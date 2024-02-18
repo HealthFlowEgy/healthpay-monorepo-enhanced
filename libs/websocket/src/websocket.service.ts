@@ -63,7 +63,7 @@ export class WebsocketService {
    * close websocket
    */
   onClose() {
-    this.logger.error('[HP_LEDGER] CLOSED');
+    // this.logger.error('[HP_LEDGER] CLOSED');
     this.reconnect();
   }
 
@@ -109,7 +109,7 @@ export class WebsocketService {
    * reconnect websocket
    */
   reconnect() {
-    this.logger.verbose(`reconnect in ${this.retryMS}`);
+    // this.logger.verbose(`reconnect in ${this.retryMS}`);
     clearTimeout(this.retryTO);
     this.retryTO = setTimeout(() => this.init(), this.retryMS);
   }

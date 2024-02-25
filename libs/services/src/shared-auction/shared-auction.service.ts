@@ -6,6 +6,8 @@ import { ConfigService } from '@nestjs/config';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedUserService } from '../shared-user/shared-user.service';
 import { AuctionUsers, Prisma, AuctionOffersStatus } from '@prisma/client';
+import { SharedBalanceService } from '../shared-balance/shared-balance.service';
+import { SharedMerchantService } from '../shared-merchant/shared-merchant.service';
 
 
 type AuctionWithMembers = AuctionOffers & {
@@ -18,6 +20,8 @@ export class SharedAuctionService {
 
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
+    @Inject(SharedBalanceService) private sharedBalance: SharedBalanceService,
+    @Inject(SharedMerchantService) private sharedMerchant: SharedMerchantService,
     @Inject(SharedUserService) private sharedUser: SharedUserService,
     @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
     @Inject(HelpersService) private helpers: HelpersService,
@@ -96,6 +100,8 @@ export class SharedAuctionService {
         .compose(element.isWinner ? 'auction_winning' : 'auction_losing', { auctionId: auction.id, itemName: auction.name })
         .notify()
         .send('default');
+
+
     }
 
     this.markAuctionAsCompleted(auction);
@@ -152,6 +158,14 @@ export class SharedAuctionService {
       await this.onAuctionMaxApplicants(auction);
       throw new BadRequestException('9002', 'auction is full');
     }
+    
+    const hpMerchant = await this.sharedMerchant.cashInMerchant();
+    await this.sharedBalance.doTransFromUserToMerchant(
+      hpMerchant.id,
+      user.id,
+      auction.price,
+      'due to apply for auction ' + auction.name + ' with id ' + auction.id,
+    );
 
     const userAuction = await this.prisma.auctionUsers.create({
       data: {
@@ -168,6 +182,8 @@ export class SharedAuctionService {
         }
       },
     });
+
+
 
     return auction;
   }

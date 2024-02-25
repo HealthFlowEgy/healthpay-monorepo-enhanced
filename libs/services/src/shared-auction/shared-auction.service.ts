@@ -154,12 +154,6 @@ export class SharedAuctionService {
       throw new BadRequestException('9001', 'user already have active auctions');
     }
 
-    if (auction.maxApplicants === auction.AuctionUsers.length + 1) {
-      await this.onAuctionMaxApplicants(auction);
-      if (auction.maxApplicants < auction.AuctionUsers.length + 1) {
-        throw new BadRequestException('9002', 'auction is full');
-      }
-    }
 
     const hpMerchant = await this.sharedMerchant.cashInMerchant();
     await this.sharedBalance.doTransFromUserToMerchant(
@@ -168,6 +162,15 @@ export class SharedAuctionService {
       auction.price,
       'due to apply for auction ' + auction.name + ' with id ' + auction.id,
     );
+
+
+    if (auction.maxApplicants <= auction.AuctionUsers.length + 1) {
+      await this.onAuctionMaxApplicants(auction);
+      if (auction.maxApplicants < auction.AuctionUsers.length + 1) {
+        throw new BadRequestException('9002', 'auction is full');
+      }
+    }
+
 
     const userAuction = await this.prisma.auctionUsers.create({
       data: {

@@ -128,33 +128,33 @@ export class SharedWalletService {
   ): Promise<boolean> {
     let amountFromParentWallet = 0;
 
-    const parentWallet = await this.getParentWallets(pWallet);
-    // check if there are parent wallets
-    if (parentWallet != null) {
-      const defaultWallet = await this.getDefaultParentWallet(pWallet);
+    // const parentWallet = await this.getParentWallets(pWallet);
+    // // check if there are parent wallets
+    // if (parentWallet != null) {
+    //   const defaultWallet = await this.getDefaultParentWallet(pWallet);
 
-      amountFromParentWallet =
-        await this.sharedWalletSubscription.getCoPaymentAmountFromWalletStrategy(
-          amount,
-          defaultWallet,
-          pWallet,
-        );
+    //   amountFromParentWallet =
+    //     await this.sharedWalletSubscription.getCoPaymentAmountFromWalletStrategy(
+    //       amount,
+    //       defaultWallet,
+    //       pWallet,
+    //     );
 
-      if (amountFromParentWallet > 0) {
-        await this.sharedBalance.doTransFromUserToUser(
-          rWallet.userId,
-          defaultWallet.userId,
-          amountFromParentWallet,
-          'deducted due to wallet subscription payment',
-          true,
-        );
+    //   if (amountFromParentWallet > 0) {
+    //     await this.sharedBalance.doTransFromUserToUser(
+    //       rWallet.userId,
+    //       defaultWallet.userId,
+    //       amountFromParentWallet,
+    //       'deducted due to wallet subscription payment',
+    //       true,
+    //     );
 
-        // temporary fix for the total amount (assumed to be transferred from parent wallet to user wallet)
-        pWallet.total = pWallet.total + amountFromParentWallet;
+    //     // temporary fix for the total amount (assumed to be transferred from parent wallet to user wallet)
+    //     pWallet.total = pWallet.total + amountFromParentWallet;
 
-        await sleep(5000);
-      }
-    }
+    //     await sleep(5000);
+    //   }
+    // }
 
     const safety = safetyCheck || true;
     if (safety && pWallet.total < amount) {

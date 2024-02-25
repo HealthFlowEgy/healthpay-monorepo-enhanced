@@ -74,8 +74,8 @@ export class SharedWalletSubscriptionService {
       (
         await this.prisma.walletSubscription.findMany({
           where: {
-            payerWalletId: parentWallet.id,
-            payeeWalletId: subWallet.id,
+            payerWalletId: parentWallet?.id,
+            payeeWalletId: subWallet?.id,
             status: onlyActive ? 'ACTIVE' : undefined,
             activeTo: {
               gte: moment().toISOString(),

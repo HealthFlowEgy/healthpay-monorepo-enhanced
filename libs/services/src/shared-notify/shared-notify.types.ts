@@ -8,4 +8,6 @@ export type AvailableMessages =
   | 'login'
   | 'charge'
   | 'deduct'
-  | 'cashout';
+  | 'cashout'
+  | 'auction_winning'
+  | 'auction_losing';

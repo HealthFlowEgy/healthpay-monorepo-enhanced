@@ -1,5 +1,7 @@
 {
   "otp": "Healthpay LLc: please use {otp} for Healthpay app. valid for 10 minutes",
   "deduct": "{amount}EGP has been deducted from your healthpay wallet for more info visit http://healthpay.tech",
-  "cashout": "New cashout request with amount: {amount} EGP , pending requests amount: {totalAmount} EGP"
+  "cashout": "New cashout request with amount: {amount} EGP , pending requests amount: {totalAmount} EGP",
+  "auction_losing": "Sorry, you lost the auction for {itemName}. but still you can enjoy your healthpay Card",
+  "auction_winning": "Congratulations, you won the auction for {itemName}."
 }

@@ -21,6 +21,8 @@ import { SharedNotificationsService } from './shared-notifications/shared-notifi
 import { SharedFinanceService } from './shared-finance/shared-finance.service';
 import { SharedKhadamatyService } from './shared-khadamaty/shared-khadamaty.service';
 import { HttpModule } from '@nestjs/axios';
+import { SharedWalletSubscriptionService } from './shared-wallet-subscription/shared-wallet-subscription.service';
+import { SharedAuctionService } from './shared-auction/shared-auction.service';
 
 @Module({
   imports: [
@@ -49,11 +51,13 @@ import { HttpModule } from '@nestjs/axios';
     SharedHpOpsService,
     SharedPaymentRequestService,
     SharedWalletService,
+    SharedWalletSubscriptionService,
     SharedUtxoService,
     SharedCronService,
     SharedNotificationsService,
     SharedFinanceService,
     SharedKhadamatyService,
+    SharedAuctionService,
   ],
   exports: [ServicesService],
 })

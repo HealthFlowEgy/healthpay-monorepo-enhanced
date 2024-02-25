@@ -69,6 +69,7 @@ model User {
   verificationRequest       UserVerificationRequest?
   wallet                    Wallet?
   deviceTokens              DeviceTokens[]
+  AuctionUsers              AuctionUsers[]
 }
 
 model Card {
@@ -494,15 +495,49 @@ model WalletSubscription {
   payerWallet Wallet? @relation("walletToPayerWallet", fields: [payerWalletId], references: [id])
   payeeWallet Wallet? @relation("walletToPayeeWallet", fields: [payeeWalletId], references: [id])
 
-  activeFrom DateTime
-  activeTo   DateTime?
-  status     WalletSubscriptionStatus @default(INVITED)
-  isDefault  Boolean                  @default(false)
+  activeTo  DateTime?
+  status    WalletSubscriptionStatus @default(INVITED)
+  isDefault Boolean                  @default(false)
+
+  strategy String? @default("DEFAULT")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @default(now()) @updatedAt
 
   @@unique([payerWalletId, payeeWalletId], name: "walletToSubWallet_unique")
+}
+
+model AuctionOffers {
+  id Int @id @default(autoincrement())
+
+  price  Float
+  status AuctionOffersStatus @default(PENDING)
+  img    String?
+  name   String
+
+  desc          String? @db.Text
+  maxApplicants Int     @default(0)
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @updatedAt
+  AuctionUsers AuctionUsers[]
+}
+
+model AuctionUsers {
+  id Int @id @default(autoincrement())
+
+  userId  Int
+  offerId Int
+
+  isWinner Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user  User          @relation(fields: [userId], references: [id])
+  offer AuctionOffers @relation(fields: [offerId], references: [id])
+
+  @@unique([userId, offerId], name: "user_offer_unique")
 }
 
 enum PaymentRequestConsent {
@@ -581,4 +616,11 @@ enum WalletSubscriptionStatus {
   INACTIVE
   SUSPENDED
   CANCELLED
+}
+
+enum AuctionOffersStatus {
+  PENDING
+  CANCELLED
+  COMPLETED
+  DECLINED
 }

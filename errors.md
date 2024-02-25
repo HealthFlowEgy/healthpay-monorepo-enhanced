@@ -44,3 +44,9 @@
 - `2002`: user not found
 - `2003`: user already exists
 - `2009`: Api header or IP is invalid
+
+
+### 9xxx (auction errors)
+
+- `9001`: user already have active auctions
+- `9001`: auction is full

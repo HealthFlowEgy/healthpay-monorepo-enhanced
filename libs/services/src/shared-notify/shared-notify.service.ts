@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { I18nService } from 'nestjs-i18n';
 import { AvailableMessages, SendNotifyResults } from './shared-notify.types';
+import { FirebaseService } from '@app/helpers/firebase.service';
 
 @Injectable()
 export class SharedNotifyService {
@@ -25,11 +26,12 @@ export class SharedNotifyService {
 
   constructor(
     @Inject(SmsService) private smsServ: SmsService,
+    @Inject(FirebaseService) private fcmServ: FirebaseService,
     @Inject(PrismaService) private prisma: PrismaService,
     private configService: ConfigService,
     @Inject(I18nService)
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   public toUser(user: User): SharedNotifyService {
     this.thisUser = user;
@@ -79,11 +81,11 @@ export class SharedNotifyService {
     const errors = [];
     const success = [];
     const i18nMessage = await this.i18n.translate(this.composed.message, {
-      lang: this.thisUser.prefLang,
+      lang: "ar",
       args: this.composed.vars,
     });
     if (this.options.includeNotification) {
-      // TODO: Send push notification to user;
+      this.sendFCMNotification(i18nMessage, this.composed.vars?.otp);
     }
     if (this.options.includeEmail) {
       // TODO: Send email to user;
@@ -123,6 +125,20 @@ export class SharedNotifyService {
       confirmed,
     );
     // }
+  }
+
+  private async sendFCMNotification(msg: string, otp: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: this.thisUser.id,
+      },
+      include: {
+        deviceTokens: true,
+      },
+    });
+    const tokens = user.deviceTokens.map((t) => t.token);
+
+    return this.fcmServ.sendMessage(msg, tokens, 'fcm', otp, true);
   }
 
   public async getTranslatedMessage() {

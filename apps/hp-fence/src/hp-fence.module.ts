@@ -32,6 +32,8 @@ import { WebsocketModule } from '@app/websocket';
 import path from 'path';
 import { FenceUserMedCardsResolver } from './fence-user-med-cards/fence-user-med-cards.resolver';
 import { KhadamatyController } from './khadamaty/khadamaty.controller';
+import { FenceAuctionApisResolver } from './fence-auction-apis/fence-auction-apis.resolver';
+import { AuctionModelResolver } from './models/fence-auction.model';
 
 @Module({
   imports: [
@@ -86,10 +88,12 @@ import { KhadamatyController } from './khadamaty/khadamaty.controller';
     FenceFinancingApisResolver,
     PaymentRequestApisResolver,
     FenceUserMedCardsResolver,
+    FenceAuctionApisResolver,
+    AuctionModelResolver,
     // {
     //   provide: APP_GUARD,
     //   useClass: GqlThrottlerGuard,
     // },
   ],
 })
-export class HpFenceModule {}
+export class HpFenceModule { }

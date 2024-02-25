@@ -2,8 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import Twilio from 'twilio';
+import { MessagingContract } from './messaging.contract';
 @Injectable()
-export class SmsService {
+export class SmsService implements MessagingContract {
   instance: AxiosInstance | null = null;
   mobi_instance: AxiosInstance | null = null;
   whatsapp_instance: AxiosInstance | null = null;
@@ -133,11 +134,11 @@ export class SmsService {
 
   async sendMessage(
     messageText: string,
-    recipients: string,
+    recipients: string | string[],
     via: string,
     otp: string,
     confirmed?: boolean,
-  ) {
+  ): Promise<boolean> {
     this.logger.verbose(
       '[sendMessage] messageText',
       messageText,
@@ -150,18 +151,21 @@ export class SmsService {
       'confirmed',
       confirmed,
     );
+
     if (via == null || via === 'DEFAULT') {
       this.logger.verbose('[sendMessage] recipients', recipients);
-      // if (recipients.startsWith('+2011')) {
+      recipients = typeof recipients === 'string' ? recipients : recipients[0];
       const mobiShastra = await this.mshastra(messageText, recipients);
       this.logger.verbose('[mobiShastra] ' + mobiShastra);
-      // } else {
+
       try {
         const msgObject = {
           senderName: this.configService.get<string>('SMS_SENDERID'),
           messageType: 'text',
           messageText,
-          recipients,
+          recipients: Array.isArray(recipients)
+            ? recipients.join(',')
+            : recipients,
         };
         if (!this.access_token) {
           await this.getAccessToken();
@@ -177,33 +181,12 @@ export class SmsService {
           message: `[sendMessage] ${JSON.stringify(e)}`,
           error: e,
         });
-        // }
-
-        // if (confirmed) {
-        //   try {
-        //     this.tClinet = Twilio(
-        //       this.configService.get<string>('TWILIO_SID'),
-        //       this.configService.get<string>('TWILIO_AUTH_TOKEN'),
-        //     );
-        //     this.tClinet.messages
-        //       .create({
-        //         body: messageText,
-        //         to: recipients, // Text this number
-        //         from: this.configService.get<string>('TWILIO_NUMBER'), // From a valid Twilio number
-        //       })
-        //       .then((message) => this.logger.verbose(message.sid))
-        //       .catch((e) => {
-        //         this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
-        //       });
-        //   } catch (e) {
-        //     this.logger.error(`[Twiliorror] ${JSON.stringify(e)}`);
-        //   }
-        // }
       }
     } else if (via === 'WHATSAPP') {
+      recipients = typeof recipients === 'string' ? recipients : recipients[0];
       const wa_response = await this.whatsapp(otp, parseInt(recipients));
     }
 
-    return {};
+    return true;
   }
 }

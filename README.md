@@ -36,3 +36,6 @@ Merchant authentication, you can find your `api-header` and `apiKey` at your hea
 
 After completed the first step successfully you should obtain an API `token` which is in mandatory the upcoming steps.
 in this step you will authenticate the user/provider to your merchant to grant your merchant a set of permissions over this provider/user (deduct/add amount),(view/log balance).
+
+
+

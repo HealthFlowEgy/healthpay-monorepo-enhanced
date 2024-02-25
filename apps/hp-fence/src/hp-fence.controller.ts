@@ -8,7 +8,22 @@ export class HpFenceController {
     private readonly hpFenceService: HpFenceService,
     @Inject(ServicesService)
     private serviceService: ServicesService,
-  ) {}
+  ) { }
+
+
+  @Get('/sendFCM')
+  async sendFCM(): Promise<any> {
+    const message = 'Hello from FCM';
+
+
+    const puser = await this.serviceService.sharedUser.getUserById(95);
+
+    this.serviceService.sharedNotify
+      .toUser(puser)
+      .compose('auction_losing', { amount: 5 })
+      .notify()
+      .send('default');
+  }
 
   @Get('/test')
   async getHello(): Promise<any> {

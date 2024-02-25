@@ -29,10 +29,13 @@ export class FenceWalletApisResolver {
         endDate,
         take,
       );
+
     return {
       id: wallet.id,
       total: wallet.total,
       balance: balance,
+      owner: user,
+      parentWallets: await this.services.sharedWallet.getParentWallets(wallet),
     };
   }
 

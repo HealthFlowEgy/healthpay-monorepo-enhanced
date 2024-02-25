@@ -38,4 +38,9 @@ export class HelpersService {
   public async handlebarHelpers() {
 
   }
+
+
+  public async pickRandomElementFromArray(arr: any[]): Promise<any> {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
 }

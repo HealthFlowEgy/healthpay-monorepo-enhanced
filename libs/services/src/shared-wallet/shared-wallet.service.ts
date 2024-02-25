@@ -14,6 +14,8 @@ import { Prisma, Wallet } from '@prisma/client';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedPaymentRequestService } from '../shared-payment-request/shared-payment-request.service';
+import { SharedWalletSubscriptionService } from '../shared-wallet-subscription/shared-wallet-subscription.service';
+import { sleep } from '../shared-cron/shared-cron.service';
 
 @Injectable()
 export class SharedWalletService {
@@ -22,12 +24,18 @@ export class SharedWalletService {
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
     @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
+
     @Inject(forwardRef(() => SharedBalanceService))
     private sharedBalance: SharedBalanceService,
+
+    @Inject(forwardRef(() => SharedWalletSubscriptionService))
+    private sharedWalletSubscription: SharedWalletSubscriptionService,
+
     @Inject(SharedPaymentRequestService)
     private sharedPaymentRequests: SharedPaymentRequestService,
+
     private eventEmitter: EventEmitter2,
-  ) { }
+  ) {}
 
   async getAllWallets(where?: any): Promise<Wallet[]> {
     return this.prisma.wallet.findMany(where);
@@ -44,8 +52,8 @@ export class SharedWalletService {
     return this.prisma.siteSettings.findFirst({
       where: {
         key: 'cashout',
-      }
-    })
+      },
+    });
   }
   async getWalletByUserUID(userUID: string): Promise<Wallet> {
     const wallet = await this.prisma.user
@@ -99,6 +107,17 @@ export class SharedWalletService {
     return wallet;
   }
 
+  /**
+   * main function to transfer amount between wallets
+   *
+   * @param rWallet receivable wallet
+   * @param pWallet payer wallet
+   * @param amount amount to transfer
+   * @param txId transaction id
+   * @param safetyCheck
+   * @param notify notify user about the transaction
+   * @returns boolean
+   */
   async transferAmountBetweenWallets(
     rWallet: Wallet,
     pWallet: Wallet,
@@ -107,6 +126,36 @@ export class SharedWalletService {
     safetyCheck?: boolean,
     notify?: boolean,
   ): Promise<boolean> {
+    let amountFromParentWallet = 0;
+
+    const parentWallet = await this.getParentWallets(pWallet);
+    // check if there are parent wallets
+    if (parentWallet != null) {
+      const defaultWallet = await this.getDefaultParentWallet(pWallet);
+
+      amountFromParentWallet =
+        await this.sharedWalletSubscription.getCoPaymentAmountFromWalletStrategy(
+          amount,
+          defaultWallet,
+          pWallet,
+        );
+
+      if (amountFromParentWallet > 0) {
+        await this.sharedBalance.doTransFromUserToUser(
+          rWallet.userId,
+          defaultWallet.userId,
+          amountFromParentWallet,
+          'deducted due to wallet subscription payment',
+          true,
+        );
+
+        // temporary fix for the total amount (assumed to be transferred from parent wallet to user wallet)
+        pWallet.total = pWallet.total + amountFromParentWallet;
+
+        await sleep(5000);
+      }
+    }
+
     const safety = safetyCheck || true;
     if (safety && pWallet.total < amount) {
       this.logger.error(`[transferAmountBetweenWallets] 7001 ${pWallet.id}`);
@@ -125,21 +174,19 @@ export class SharedWalletService {
         },
       });
     }
-    // const updatePayableWallet = await this.prisma.wallet.update({
-    //   where: { id: pWallet.id },
-    //   data: { total: pWallet.total - amount },
-    // });
+
     // TODO: add healthpay commission
-    // if (notify) {
-    //   const pUser = await this.prisma.wallet
-    //     .findFirst({ where: { id: pWallet.id } })
-    //     .user();
-    //   this.sharedNotify
-    //     .toUser(pUser)
-    //     .compose('deduct', { amount })
-    //     .allChannels()
-    //     .send(false);
-    // }
+    if (notify) {
+      const pUser = await this.prisma.wallet
+        .findFirst({ where: { id: pWallet.id } })
+        .user();
+
+      this.sharedNotify
+        .toUser(pUser)
+        .compose('deduct', { amount })
+        .notify()
+        .send('default');
+    }
 
     this.eventEmitter.emit(
       WEBSOCKET_EVENTS.PRISMA_NEW_TX,
@@ -150,7 +197,37 @@ export class SharedWalletService {
     //   where: { id: rWallet.id },
     //   data: { total: rWallet.total + amount },
     // });
+
     return true;
+  }
+
+  async getParentWallets(
+    wallet: Wallet,
+    defaultOnly = false,
+  ): Promise<Wallet[]> {
+    return (
+      await this.prisma.walletSubscription.findMany({
+        where: {
+          isDefault: defaultOnly == true ? true : undefined,
+          payeeWalletId: wallet.id,
+        },
+        include: {
+          payerWallet: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      })
+    ).map((ws) => ({
+      ...ws,
+      ...ws.payerWallet,
+    }));
+  }
+
+  async getDefaultParentWallet(wallet: Wallet): Promise<Wallet | null> {
+    const subToWallets = await this.getParentWallets(wallet, true);
+    return subToWallets[0] || null;
   }
 
   async walletWithStartDate(

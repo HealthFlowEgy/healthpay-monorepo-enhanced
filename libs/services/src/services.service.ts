@@ -13,12 +13,16 @@ import { SharedTransactionService } from './shared-transaction/shared-transactio
 import { SharedUserService } from './shared-user/shared-user.service';
 import { SharedWalletService } from './shared-wallet/shared-wallet.service';
 import { SharedKhadamatyService } from './shared-khadamaty/shared-khadamaty.service';
+import { SharedWalletSubscriptionService } from './shared-wallet-subscription/shared-wallet-subscription.service';
+import { SharedAuctionService } from './shared-auction/shared-auction.service';
 
 @Injectable()
 export class ServicesService {
   constructor(
     @Inject(SharedUserService) public sharedUser: SharedUserService,
     @Inject(SharedWalletService) public sharedWallet: SharedWalletService,
+    @Inject(SharedWalletSubscriptionService)
+    public sharedWalletSubscription: SharedWalletSubscriptionService,
     @Inject(SharedMerchantService) public sharedMerchant: SharedMerchantService,
     @Inject(SharedNotifyService) public sharedNotify: SharedNotifyService,
     @Inject(SharedBalanceService) public sharedBalance: SharedBalanceService,
@@ -41,5 +45,9 @@ export class ServicesService {
 
     @Inject(SharedKhadamatyService)
     public sharedKhadamatyService: SharedKhadamatyService,
+
+
+    @Inject(SharedAuctionService)
+    public sharedAuctionService: SharedAuctionService,
   ) {}
 }

@@ -43,6 +43,7 @@ export class SharedBalanceService {
     pMerchantId: number,
     amount: number,
     notes?: string,
+    isDueToWalletSub = false,
   ): Promise<Balance> {
     const rWallet = await this.sharedWallet.getWalletByUserId(rUserId);
     const pWallet = await this.sharedWallet.getWalletByMerchantId(pMerchantId);
@@ -75,6 +76,7 @@ export class SharedBalanceService {
         },
         type: 'M2U',
         notes,
+        isDueToWalletSub,
       },
     });
   }
@@ -84,6 +86,7 @@ export class SharedBalanceService {
     pMerchantId: number,
     amount: number,
     notes?: string,
+    isDueToWalletSub = false,
   ): Promise<Balance> {
     const rWallet = await this.sharedWallet.getWalletByMerchantId(rMerchantId);
     const pWallet = await this.sharedWallet.getWalletByMerchantId(pMerchantId);
@@ -121,6 +124,7 @@ export class SharedBalanceService {
         },
         type: 'M2M',
         notes,
+        isDueToWalletSub,
       },
     });
   }
@@ -130,6 +134,7 @@ export class SharedBalanceService {
     pUserId: number,
     amount: number,
     notes?: string,
+    isDueToWalletSub = false,
   ): Promise<Balance> {
     const rWallet = await this.sharedWallet.getWalletByUserId(rUserId);
     const pWallet = await this.sharedWallet.getWalletByUserId(pUserId);
@@ -157,6 +162,7 @@ export class SharedBalanceService {
         },
         type: 'U2U',
         notes,
+        isDueToWalletSub,
       },
     });
   }
@@ -166,6 +172,7 @@ export class SharedBalanceService {
     pUserId: number,
     amount: number,
     notes?: string,
+    isDueToWalletSub = false,
   ): Promise<Balance> {
     const rWallet = await this.sharedWallet.getWalletByMerchantId(rMerchantId);
     const pWallet = await this.sharedWallet.getWalletByUserId(pUserId);
@@ -199,6 +206,8 @@ export class SharedBalanceService {
         },
         type: 'U2M',
         notes,
+
+        isDueToWalletSub,
       },
     });
   }

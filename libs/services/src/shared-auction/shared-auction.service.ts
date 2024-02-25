@@ -154,9 +154,11 @@ export class SharedAuctionService {
       throw new BadRequestException('9001', 'user already have active auctions');
     }
 
-    if (auction.maxApplicants === auction.AuctionUsers.length) {
+    if (auction.maxApplicants === auction.AuctionUsers.length + 1) {
       await this.onAuctionMaxApplicants(auction);
-      throw new BadRequestException('9002', 'auction is full');
+      if (auction.maxApplicants < auction.AuctionUsers.length + 1) {
+        throw new BadRequestException('9002', 'auction is full');
+      }
     }
 
     const hpMerchant = await this.sharedMerchant.cashInMerchant();

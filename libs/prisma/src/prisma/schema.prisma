@@ -142,9 +142,11 @@ model MedCard {
   relationId String?
   userId     Int?
   img        String?
+  merchantId Int?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime? @default(now()) @updatedAt
   user       User?     @relation(fields: [userId], references: [id])
+  merchant   Merchant? @relation(fields: [merchantId], references: [id])
 }
 
 model UserNotifyTokens {
@@ -195,6 +197,7 @@ model Merchant {
   Transaction       Transaction[]
   users             UserAuthMerchant[]
   attachedAgents    User[]                 @relation("UserAttachedToMerchant")
+  MedCard           MedCard[]
 
   @@unique([name, ownerId], name: "name_ownerId_unique")
 }

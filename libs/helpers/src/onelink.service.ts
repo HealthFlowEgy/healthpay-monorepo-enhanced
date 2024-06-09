@@ -28,8 +28,8 @@ export class OnelinkService {
 
   private async getAccessToken() {
     const response = await this.instance.post('/auth/login', {
-      api_key: '32b5f364-4f0f-45bd-965c-0830f7dc24f3',
-      api_secret: 'b3179c45-d110-477d-90d8-27c9046c9fe0',
+      api_key: '8301df53-4ca9-465b-9878-a134c4a17942',
+      api_secret: '28cb42c5-01d9-4c09-98f8-e1e276497a52',
     });
     console.log(response.data);
     this.access_token = response.data.token;

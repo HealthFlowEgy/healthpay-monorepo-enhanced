@@ -13,6 +13,11 @@ export class CashOutRequest {
   @Field(() => String)
   status: string;
 
+
+  @Field(() => String, { nullable: true })
+  comment?: string;
+
+
   @Field(() => Date)
   createdAt: Date | null;
 

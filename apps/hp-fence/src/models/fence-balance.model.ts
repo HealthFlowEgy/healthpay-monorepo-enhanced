@@ -14,6 +14,12 @@ export class Balance {
   @Field(() => String)
   type: string;
 
+
+
+  @Field(() => String, { nullable: true })
+  notes: string;
+
+
   @Field(() => Date)
   createdAt: Date;
 

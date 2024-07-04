@@ -18,7 +18,7 @@ export class SharedBalanceService {
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
     @Inject(SharedPaymentRequestService)
     private sharedPaymentRequests: SharedPaymentRequestService,
-  ) {}
+  ) { }
 
   public async getAllBalances(
     where: Prisma.BalanceFindManyArgs,
@@ -348,6 +348,7 @@ export class SharedBalanceService {
         uid,
         amount,
         createdAt,
+        notes: balance.notes,
         merchant: receivableMerchant,
         user: receivableWallet?.user,
         type: 'DEBIT',

@@ -336,6 +336,8 @@ export class SharedBalanceService {
         uid,
         amount,
         createdAt,
+        notes: balance.notes,
+
         merchant: payableMerchant,
         user: payableWallet?.user,
         type: 'CREDIT',
@@ -348,6 +350,7 @@ export class SharedBalanceService {
         uid,
         amount,
         createdAt,
+        notes: balance.notes,
         merchant: receivableMerchant,
         user: receivableWallet?.user,
         type: 'DEBIT',

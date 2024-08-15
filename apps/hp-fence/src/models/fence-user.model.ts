@@ -57,8 +57,6 @@ export class User {
   @Field(() => Date)
   createdAt: Date;
 
-  @Field(() => Date)
-  createdAt: Date;
 
 }
 

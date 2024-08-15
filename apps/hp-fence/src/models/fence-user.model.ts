@@ -52,6 +52,14 @@ export class User {
 
   @Field(() => Boolean, { nullable: true })
   isVerified?: boolean | null;
+
+
+  @Field(() => Date)
+  createdAt: Date;
+
+  @Field(() => Date)
+  createdAt: Date;
+
 }
 
 @ObjectType()

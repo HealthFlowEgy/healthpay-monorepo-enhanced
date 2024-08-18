@@ -15,8 +15,8 @@ export class Balance {
   type: string;
 
 
-  @Field(() => String)
-  notes: string;
+  @Field(() => String, { nullable: true })
+  notes?: string;
 
 
   @Field(() => Date)

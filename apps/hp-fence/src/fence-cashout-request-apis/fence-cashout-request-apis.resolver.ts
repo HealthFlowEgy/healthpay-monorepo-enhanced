@@ -13,7 +13,7 @@ import { KhadamatyServicePaymentRequest } from '@app/services/shared-khadamaty/k
 export class FenceCashoutRequestApisResolver {
   private readonly logger = new Logger(FenceCashoutRequestApisResolver.name);
 
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
   @Query(() => [CashOutRequest], { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async cashOutRequests(@CurrentUser() user: User): Promise<CashOutRequest[]> {
@@ -29,11 +29,21 @@ export class FenceCashoutRequestApisResolver {
     @Args('amount') amount: number,
     @Args('settingsId') settingsId: number,
   ): Promise<CashOutRequest> {
+
+
+
     const allPendingRequests =
       await this.services.sharedCashoutRequestService.totalPendingCashoutRequests();
     const totalAmount = allPendingRequests._sum.amount + amount;
     const wallet = await this.services.sharedWallet.getWalletByUserId(user.id);
     const cashout = await this.services.sharedWallet.cashoutSettings();
+
+
+
+    if (amount > 200) {
+      throw new BadRequestException('7005', 'Maximum cashout amount is 200');
+    }
+
     if (wallet.total < amount) {
       throw new BadRequestException('7001', 'Insufficient funds');
     } else {
@@ -49,6 +59,9 @@ export class FenceCashoutRequestApisResolver {
     if (pendingUserRequests.length > 0) {
       throw new BadRequestException('7002', 'You have a pending request');
     }
+
+
+
 
     const hpMerchant = await this.services.sharedMerchant.cashInMerchant();
     await this.services.sharedBalance.doTransFromUserToMerchant(
@@ -131,9 +144,9 @@ export class FenceCashoutRequestApisResolver {
       throw new BadRequestException(
         '1004',
         'Payment failed ' +
-          paymentResponse.StatusDescription +
-          ' ' +
-          paymentResponse.BillerStatus,
+        paymentResponse.StatusDescription +
+        ' ' +
+        paymentResponse.BillerStatus,
       );
     }
 

@@ -40,7 +40,7 @@ export class FenceCashoutRequestApisResolver {
 
 
 
-    if (amount > 200) {
+    if (amount < 200) {
       throw new BadRequestException('7005', 'Maximum cashout amount is 200');
     }
 

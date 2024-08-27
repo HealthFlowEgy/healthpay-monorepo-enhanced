@@ -61,7 +61,6 @@ export class FenceUserMedCardsResolver {
   )
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async createMedCard(
-    @Args('mobile') mobile: string,
     @Args('fullName') fullname: string,
     @Args('nationalId') nationalId: string,
     @Args('birthDate') birthDate: string,
@@ -91,7 +90,7 @@ export class FenceUserMedCardsResolver {
 
     return this.services.sharedUser.createMedCard(
       {
-        mobile,
+        mobile: currentUser.mobile,
         nationalId,
         birthDate,
         fullname,

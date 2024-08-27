@@ -13,6 +13,17 @@ import moment from 'moment';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 import { doUpsertUserInput } from './shared-user.types';
+
+type ICreateMedCards = {
+  mobile: string;
+  nationalId: string;
+  birthDate: string;
+  fullname: string;
+  gender: string;
+  relationId: number;
+  merchantId: number;
+};
+
 @Injectable()
 export class SharedUserService {
   private readonly logger = new Logger(SharedUserService.name);
@@ -95,7 +106,6 @@ export class SharedUserService {
       | 'deviceTokens'
     >,
   ): Promise<User> {
-
     // ignore device token if null
     if (user.deviceTokens === null) {
       delete user.deviceTokens;
@@ -240,6 +250,109 @@ export class SharedUserService {
       where: {
         userId,
       },
+    });
+  }
+
+  async upsertUser(
+    { mobile, firstName, lastName, email }: doUpsertUserInput,
+    validationCheckUser: boolean = null,
+  ): Promise<User | null> {
+    let user = await this.getUserByMobile(mobile);
+    if (!user) {
+      if (validationCheckUser) {
+        throw new NotFoundException('2002');
+      }
+      user = await this.doCreateNewUser({
+        mobile,
+        firstName,
+        lastName,
+        email,
+      });
+    }
+
+    return user;
+  }
+
+  public parseRelationshipId(relationId: number): string {
+    switch (relationId) {
+      case 1:
+        return 'Father';
+      case 2:
+        return 'Mother';
+      case 3:
+        return 'Brother';
+      case 4:
+        return 'Sister';
+      case 5:
+        return 'Son';
+      case 6:
+        return 'Daughter';
+      case 7:
+        return 'Husband';
+      case 8:
+        return 'Wife';
+      case 9:
+        return 'Grandfather';
+      case 10:
+        return 'Grandmother';
+      default:
+        return 'self';
+    }
+  }
+
+  public async createMedCard(
+    params: ICreateMedCards,
+    user: User | null = null,
+  ): Promise<MedCard> {
+    const nameParts = params.fullname.split(' ');
+
+    if (!user) {
+      user = await this.upsertUser({
+        firstName: nameParts.length > 0 ? nameParts[0] : params.fullname,
+        lastName: nameParts.length > 1 ? nameParts[1] : nameParts[0],
+        mobile: params.mobile,
+      });
+    }
+
+    this.logger.verbose('[createMedCard] user', user);
+    this.logger.verbose('[createMedCard] params', params);
+
+    // check if card exists with national id or user name
+    const existingMedCard = await this.prisma.medCard.findFirst({
+      where: {
+        OR: [
+          {
+            nationalId: params.nationalId,
+          },
+        ],
+      },
+    });
+    if (existingMedCard) {
+      throw new BadRequestException('2003', 'card already exists');
+    }
+
+    const createdMedCard: MedCard = await this.prisma.medCard.create({
+      data: {
+        nameOnCard: params.fullname,
+        birthDate: params.birthDate,
+        relationId: this.parseRelationshipId(params.relationId),
+        gender: params.gender,
+        nationalId: params.nationalId ?? user.nationalId,
+        uid: this.helpers.doCreateUUID('medCard'),
+        isActive: true,
+
+        merchantId: params.merchantId,
+        userId: user.id,
+      },
+    });
+
+    console.log(createdMedCard, 'createdMedCard');
+
+    return await this.prisma.medCard.findFirst({
+      where: {
+        id: createdMedCard.id,
+      },
+      include: { user: true },
     });
   }
 }

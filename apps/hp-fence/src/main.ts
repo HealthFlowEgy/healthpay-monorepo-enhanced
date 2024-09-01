@@ -1,11 +1,13 @@
-import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 import { HpFenceModule } from './hp-fence.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ThrottleMiddleware } from 'libs/middelwares/ThrottleMiddleware';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
+import { NestFactory } from '@nestjs/core';
+import { ThrottleMiddleware } from 'libs/middelwares/ThrottleMiddleware';
+import { ValidationPipe } from '@nestjs/common';
 import { create } from 'express-handlebars';
 import helpers from './hp-fence-hbs-helpers';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(HpFenceModule);
@@ -38,6 +40,14 @@ async function bootstrap() {
   app.engine('hbs', hbs.engine);
 
   app.setViewEngine('hbs');
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // whitelist: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
 
   await app.listen(3002);
 }

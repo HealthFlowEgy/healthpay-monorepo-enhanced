@@ -1,8 +1,10 @@
+import 'reflect-metadata';
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsEmail } from 'class-validator';
-import 'reflect-metadata';
+
 import { CashOutMethod } from './fence-cashout-method.model';
+import { IsEmail } from 'class-validator';
 import { Wallet } from './fence-wallet.model';
 
 @ObjectType()
@@ -52,7 +54,6 @@ export class User {
 
   @Field(() => Boolean, { nullable: true })
   isVerified?: boolean | null;
-
 
   @Field(() => Date, { nullable: true })
   createdAt?: Date | null;

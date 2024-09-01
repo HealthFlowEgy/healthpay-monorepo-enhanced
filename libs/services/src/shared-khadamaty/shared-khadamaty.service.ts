@@ -229,7 +229,7 @@ export class SharedKhadamatyService {
   }
 
   public async updateKhadamatyServices(key: string, value: any) {
-    return this.prisma.khadamatyServices.upsert({
+    return this.prisma.billPaymentService.upsert({
       where: {
         name: key,
       },
@@ -244,7 +244,7 @@ export class SharedKhadamatyService {
   }
 
   public async getKhadamatyServices(key: string): Promise<any> {
-    return this.prisma.khadamatyServices.findFirst({
+    return this.prisma.billPaymentService.findFirst({
       where: {
         name: key,
       },

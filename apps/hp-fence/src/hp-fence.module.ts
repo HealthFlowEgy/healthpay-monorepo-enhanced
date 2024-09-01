@@ -3,10 +3,14 @@ import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { APP_GUARD } from '@nestjs/core';
+import { AuctionModelResolver } from './models/fence-auction.model';
 import { AuthModule } from './auth/auth.module';
+import { BillsController } from './bills/bills.controller';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { FenceAuctionApisResolver } from './fence-auction-apis/fence-auction-apis.resolver';
 import { FenceBalanceResolver } from './fence-balance/fence-balance.resolver';
+import { FenceBillsAPISResolver } from './fence-bills-apis/fence-bills-apis.resolver';
 import { FenceCashOutApisResolver } from './fence-cashout-apis/fence-cashout-apis.resolver';
 import { FenceCashoutMethodResolver } from './fence-cashout-method/fence-cashout-method.resolver';
 import { FenceCashoutRequestApisResolver } from './fence-cashout-request-apis/fence-cashout-request-apis.resolver';
@@ -16,6 +20,7 @@ import { FenceFinancingApisResolver } from './fence-financing-apis/fence-financi
 import { FenceMerchantApisResolver } from './fence-merchant-apis/fence-merchant-apis.resolver';
 import { FenceNotificationsApisResolver } from './fence-notifications-apis/fence-notifications-apis.resolver';
 import { FenceUserApisResolver } from './fence-user-apis/fence-user-apis.resolver';
+import { FenceUserMedCardsResolver } from './fence-user-med-cards/fence-user-med-cards.resolver';
 import { FenceUserResolver } from './fence-user/fence-user.resolver';
 import { FenceWalletApisResolver } from './fence-wallet-apis/fence-wallet-apis.resolver';
 import { FenceWalletResolver } from './fence-wallet/fence-wallet.resolver';
@@ -24,16 +29,13 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { HelpersModule } from '@app/helpers';
 import { HpFenceController } from './hp-fence.controller';
 import { HpFenceService } from './hp-fence.service';
+import { KhadamatyController } from './khadamaty/khadamaty.controller';
 import { Module } from '@nestjs/common';
 import { PaymentRequestApisResolver } from './payment-request-apis/payment-request-apis.resolver';
 import { ServicesModule } from '@app/services';
 import { ValidationsModule } from '@app/validations';
 import { WebsocketModule } from '@app/websocket';
 import path from 'path';
-import { FenceUserMedCardsResolver } from './fence-user-med-cards/fence-user-med-cards.resolver';
-import { KhadamatyController } from './khadamaty/khadamaty.controller';
-import { FenceAuctionApisResolver } from './fence-auction-apis/fence-auction-apis.resolver';
-import { AuctionModelResolver } from './models/fence-auction.model';
 
 @Module({
   imports: [
@@ -70,7 +72,7 @@ import { AuctionModelResolver } from './models/fence-auction.model';
     ValidationsModule,
     WebsocketModule,
   ],
-  controllers: [HpFenceController, KhadamatyController],
+  controllers: [HpFenceController, BillsController],
   providers: [
     HpFenceService,
     FenceUserApisResolver,
@@ -90,10 +92,11 @@ import { AuctionModelResolver } from './models/fence-auction.model';
     FenceUserMedCardsResolver,
     FenceAuctionApisResolver,
     AuctionModelResolver,
+    FenceBillsAPISResolver,
     // {
     //   provide: APP_GUARD,
     //   useClass: GqlThrottlerGuard,
     // },
   ],
 })
-export class HpFenceModule { }
+export class HpFenceModule {}

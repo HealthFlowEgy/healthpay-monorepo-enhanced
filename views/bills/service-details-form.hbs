@@ -1,0 +1,47 @@
+{{> page/nav param=service.ServiceName}}
+
+
+<div class="hello">
+    <div class="container mt-3">
+        <form method="POST">
+            {{#each service.ServiceFields}}
+            {{#switch TypeId}}
+            {{#case '12'}}
+            <div class="mb-3">
+                <label for="Service-{{SFId}}" class="form-label">{{FieldName}}</label>
+                <select class="form-control" required="{{Required}}" id="Service-{{SFId}}" name="service[{{SFId}}]"
+                    placeholder="{{FieldName}}">
+                    {{#each AvailableValues}}
+
+                    <option value="{{Value}}">{{Value}}</option>
+
+                    {{/each}}
+
+                </select>
+            </div>
+            {{/case}}
+            {{#case 'default'}}
+            <div class="mb-3">
+                <label for="Service-{{SFId}}" class="form-label">{{FieldName}}</label>
+                <input type="text" class="form-control" id="Service-{{SFId}}" name='service["{{SFId}}"]'
+                    pattern="{{ValExp}}" required="{{Required}}" placeholder="{{FieldName}}">
+            </div>
+            {{/case}}
+            {{/switch}}
+
+            {{/each}}
+
+            {{#if service.ServiceFields}}
+            <center>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">استعلام</button>
+            </center>
+            {{/if}}
+
+            {{#unless service.ServiceFields}}
+            <center>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">تاكيد</button>
+            </center>
+            {{/unless}}
+        </form>
+    </div>
+</div>

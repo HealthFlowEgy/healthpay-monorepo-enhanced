@@ -1,0 +1,430 @@
+import { HelpersService } from '@app/helpers';
+import { PrismaService } from '@app/prisma';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { SharedBalanceService } from '../shared-balance/shared-balance.service';
+import { SharedNotifyService } from '../shared-notify/shared-notify.service';
+
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import {
+  BasataService,
+  IBasataCategories,
+  IBasataProviders,
+  IBasataServiceInputParams,
+  IBasataServices,
+  IBasataTransactionDetails,
+  IBasataTransactionDetailsObj,
+  IBasataTransactionInquiry,
+  IBasataTransactionPayment,
+} from '@app/helpers/basata.service';
+import {
+  BillPaymentService,
+  TRANS_STATUS,
+  User,
+  UserPayoutServiceRequest,
+} from '@prisma/client';
+import { FirebaseService } from '@app/helpers/firebase.service';
+import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
+import { SharedMerchantService } from '../shared-merchant/shared-merchant.service';
+
+@Injectable()
+export class ShardBillsService {
+  private readonly logger = new Logger(ShardBillsService.name);
+
+  constructor(
+    @Inject(PrismaService) private prisma: PrismaService,
+    @Inject(HelpersService) private helpers: HelpersService,
+    @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
+    @Inject(BasataService) private basataService: BasataService,
+    @Inject(forwardRef(() => SharedBalanceService))
+    private sharedBalance: SharedBalanceService,
+
+    @Inject(forwardRef(() => SharedWalletService))
+    private sharedWallet: SharedWalletService,
+
+    @Inject(forwardRef(() => SharedMerchantService))
+    private sharedMerchant: SharedMerchantService,
+
+    private readonly httpService: HttpService,
+    private configService: ConfigService,
+  ) {}
+
+  public async getBillsProviders(): Promise<IBasataProviders> {
+    const serviceList = await this._syncAction<IBasataProviders>(
+      'GetProviderList',
+      {
+        service_version: this.configService.get('BASATA_SERVICE_VERSION') ?? 0,
+      },
+    );
+    return serviceList;
+  }
+
+  public async getBillsServices(providerId: number): Promise<IBasataServices> {
+    const serviceList = await this._syncAction<IBasataServices>(
+      'GetServiceList',
+      {
+        provider_id: providerId,
+      },
+      false,
+    );
+    return serviceList;
+  }
+
+  public async getServiceInputParams(
+    serviceId: number,
+  ): Promise<IBasataServiceInputParams> {
+    const paramList = await this._syncAction<IBasataServiceInputParams>(
+      'GetServiceInputParameterList',
+      {
+        service_id: serviceId,
+      },
+      false,
+    );
+    return paramList;
+  }
+
+  public async transactionInquiry(
+    serviceId: number,
+    input_parameter_list: { key: string; value: string }[],
+  ): Promise<IBasataTransactionInquiry> {
+    const { data, error_code, error_text } =
+      await this.basataService.getByActionName<IBasataTransactionInquiry>(
+        'TransactionInquiry',
+        {
+          service_version:
+            Number(this.configService.get<number>('BASATA_SERVICE_VERSION')) ??
+            0,
+          service_id: serviceId,
+          account_number: this.configService.get('BASATA_LOGIN') ?? 0,
+          input_parameter_list,
+        },
+        '/transaction',
+      );
+    if (error_code != null || error_text != null) {
+      this.logger.error(
+        'transactionInquiry error' +
+          JSON.stringify({ error_code, error_text, data }),
+      );
+      throw new BadRequestException('7900', error_text);
+    }
+
+    return data;
+  }
+
+  public async trasnactionById(
+    trasnactionId: string,
+  ): Promise<IBasataTransactionDetails> {
+    const { data, error_code } =
+      await this.basataService.getByActionName<IBasataTransactionDetails>(
+        'GetTransactionDetails',
+        {
+          transaction_id: trasnactionId,
+        },
+        '/report',
+      );
+
+    if (error_code != null) {
+      this.logger.error(
+        'trasnactionById error' + JSON.stringify({ error_code, data }),
+      );
+      throw new BadRequestException('7900', 'transaction not found');
+    }
+
+    return data;
+  }
+
+  public async payTransaction(
+    trasnactionId: string,
+    input_parameter_list: { key: string; value: string }[],
+    user: User,
+    serviceId: number,
+  ): Promise<{
+    data: IBasataTransactionPayment;
+    isPaymentProcessed: boolean;
+  }> {
+    const { transaction_details } = await this.trasnactionById(trasnactionId);
+    const { amount, serviceCharge, systemCharge, userAmount } =
+      await this._caluculateUserPayingAmount(
+        serviceId,
+        transaction_details,
+        null,
+      );
+
+    if (amount <= 0) {
+      throw new BadRequestException('7901', 'bill amount is invalid ');
+    }
+
+    // user has enough balance
+    const wallet = await this.sharedWallet.getWalletByUserId(user.id);
+    if (wallet.total < userAmount) {
+      throw new BadRequestException('7001', 'Insufficient balance');
+    }
+
+    // process payment
+    const { isPaymentProcessed, data, uid } = await this.processBillPayment(
+      trasnactionId,
+      input_parameter_list,
+      serviceId,
+      amount,
+      serviceCharge,
+    );
+
+    await this.prisma.userPayoutServiceRequest.create({
+      data: {
+        serviceId: serviceId,
+        fields: JSON.stringify(data),
+        status: isPaymentProcessed
+          ? TRANS_STATUS.COMPLETED
+          : TRANS_STATUS.DECLINED,
+        userId: user.id,
+        uid,
+      },
+    });
+
+    if (isPaymentProcessed) {
+      const hpMerchant = await this.sharedMerchant.cashInMerchant();
+      await this.sharedBalance.doTransFromUserToMerchant(
+        hpMerchant.id,
+        user.id,
+        userAmount,
+        'deducted due bill payment request ' + uid,
+      );
+    }
+
+    return {
+      data,
+      isPaymentProcessed,
+    };
+  }
+
+  /**
+   * Process bill payment with api
+   */
+  public async processBillPayment(
+    trasnactionId: string,
+    input_parameter_list: { key: string; value: string }[],
+    serviceId: number,
+    amount: number,
+    serviceCharge: number,
+  ): Promise<{
+    isPaymentProcessed: boolean;
+    data: IBasataTransactionPayment | null;
+    uid: string;
+  }> {
+    const uid = this.helpers.doCreateUUID('bp');
+    const { data, error_text, error_code } =
+      await this.basataService.getByActionName<IBasataTransactionPayment>(
+        'TransactionPayment',
+        {
+          external_id: uid,
+          service_version:
+            Number(this.configService.get<number>('BASATA_SERVICE_VERSION')) ??
+            0,
+          account_number: this.configService.get('BASATA_LOGIN') ?? 0,
+          inquiry_transaction_id: trasnactionId,
+          service_id: serviceId,
+          amount,
+          total_amount: amount + serviceCharge,
+          quantity: 1,
+          input_parameter_list,
+        },
+        '/transaction',
+      );
+
+    if (error_code != null || error_text != null) {
+      this.logger.error(
+        'processBillPayment error' +
+          JSON.stringify({ error_code, error_text, data }),
+      );
+
+      throw new BadRequestException('7905', error_text);
+    }
+
+    if (data == null) {
+      return {
+        isPaymentProcessed: false,
+        data: null,
+        uid,
+      };
+    }
+
+    if (this._isPaymentSuccess(data)) {
+      return {
+        isPaymentProcessed: true,
+        data,
+        uid,
+      };
+    }
+
+    return {
+      isPaymentProcessed: false,
+      data,
+      uid,
+    };
+  }
+
+  public async _caluculateUserPayingAmount(
+    serviceId: number,
+    transaction_details: IBasataTransactionDetailsObj | null,
+    rAmount: number | null = null,
+  ): Promise<{
+    amount: number;
+    serviceCharge: number;
+    systemCharge: number;
+    userAmount: number;
+  }> {
+    let amount = rAmount;
+    if (
+      rAmount == null &&
+      transaction_details != null &&
+      transaction_details.details_list.length > 0
+    ) {
+      amount = this._getBillAmountFromDetailsList(
+        transaction_details.details_list,
+      );
+    }
+
+    const serviceCharge = await this._caluclateServiceCharge(serviceId, amount);
+    const systemFees =
+      Number(this.configService.get<number>('SYSTEM_FEES', 0.02)) ?? 0.02;
+
+    const systemCharge = Math.ceil((amount + serviceCharge) * systemFees);
+
+    const data = {
+      amount,
+      serviceCharge,
+      systemCharge,
+      userAmount: amount + serviceCharge + systemCharge,
+    };
+
+    this.logger.debug(
+      '[_caluculateUserPayingAmount] data' + JSON.stringify(data),
+    );
+
+    return data;
+  }
+
+  private _isPaymentSuccess(data: IBasataTransactionPayment) {
+    return data.transaction_id != null && data.status === 'SUCCESS';
+  }
+
+  private async _caluclateServiceCharge(
+    serviceId: number,
+    amount: number,
+  ): Promise<number> {
+    const serviceList = await this._syncAction<IBasataServices>(
+      'GetServiceList',
+      {},
+    );
+
+    if (serviceList == null || serviceList.service_list.length <= 0) {
+      throw new BadRequestException('7902', 'service list is empty');
+    }
+
+    const service = serviceList.service_list.find(
+      (item) => item.id === serviceId,
+    );
+
+    if (service == null) {
+      throw new BadRequestException('7903', 'service not found');
+    }
+
+    this.logger.debug(
+      '[_caluclateServiceCharge] service' + JSON.stringify(service),
+    );
+
+    const amountBracket = service.service_charge_list.find(
+      (item) => item.from <= amount && item.to >= amount,
+    );
+
+    if (amountBracket == null) {
+      throw new BadRequestException('7904', 'amount bracket not found');
+    }
+
+    const slapAmount =
+      amountBracket.percentage == true
+        ? amountBracket.slap / 100
+        : amountBracket.slap;
+
+    return amountBracket.charge + slapAmount;
+  }
+
+  /**
+   * Get bill amount + system fees based on bill amount
+   * @param details_list
+   * @returns
+   */
+  _getBillAmountFromDetailsList(
+    details_list: Array<
+      Array<{
+        key: string;
+        value: string;
+      }>
+    > = [],
+  ): number {
+    const amountKey = details_list[0].find(
+      (item) => item.key === 'amount',
+    ).value;
+    return Number(amountKey ?? 0);
+  }
+
+  /**
+   * Get cached action
+   * @param name
+   * @returns BillPaymentService | null
+   */
+  private async _getCachedAction(
+    name: string,
+  ): Promise<BillPaymentService | null> {
+    return this.prisma.billPaymentService.findFirst({
+      where: {
+        name,
+      },
+    });
+  }
+
+  /**
+   * Sync action with cache into db
+   * @param action
+   * @param data
+   * @param allowCache
+   * @returns
+   */
+  private async _syncAction<T>(
+    action: string,
+    data: any,
+    allowCache = true,
+  ): Promise<T> {
+    if (allowCache) {
+      const cachedAction = await this._getCachedAction(action);
+      if (cachedAction) {
+        return cachedAction.data as T;
+      }
+    }
+
+    const actionData = await this.basataService.getByActionName<T>(
+      action,
+      data,
+    );
+
+    if (actionData.data) {
+      if (allowCache) {
+        await this.prisma.billPaymentService.create({
+          data: {
+            name: action,
+            data: actionData.data as any,
+          },
+        });
+      }
+      return actionData.data as T;
+    }
+
+    return null;
+  }
+}

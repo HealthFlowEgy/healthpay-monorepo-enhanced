@@ -79,11 +79,21 @@ export class FenceUserApisResolver {
     ) {
       throw new BadRequestException('5006', 'Invalid secret');
     }
-    return this.services.sharedUser.doUpsertUser(
+    const user = await this.services.sharedUser.doUpsertUser(
       { mobile, firstName: null, lastName: null, email: null },
       true,
       via,
     );
+    // return only email and mobile ommit the rest of the data
+    return {
+      uid: user.uid,
+      mobile: user.mobile,
+      email: user.email,
+      firstName: 'omitted',
+      lastName: 'omitted',
+      avatar: 'omitted',
+      prefLang: 'omitted',
+    };
   }
   // login mutation
 

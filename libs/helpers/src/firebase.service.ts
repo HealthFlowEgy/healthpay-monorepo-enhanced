@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
+
 import { ConfigService } from '@nestjs/config';
-import Twilio from 'twilio';
 import { MessagingContract } from './messaging.contract';
+import Twilio from 'twilio';
+
 @Injectable()
 export class FirebaseService implements MessagingContract {
   instance: AxiosInstance | null = null;
@@ -24,7 +26,6 @@ export class FirebaseService implements MessagingContract {
           'key=' +
           (this.configService.get<string>('FCM_SERVER_KEY') ??
             'AAAAWy7qAC0:APA91bEPsIb1bzR07OQ1TizJUBtXeO2wD9FCb392pi41ndW1AhVwrHOJ4K1-3SXlHwFUu93EdTL-51GymzboBw-EmsL537gCoYEbRcSd8T7_AetV3HCarYxAQidtqwHBqWM7o6OzDRMQ'),
-
       },
     });
   }
@@ -35,21 +36,21 @@ export class FirebaseService implements MessagingContract {
     otp: string,
     confirmed?: boolean,
   ): Promise<boolean> {
-
     return new Promise((resolve, reject) => {
       for (let index = 0; index < recipients.length; index++) {
-
-
         const element = recipients[index];
 
-        this.logger.verbose('Sending message to ', {
-          notification: {
-            title: messageText,
-            body: messageText,
-            sound: 'default',
-          },
-          to: element,
-        });
+        this.logger.verbose(
+          'Sending message to ',
+          JSON.stringify({
+            notification: {
+              title: messageText,
+              body: messageText,
+              sound: 'default',
+            },
+            to: element,
+          }),
+        );
 
         this.instance
           .post('/send', {
@@ -70,7 +71,6 @@ export class FirebaseService implements MessagingContract {
             // reject(false);
           });
       }
-
     });
   }
 }

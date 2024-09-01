@@ -1,0 +1,56 @@
+{{> page/nav param=service.ServiceName}}
+
+
+{{#if error}}
+
+<div class="alert alert-danger" role="alert">
+    {{error}}
+</div>
+
+{{/if}}
+{{#unless error}}
+
+<div class="container">
+    <center>
+        <img src="https://cdn.khadamaty.com.eg/Production/logo/b/{{service.BillerId}}.png" class="img-fluid "
+            height="200px" onerror="this.remove()" />
+    </center>
+
+
+    {{#each filledFields}}
+    <dl>
+        <dd class="col-sm-3 col"> {{ FieldName }}</dd>
+        <dt class="col-sm-9 col"> {{ Value }}</dt>
+    </dl>
+
+    <hr />
+
+    {{/each}}
+
+
+    <h5>
+        <b>
+            <center>الاجمالي</center>
+        </b>
+    </h5>
+    <h5>
+        <b>
+            <center> {{ payable }} EGP</center>
+        </b>
+    </h5>
+
+
+    <center>
+        <a href="about:blank?paymentId={{UserPayoutServiceRequest.uid}}" type="submit"
+            class="btn btn-primary btn-lg btn-block">دفع {{ payable }}</a>
+    </center>
+    <hr>
+    <small class="mt-5">
+        تطبق الشروط والاحكام
+    </small>
+
+
+</div>
+
+
+{{/unless}}

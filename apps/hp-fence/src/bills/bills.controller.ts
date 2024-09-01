@@ -25,33 +25,33 @@ export class BillsController {
     private serviceService: ServicesService,
   ) {}
 
-  @Get('/providers')
-  async getCatalog(): Promise<IBasataProviders> {
-    return this.serviceService.sharedBillsService.getBillsProviders();
-  }
+  // @Get('/providers')
+  // async getCatalog(): Promise<IBasataProviders> {
+  //   return this.serviceService.sharedBillsService.getBillsProviders();
+  // }
 
-  @Get('/provider/:providerId/services')
-  async getServices(@Param('providerId') providerId: string): Promise<any> {
-    return this.serviceService.sharedBillsService.getBillsServices(
-      Number(providerId),
-    );
-  }
+  // @Get('/provider/:providerId/services')
+  // async getServices(@Param('providerId') providerId: string): Promise<any> {
+  //   return this.serviceService.sharedBillsService.getBillsServices(
+  //     Number(providerId),
+  //   );
+  // }
 
-  @Get('/service/:serviceId/params')
-  async getServiceParams(@Param('serviceId') serviceId: string): Promise<any> {
-    return this.serviceService.sharedBillsService.getServiceInputParams(
-      Number(serviceId),
-    );
-  }
+  // @Get('/service/:serviceId/params')
+  // async getServiceParams(@Param('serviceId') serviceId: string): Promise<any> {
+  //   return this.serviceService.sharedBillsService.getServiceInputParams(
+  //     Number(serviceId),
+  //   );
+  // }
 
-  @Post('/service/:serviceId/inquiry')
-  async transactionInquiry(
-    @Param('serviceId') serviceId: string,
-    @Body() { input_parameter_list }: TransactionInquiryDto,
-  ): Promise<IBasataTransactionInquiry> {
-    return this.serviceService.sharedBillsService.transactionInquiry(
-      Number(serviceId),
-      input_parameter_list,
-    );
-  }
+  // @Post('/service/:serviceId/inquiry')
+  // async transactionInquiry(
+  //   @Param('serviceId') serviceId: string,
+  //   @Body() { input_parameter_list }: TransactionInquiryDto,
+  // ): Promise<IBasataTransactionInquiry> {
+  //   return this.serviceService.sharedBillsService.transactionInquiry(
+  //     Number(serviceId),
+  //     input_parameter_list,
+  //   );
+  // }
 }

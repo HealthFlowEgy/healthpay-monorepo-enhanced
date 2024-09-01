@@ -84,8 +84,17 @@ export class FenceUserApisResolver {
       true,
       via,
     );
+
+    if (!user) {
+      throw new BadRequestException('4001', 'User does not exist');
+    }
+    if (user.isDeactivated) {
+      throw new BadRequestException('4001', 'User does not exist');
+    }
+
     // return only email and mobile ommit the rest of the data
-    return {
+    const response = {
+      id: user.id,
       uid: user.uid,
       mobile: user.mobile,
       email: user.email,
@@ -94,6 +103,11 @@ export class FenceUserApisResolver {
       avatar: 'omitted',
       prefLang: 'omitted',
     };
+
+    this.logger.log('User logged in');
+    this.logger.log(response);
+
+    return response;
   }
   // login mutation
 

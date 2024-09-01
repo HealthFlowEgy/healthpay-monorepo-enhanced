@@ -118,13 +118,13 @@ export class ShardBillsService {
   }
 
   public async trasnactionById(
-    trasnactionId: string,
+    transactionId: string,
   ): Promise<IBasataTransactionDetails> {
     const { data, error_code } =
       await this.basataService.getByActionName<IBasataTransactionDetails>(
         'GetTransactionDetails',
         {
-          transaction_id: trasnactionId,
+          transaction_id: transactionId,
         },
         '/report',
       );
@@ -140,7 +140,7 @@ export class ShardBillsService {
   }
 
   public async payTransaction(
-    trasnactionId: string,
+    transactionId: string,
     input_parameter_list: { key: string; value: string }[],
     user: User,
     serviceId: number,
@@ -148,7 +148,7 @@ export class ShardBillsService {
     data: IBasataTransactionPayment;
     isPaymentProcessed: boolean;
   }> {
-    const { transaction_details } = await this.trasnactionById(trasnactionId);
+    const { transaction_details } = await this.trasnactionById(transactionId);
     const { amount, serviceCharge, systemCharge, userAmount } =
       await this._caluculateUserPayingAmount(
         serviceId,
@@ -168,7 +168,7 @@ export class ShardBillsService {
 
     // process payment
     const { isPaymentProcessed, data, uid } = await this.processBillPayment(
-      trasnactionId,
+      transactionId,
       input_parameter_list,
       serviceId,
       amount,
@@ -207,7 +207,7 @@ export class ShardBillsService {
    * Process bill payment with api
    */
   public async processBillPayment(
-    trasnactionId: string,
+    transactionId: string,
     input_parameter_list: { key: string; value: string }[],
     serviceId: number,
     amount: number,
@@ -227,7 +227,7 @@ export class ShardBillsService {
             Number(this.configService.get<number>('BASATA_SERVICE_VERSION')) ??
             0,
           account_number: this.configService.get('BASATA_LOGIN') ?? 0,
-          inquiry_transaction_id: trasnactionId,
+          inquiry_transaction_id: transactionId,
           service_id: serviceId,
           amount,
           total_amount: amount + serviceCharge,

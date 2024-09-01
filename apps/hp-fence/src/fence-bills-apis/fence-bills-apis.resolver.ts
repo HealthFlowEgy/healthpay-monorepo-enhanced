@@ -80,7 +80,7 @@ export class FenceBillsAPISResolver {
   @Mutation(() => IGQLBasataTransactionPaymentResponse)
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async transactionPayment(
-    @Args('trasnactionId') trasnactionId: string,
+    @Args('transactionId') transactionId: string,
     @Args('serviceId') serviceId: number,
     @Args({
       name: 'input_parameter_list',
@@ -92,7 +92,7 @@ export class FenceBillsAPISResolver {
   ): Promise<IGQLBasataTransactionPaymentResponse> {
     const paymentResponse =
       await this.services.sharedBillsService.payTransaction(
-        trasnactionId,
+        transactionId,
         input_parameter_list,
         user,
         serviceId,

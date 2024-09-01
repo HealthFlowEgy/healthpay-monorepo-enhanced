@@ -274,7 +274,7 @@ export class SharedUserService {
   }
 
   public parseRelationshipId(relationId: number): string {
-    switch (relationId) {
+    switch (Number(relationId)) {
       case 1:
         return 'Father';
       case 2:

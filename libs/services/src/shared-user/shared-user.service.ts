@@ -327,6 +327,7 @@ export class SharedUserService {
         ],
       },
     });
+
     if (existingMedCard) {
       throw new BadRequestException('2003', 'card already exists');
     }

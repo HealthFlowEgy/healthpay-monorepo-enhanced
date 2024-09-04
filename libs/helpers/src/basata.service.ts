@@ -32,26 +32,28 @@ export type IBasataCategories = {
   }[];
 };
 
-export type IBasataServices = {
-  service_list: Array<{
-    id: number;
-    provider_id: number;
-    name: string;
-    name_ar: string;
-    price_type: string;
-    service_value: number;
-    min_quantity: number;
-    max_quantity: number;
-    sort_order: number;
-    inquiry_required: boolean;
-    service_charge_list: Array<{
-      from: number;
-      to: number;
-      charge: number;
-      slap: number;
-      percentage: boolean;
-    }>;
+export type IBasataService = {
+  id: number;
+  provider_id: number;
+  name: string;
+  name_ar: string;
+  price_type: string;
+  service_value: number;
+  min_quantity: number;
+  max_quantity: number;
+  sort_order: number;
+  inquiry_required: boolean;
+  service_charge_list: Array<{
+    from: number;
+    to: number;
+    charge: number;
+    slap: number;
+    percentage: boolean;
   }>;
+};
+
+export type IBasataServices = {
+  service_list: Array<IBasataService>;
 };
 
 export type IBasataServiceInputParams = {

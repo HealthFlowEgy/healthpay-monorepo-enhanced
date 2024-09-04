@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { HelpersService } from '@app/helpers';
 import { PrismaService } from '@app/prisma';
 import {
@@ -10,12 +11,10 @@ import {
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
 import {
   BasataService,
-  IBasataCategories,
   IBasataProviders,
+  IBasataService,
   IBasataServiceInputParams,
   IBasataServices,
   IBasataTransactionDetails,
@@ -23,15 +22,11 @@ import {
   IBasataTransactionInquiry,
   IBasataTransactionPayment,
 } from '@app/helpers/basata.service';
-import {
-  BillPaymentService,
-  TRANS_STATUS,
-  User,
-  UserPayoutServiceRequest,
-} from '@prisma/client';
-import { FirebaseService } from '@app/helpers/firebase.service';
-import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { BillPaymentService, TRANS_STATUS, User } from '@prisma/client';
 import { SharedMerchantService } from '../shared-merchant/shared-merchant.service';
+import { SharedWalletService } from '../shared-wallet/shared-wallet.service';
 
 @Injectable()
 export class ShardBillsService {
@@ -144,19 +139,34 @@ export class ShardBillsService {
     input_parameter_list: { key: string; value: string }[],
     user: User,
     serviceId: number,
+    rAmount: number = null,
   ): Promise<{
     data: IBasataTransactionPayment;
     isPaymentProcessed: boolean;
   }> {
-    const { transaction_details } = await this.trasnactionById(transactionId);
-    const { amount, serviceCharge, systemCharge, userAmount } =
-      await this._caluculateUserPayingAmount(
-        serviceId,
-        transaction_details,
-        null,
-      );
+    const service = await this.getServiceById(serviceId);
 
-    if (amount <= 0) {
+    if (service.inquiry_required == true) {
+      const { transaction_details } = await this.trasnactionById(transactionId);
+      if (transaction_details == null) {
+        throw new BadRequestException('7910', 'transaction not found');
+      }
+      rAmount =
+        this._getBillAmountFromDetailsList(transaction_details.details_list) ??
+        transaction_details.amount;
+    } else {
+      if (rAmount == null || rAmount == 0) {
+        throw new BadRequestException(
+          '7913',
+          'amount is required for non inquiry services',
+        );
+      }
+    }
+
+    const { amount, serviceCharge, systemCharge, userAmount } =
+      await this._caluculateUserPayingAmount(service, rAmount);
+
+    if (userAmount <= 0) {
       throw new BadRequestException('7901', 'bill amount is invalid ');
     }
 
@@ -270,8 +280,7 @@ export class ShardBillsService {
   }
 
   public async _caluculateUserPayingAmount(
-    serviceId: number,
-    transaction_details: IBasataTransactionDetailsObj | null,
+    service: IBasataService,
     rAmount: number | null = null,
   ): Promise<{
     amount: number;
@@ -279,18 +288,11 @@ export class ShardBillsService {
     systemCharge: number;
     userAmount: number;
   }> {
-    let amount = rAmount;
-    if (
-      rAmount == null &&
-      transaction_details != null &&
-      transaction_details.details_list.length > 0
-    ) {
-      amount = this._getBillAmountFromDetailsList(
-        transaction_details.details_list,
-      );
-    }
+    let amount = 0;
 
-    const serviceCharge = await this._caluclateServiceCharge(serviceId, amount);
+    amount = rAmount;
+
+    const serviceCharge = await this._caluclateServiceCharge(service, amount);
     const systemFees =
       Number(this.configService.get<number>('SYSTEM_FEES', 0.02)) ?? 0.02;
 
@@ -314,10 +316,7 @@ export class ShardBillsService {
     return data.transaction_id != null && data.status === 'SUCCESS';
   }
 
-  private async _caluclateServiceCharge(
-    serviceId: number,
-    amount: number,
-  ): Promise<number> {
+  async getServiceById(serviceId: number): Promise<IBasataService> {
     const serviceList = await this._syncAction<IBasataServices>(
       'GetServiceList',
       {},
@@ -335,6 +334,13 @@ export class ShardBillsService {
       throw new BadRequestException('7903', 'service not found');
     }
 
+    return service;
+  }
+
+  private async _caluclateServiceCharge(
+    service: IBasataService,
+    amount: number,
+  ): Promise<number> {
     this.logger.debug(
       '[_caluclateServiceCharge] service' + JSON.stringify(service),
     );
@@ -344,7 +350,10 @@ export class ShardBillsService {
     );
 
     if (amountBracket == null) {
-      throw new BadRequestException('7904', 'amount bracket not found');
+      throw new BadRequestException(
+        '7904',
+        'no bills available for this inquiry',
+      );
     }
 
     const slapAmount =
@@ -370,7 +379,7 @@ export class ShardBillsService {
   ): number {
     const amountKey = details_list[0].find(
       (item) => item.key === 'amount',
-    ).value;
+    )?.value;
     return Number(amountKey ?? 0);
   }
 

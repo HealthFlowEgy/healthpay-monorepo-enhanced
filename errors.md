@@ -61,3 +61,5 @@
 - `7903` 'service not found'
 - `7904` 'amount bracket not found'
 - `7905` 'general error'
+- `7911` 'provider or services doesnt exist'
+- `7913` 'amount is required for non inquiry'

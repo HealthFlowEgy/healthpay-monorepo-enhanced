@@ -54,9 +54,12 @@ export class ShardBillsService {
     const serviceList = await this._syncAction<IBasataProviders>(
       'GetProviderList',
       {
-        service_version: this.configService.get('BASATA_SERVICE_VERSION') ?? 0,
+        service_version:
+          parseInt(this.configService.get<string>('BASATA_SERVICE_VERSION')) ??
+          0,
       },
     );
+
     return serviceList;
   }
 
@@ -412,6 +415,10 @@ export class ShardBillsService {
   ): Promise<T> {
     if (allowCache) {
       const cachedAction = await this._getCachedAction(action);
+      this.logger.verbose(
+        '[_syncAction] cachedAction ' + JSON.stringify(cachedAction),
+      );
+
       if (cachedAction) {
         return cachedAction.data as T;
       }
@@ -420,6 +427,10 @@ export class ShardBillsService {
     const actionData = await this.basataService.getByActionName<T>(
       action,
       data,
+    );
+
+    this.logger.verbose(
+      '[_syncAction] actionData ' + JSON.stringify(actionData),
     );
 
     if (actionData.data) {

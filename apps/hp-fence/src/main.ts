@@ -4,7 +4,7 @@ import { HpFenceModule } from './hp-fence.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { NestFactory } from '@nestjs/core';
 import { ThrottleMiddleware } from 'libs/middelwares/ThrottleMiddleware';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { create } from 'express-handlebars';
 import helpers from './hp-fence-hbs-helpers';
 import { join } from 'path';
@@ -49,6 +49,10 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3002, '0.0.0.0');
+  await app.listen(process.env.PORT ?? 3002, '0.0.0.0');
+
+  Logger.verbose(
+    '[App] Starting app on url ' + (await app.getUrl()) + '/graphql',
+  );
 }
 bootstrap();

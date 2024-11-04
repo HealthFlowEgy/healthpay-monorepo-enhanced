@@ -1,4 +1,4 @@
-import { FinancingAdmin, FINANCING_REQUEST_STATUS } from '.prisma/client';
+import { FinancingAdmin, FINANCING_REQUEST_STATUS } from '@prisma/client';
 import { HelpersService } from '@app/helpers/helpers.service';
 import { PrismaService } from '@app/prisma';
 import { Inject, Injectable, Logger } from '@nestjs/common';

@@ -185,6 +185,8 @@ export class BasataService {
         this._buildParams(action, params),
       );
 
+      this.logger.verbose("[basata_api_responses] " + JSON.stringify(apiResponse?.data));
+
       return this._handleResponse(apiResponse);
     } catch (e) {
       return {
@@ -220,6 +222,9 @@ export class BasataService {
   private _handleResponse<T>(
     response: AxiosResponse<BasataResponse<T>>,
   ): BasataResponse<T> {
+
+    this.logger.verbose("[basata_api_responses] " + JSON.stringify(response?.data));
+
     if (response.data.success) {
       return response.data;
     }

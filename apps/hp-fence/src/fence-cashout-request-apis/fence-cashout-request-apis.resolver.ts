@@ -5,7 +5,7 @@ import { CurrentUser } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { CashOutRequest } from '../models/fence-cashout-request.model';
-import { Success, SuccessWithMessage } from '../models/fence-success.model';
+import { SuccessWithMessage } from '../models/fence-success.model';
 import { User } from '../models/fence-user.model';
 import { KhadamatyServicePaymentRequest } from '@app/services/shared-khadamaty/khadamaty-service-request';
 
@@ -13,7 +13,7 @@ import { KhadamatyServicePaymentRequest } from '@app/services/shared-khadamaty/k
 export class FenceCashoutRequestApisResolver {
   private readonly logger = new Logger(FenceCashoutRequestApisResolver.name);
 
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
   @Query(() => [CashOutRequest], { nullable: true })
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
   async cashOutRequests(@CurrentUser() user: User): Promise<CashOutRequest[]> {
@@ -136,9 +136,9 @@ export class FenceCashoutRequestApisResolver {
       throw new BadRequestException(
         '1004',
         'Payment failed ' +
-          paymentResponse.StatusDescription +
-          ' ' +
-          paymentResponse.BillerStatus,
+        paymentResponse.StatusDescription +
+        ' ' +
+        paymentResponse.BillerStatus,
       );
     }
 

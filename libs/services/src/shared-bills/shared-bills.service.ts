@@ -9,7 +9,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { SharedBalanceService } from '../shared-balance/shared-balance.service';
-import { SharedNotifyService } from '../shared-notify/shared-notify.service';
 
 import {
   BasataService,
@@ -18,11 +17,9 @@ import {
   IBasataServiceInputParams,
   IBasataServices,
   IBasataTransactionDetails,
-  IBasataTransactionDetailsObj,
   IBasataTransactionInquiry,
   IBasataTransactionPayment,
 } from '@app/helpers/basata.service';
-import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { BillPaymentService, TRANS_STATUS, User } from '@prisma/client';
 import { SharedMerchantService } from '../shared-merchant/shared-merchant.service';
@@ -35,7 +32,6 @@ export class ShardBillsService {
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(HelpersService) private helpers: HelpersService,
-    @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
     @Inject(BasataService) private basataService: BasataService,
     @Inject(forwardRef(() => SharedBalanceService))
     private sharedBalance: SharedBalanceService,
@@ -46,9 +42,8 @@ export class ShardBillsService {
     @Inject(forwardRef(() => SharedMerchantService))
     private sharedMerchant: SharedMerchantService,
 
-    private readonly httpService: HttpService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   public async getBillsProviders(): Promise<IBasataProviders> {
     const serviceList = await this._syncAction<IBasataProviders>(
@@ -107,7 +102,7 @@ export class ShardBillsService {
     if (error_code != null || error_text != null) {
       this.logger.error(
         'transactionInquiry error' +
-          JSON.stringify({ error_code, error_text, data }),
+        JSON.stringify({ error_code, error_text, data }),
       );
       throw new BadRequestException('7900', error_text);
     }
@@ -159,15 +154,12 @@ export class ShardBillsService {
         transaction_details.amount;
     } else {
       if (rAmount == null || rAmount == 0) {
-        throw new BadRequestException(
-          '7913',
-          'amount is required for non inquiry services',
-        );
+        rAmount = service.service_value ?? 0;
       }
     }
 
-    const { amount, serviceCharge, systemCharge, userAmount } =
-      await this._caluculateUserPayingAmount(service, rAmount);
+    const { amount, serviceCharge, userAmount } =
+      await this._caluculateUserPayingAmount(service, rAmount, input_parameter_list);
 
     if (userAmount <= 0) {
       throw new BadRequestException('7901', 'bill amount is invalid ');
@@ -179,6 +171,15 @@ export class ShardBillsService {
       throw new BadRequestException('7001', 'Insufficient balance');
     }
 
+
+    if (service.price_type == "RANGE") {
+      // delete amout from input params list
+      input_parameter_list = input_parameter_list.filter((item) => item.key !== 'amount');
+    }
+
+
+
+
     // process payment
     const { isPaymentProcessed, data, uid } = await this.processBillPayment(
       transactionId,
@@ -188,6 +189,30 @@ export class ShardBillsService {
       serviceCharge,
     );
 
+    // save transaction
+    await this.onPaymentProccesed(
+      serviceId,
+      data,
+      isPaymentProcessed,
+      user,
+      uid,
+      userAmount,
+    );
+
+    return {
+      data,
+      isPaymentProcessed,
+    };
+  }
+
+  private async onPaymentProccesed(
+    serviceId: number,
+    data: IBasataTransactionPayment,
+    isPaymentProcessed: boolean,
+    user: User,
+    uid: string,
+    userAmount: number,
+  ): Promise<boolean> {
     await this.prisma.userPayoutServiceRequest.create({
       data: {
         serviceId: serviceId,
@@ -210,11 +235,15 @@ export class ShardBillsService {
       );
     }
 
-    return {
-      data,
-      isPaymentProcessed,
-    };
+    return isPaymentProcessed;
   }
+
+
+  // take first two decimal point without rounding
+  private _getTwoDecimalPoints(amount: number): number {
+    return Math.floor(amount * 100) / 100;
+  }
+
 
   /**
    * Process bill payment with api
@@ -231,29 +260,37 @@ export class ShardBillsService {
     uid: string;
   }> {
     const uid = this.helpers.doCreateUUID('bp');
+    const payload = {
+      external_id: uid,
+      service_version:
+        Number(this.configService.get<number>('BASATA_SERVICE_VERSION')) ??
+        0,
+      account_number: this.configService.get('BASATA_LOGIN') ?? 0,
+      inquiry_transaction_id: transactionId,
+      service_id: serviceId,
+      service_charge: this._getTwoDecimalPoints(serviceCharge),
+      amount,
+      total_amount: this._getTwoDecimalPoints(amount + serviceCharge),
+      quantity: 1,
+      input_parameter_list,
+    }
+
+    // remove empty keys from payload
+    Object.keys(payload).forEach((key) => payload[key] == null || payload[key] == "" && delete payload[key]);
+
+
+    this.logger.verbose("[processBillPayment] payload" + JSON.stringify(payload));
     const { data, error_text, error_code } =
       await this.basataService.getByActionName<IBasataTransactionPayment>(
         'TransactionPayment',
-        {
-          external_id: uid,
-          service_version:
-            Number(this.configService.get<number>('BASATA_SERVICE_VERSION')) ??
-            0,
-          account_number: this.configService.get('BASATA_LOGIN') ?? 0,
-          inquiry_transaction_id: transactionId,
-          service_id: serviceId,
-          amount,
-          total_amount: amount + serviceCharge,
-          quantity: 1,
-          input_parameter_list,
-        },
+        payload,
         '/transaction',
       );
 
     if (error_code != null || error_text != null) {
       this.logger.error(
         'processBillPayment error' +
-          JSON.stringify({ error_code, error_text, data }),
+        JSON.stringify({ error_code, error_text, data }),
       );
 
       throw new BadRequestException('7905', error_text);
@@ -285,6 +322,7 @@ export class ShardBillsService {
   public async _caluculateUserPayingAmount(
     service: IBasataService,
     rAmount: number | null = null,
+    input_parameter_list: { key: string; value: string }[],
   ): Promise<{
     amount: number;
     serviceCharge: number;
@@ -295,11 +333,23 @@ export class ShardBillsService {
 
     amount = rAmount;
 
+    if (input_parameter_list.length > 0 && input_parameter_list.filter((item) => item.key === 'amount').length > 0) {
+      // resolve to amount from   input_parameter_list
+      const amountKey = input_parameter_list.find(
+        (item) => item.key === 'amount',
+      )?.value;
+      amount = Number(amountKey ?? 0);
+      this.logger.verbose("[_caluculateUserPayingAmount] amount from input_parameter_list" + amount);
+    }
+
     const serviceCharge = await this._caluclateServiceCharge(service, amount);
     const systemFees =
       Number(this.configService.get<number>('SYSTEM_FEES', 0.02)) ?? 0.02;
 
     const systemCharge = Math.ceil((amount + serviceCharge) * systemFees);
+    this.logger.verbose("[_caluculateUserPayingAmount] systemCharge" + systemCharge);
+    this.logger.verbose("[_caluculateUserPayingAmount] serviceCharge" + serviceCharge);
+    this.logger.verbose("[_caluculateUserPayingAmount] amount" + amount);
 
     const data = {
       amount,
@@ -308,9 +358,9 @@ export class ShardBillsService {
       userAmount: amount + serviceCharge + systemCharge,
     };
 
-    this.logger.debug(
-      '[_caluculateUserPayingAmount] data' + JSON.stringify(data),
-    );
+    // this.logger.debug(
+    //   '[_caluculateUserPayingAmount] data' + JSON.stringify(data),
+    // );
 
     return data;
   }
@@ -344,27 +394,19 @@ export class ShardBillsService {
     service: IBasataService,
     amount: number,
   ): Promise<number> {
-    this.logger.debug(
-      '[_caluclateServiceCharge] service' + JSON.stringify(service),
-    );
-
     const amountBracket = service.service_charge_list.find(
       (item) => item.from <= amount && item.to >= amount,
     );
-
     if (amountBracket == null) {
       throw new BadRequestException(
         '7904',
         'no bills available for this inquiry',
       );
     }
-
-    const slapAmount =
-      amountBracket.percentage == true
-        ? amountBracket.slap / 100
-        : amountBracket.slap;
-
-    return amountBracket.charge + slapAmount;
+    if (amountBracket.percentage) {
+      return Number((amount * amountBracket.charge) / 100);
+    }
+    return amountBracket.charge;
   }
 
   /**
@@ -415,9 +457,9 @@ export class ShardBillsService {
   ): Promise<T> {
     if (allowCache) {
       const cachedAction = await this._getCachedAction(action);
-      this.logger.verbose(
-        '[_syncAction] cachedAction ' + JSON.stringify(cachedAction),
-      );
+      // this.logger.verbose(
+      //   '[_syncAction] cachedAction ' + JSON.stringify(cachedAction),
+      // );
 
       if (cachedAction) {
         return cachedAction.data as T;
@@ -429,9 +471,9 @@ export class ShardBillsService {
       data,
     );
 
-    this.logger.verbose(
-      '[_syncAction] actionData ' + JSON.stringify(actionData),
-    );
+    // this.logger.verbose(
+    //   '[_syncAction] actionData ' + JSON.stringify(actionData),
+    // );
 
     if (actionData.data) {
       if (allowCache) {

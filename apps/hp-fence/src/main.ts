@@ -3,7 +3,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HpFenceModule } from './hp-fence.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { NestFactory } from '@nestjs/core';
-import { ThrottleMiddleware } from 'libs/middelwares/ThrottleMiddleware';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { create } from 'express-handlebars';
 import helpers from './hp-fence-hbs-helpers';
@@ -24,8 +23,6 @@ async function bootstrap() {
   SwaggerModule.setup('gql/docs', app, document);
 
   app.useStaticAssets(join(__dirname, '../../..', 'public'));
-  // app.setBaseViewsDir(join(__dirname, '../../..', 'views'));
-  // hbs.registerPartials(join(__dirname, '../../..', 'views/partials'));
 
   const hbs = create({
     extname: '.hbs',

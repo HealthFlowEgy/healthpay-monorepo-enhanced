@@ -41,6 +41,10 @@ export type IBasataService = {
   service_value: number;
   min_quantity: number;
   max_quantity: number;
+
+  min_value: number;
+  max_value: number;
+
   sort_order: number;
   inquiry_required: boolean;
   service_charge_list: Array<{
@@ -76,7 +80,7 @@ export type IBasataServiceInputParams = {
 
 export type IBasataTransactionInquiry = {
   transaction_id: string;
-  status: number;
+  status: string;
   status_text: string;
   date_time: string;
   info_text: string;
@@ -128,7 +132,7 @@ export class BasataService {
       baseURL:
         this.configService.get<string>('BASATA_BASEURL') ??
         'https://nx-staging.bee.com.eg:6443/restgw/api',
-      timeout: 200000,
+      timeout: 5000,
       headers: {
         'Content-Type': 'application/json;charset=UTF-8',
         Accept: 'application/json',
@@ -185,13 +189,15 @@ export class BasataService {
         this._buildParams(action, params),
       );
 
-      this.logger.verbose("[basata_api_responses] " + JSON.stringify(apiResponse?.data));
+      this.logger.verbose(
+        '[basata_api_responses] ' + JSON.stringify(apiResponse?.data),
+      );
 
       return this._handleResponse(apiResponse);
     } catch (e) {
       return {
         success: false,
-        error_code: '7900' + e.response?.data?.error_code,
+        error_code: '7900' + (e.response?.data?.error_code ?? '00'),
         error_text:
           e.response?.data?.error_text ?? 'Bill payment service failed',
         data: null,
@@ -222,8 +228,9 @@ export class BasataService {
   private _handleResponse<T>(
     response: AxiosResponse<BasataResponse<T>>,
   ): BasataResponse<T> {
-
-    this.logger.verbose("[basata_api_responses] " + JSON.stringify(response?.data));
+    this.logger.verbose(
+      '[basata_api_responses] ' + JSON.stringify(response?.data),
+    );
 
     if (response.data.success) {
       return response.data;

@@ -72,6 +72,12 @@ export class IGQLBasataServices {
   max_quantity: number;
 
   @Field(() => Number, { nullable: true })
+  min_value: number;
+
+  @Field(() => Number, { nullable: true })
+  max_value: number;
+
+  @Field(() => Number, { nullable: true })
   sort_order: number;
 
   @Field(() => Boolean, { nullable: true })
@@ -140,8 +146,8 @@ export class IGQLBasataTransactionInquiry {
   @Field(() => String, { nullable: true })
   transaction_id: string;
 
-  @Field(() => Number, { nullable: true })
-  status: number;
+  @Field(() => String, { nullable: true })
+  status: string;
 
   @Field(() => String, { nullable: true })
   status_text: string;

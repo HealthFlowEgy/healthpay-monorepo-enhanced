@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ServicesService } from '@app/services';
-import { BadRequestException, Inject, UseGuards } from '@nestjs/common';
+import { BadRequestException, Inject, Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 // import NestjsGraphqlValidator from 'nestjs-graphql-validator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -21,7 +21,9 @@ import { User } from '@prisma/client';
 
 @Resolver()
 export class FenceBillsAPISResolver {
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  readonly logger = new Logger(FenceBillsAPISResolver.name);
+
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
 
   @Query(() => IGQLBasataProvidersList)
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)
@@ -90,6 +92,11 @@ export class FenceBillsAPISResolver {
         input_parameter_list,
       );
 
+    this.logger.verbose(
+      '[IGQLBasataTransactionInquiryResponse] ',
+      transactionInquery,
+    );
+
     const service = await this.services.sharedBillsService.getServiceById(
       Number(serviceId),
     );
@@ -98,13 +105,15 @@ export class FenceBillsAPISResolver {
       await this.services.sharedBillsService._caluculateUserPayingAmount(
         service,
         transactionInquery.amount,
+        input_parameter_list,
       );
 
     transactionInquery.amount = userAmount;
 
     return {
-      data: transactionInquery.status == 2 ? transactionInquery : null,
-      success: transactionInquery != null && transactionInquery.status === 2,
+      data: transactionInquery.status == 'SUCCESS' ? transactionInquery : null,
+      success:
+        transactionInquery != null && transactionInquery.status === 'SUCCESS',
     };
   }
 

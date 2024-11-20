@@ -7,7 +7,7 @@ import { FinancingRequest } from '../models/fence-financing-request.model';
 import { User } from '../models/fence-user.model';
 @Resolver()
 export class FenceFinancingApisResolver {
-  constructor(@Inject(ServicesService) private services: ServicesService) {}
+  constructor(@Inject(ServicesService) private services: ServicesService) { }
   @Query(() => [FinancingRequest])
   @UseGuards(JwtAuthGuard)
   async financingRequests(

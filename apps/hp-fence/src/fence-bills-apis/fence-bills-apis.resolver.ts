@@ -23,7 +23,7 @@ import { User } from '@prisma/client';
 export class FenceBillsAPISResolver {
   readonly logger = new Logger(FenceBillsAPISResolver.name);
 
-  constructor(@Inject(ServicesService) private services: ServicesService) { }
+  constructor(@Inject(ServicesService) private services: ServicesService) {}
 
   @Query(() => IGQLBasataProvidersList)
   @UseGuards(JwtAuthGuard, GqlThrottlerGuard)

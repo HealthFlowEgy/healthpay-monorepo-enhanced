@@ -43,7 +43,7 @@ export class ShardBillsService {
     private sharedMerchant: SharedMerchantService,
 
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   public async getBillsProviders(): Promise<IBasataProviders> {
     const serviceList = await this._syncAction<IBasataProviders>(
@@ -102,7 +102,7 @@ export class ShardBillsService {
     if (error_code != null || error_text != null) {
       this.logger.error(
         'transactionInquiry error' +
-        JSON.stringify({ error_code, error_text, data }),
+          JSON.stringify({ error_code, error_text, data }),
       );
       throw new BadRequestException('7900', error_text);
     }
@@ -159,7 +159,11 @@ export class ShardBillsService {
     }
 
     const { amount, serviceCharge, userAmount } =
-      await this._caluculateUserPayingAmount(service, rAmount, input_parameter_list);
+      await this._caluculateUserPayingAmount(
+        service,
+        rAmount,
+        input_parameter_list,
+      );
 
     if (userAmount <= 0) {
       throw new BadRequestException('7901', 'bill amount is invalid ');
@@ -171,14 +175,12 @@ export class ShardBillsService {
       throw new BadRequestException('7001', 'Insufficient balance');
     }
 
-
-    if (service.price_type == "RANGE") {
+    if (service.price_type == 'RANGE') {
       // delete amout from input params list
-      input_parameter_list = input_parameter_list.filter((item) => item.key !== 'amount');
+      input_parameter_list = input_parameter_list.filter(
+        (item) => item.key !== 'amount',
+      );
     }
-
-
-
 
     // process payment
     const { isPaymentProcessed, data, uid } = await this.processBillPayment(
@@ -238,12 +240,10 @@ export class ShardBillsService {
     return isPaymentProcessed;
   }
 
-
   // take first two decimal point without rounding
   private _getTwoDecimalPoints(amount: number): number {
     return Math.floor(amount * 100) / 100;
   }
-
 
   /**
    * Process bill payment with api
@@ -263,8 +263,7 @@ export class ShardBillsService {
     const payload = {
       external_id: uid,
       service_version:
-        Number(this.configService.get<number>('BASATA_SERVICE_VERSION')) ??
-        0,
+        Number(this.configService.get<number>('BASATA_SERVICE_VERSION')) ?? 0,
       account_number: this.configService.get('BASATA_LOGIN') ?? 0,
       inquiry_transaction_id: transactionId,
       service_id: serviceId,
@@ -273,13 +272,14 @@ export class ShardBillsService {
       total_amount: this._getTwoDecimalPoints(amount + serviceCharge),
       quantity: 1,
       input_parameter_list,
-    }
+    };
 
     // remove empty keys from payload
-    Object.keys(payload).forEach((key) => payload[key] == null || payload[key] == "" && delete payload[key]);
+    // Object.keys(payload).forEach((key) => payload[key] == null || payload[key] == "" && delete payload[key]);
 
-
-    this.logger.verbose("[processBillPayment] payload" + JSON.stringify(payload));
+    this.logger.verbose(
+      '[processBillPayment] payload' + JSON.stringify(payload),
+    );
     const { data, error_text, error_code } =
       await this.basataService.getByActionName<IBasataTransactionPayment>(
         'TransactionPayment',
@@ -290,7 +290,7 @@ export class ShardBillsService {
     if (error_code != null || error_text != null) {
       this.logger.error(
         'processBillPayment error' +
-        JSON.stringify({ error_code, error_text, data }),
+          JSON.stringify({ error_code, error_text, data }),
       );
 
       throw new BadRequestException('7905', error_text);
@@ -333,13 +333,19 @@ export class ShardBillsService {
 
     amount = rAmount;
 
-    if (input_parameter_list.length > 0 && input_parameter_list.filter((item) => item.key === 'amount').length > 0) {
+    if (
+      input_parameter_list.length > 0 &&
+      input_parameter_list.filter((item) => item.key === 'amount').length > 0
+    ) {
       // resolve to amount from   input_parameter_list
       const amountKey = input_parameter_list.find(
         (item) => item.key === 'amount',
       )?.value;
       amount = Number(amountKey ?? 0);
-      this.logger.verbose("[_caluculateUserPayingAmount] amount from input_parameter_list" + amount);
+      this.logger.verbose(
+        '[_caluculateUserPayingAmount] amount from input_parameter_list' +
+          amount,
+      );
     }
 
     const serviceCharge = await this._caluclateServiceCharge(service, amount);
@@ -347,9 +353,13 @@ export class ShardBillsService {
       Number(this.configService.get<number>('SYSTEM_FEES', 0.02)) ?? 0.02;
 
     const systemCharge = Math.ceil((amount + serviceCharge) * systemFees);
-    this.logger.verbose("[_caluculateUserPayingAmount] systemCharge" + systemCharge);
-    this.logger.verbose("[_caluculateUserPayingAmount] serviceCharge" + serviceCharge);
-    this.logger.verbose("[_caluculateUserPayingAmount] amount" + amount);
+    this.logger.verbose(
+      '[_caluculateUserPayingAmount] systemCharge' + systemCharge,
+    );
+    this.logger.verbose(
+      '[_caluculateUserPayingAmount] serviceCharge' + serviceCharge,
+    );
+    this.logger.verbose('[_caluculateUserPayingAmount] amount' + amount);
 
     const data = {
       amount,

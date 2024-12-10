@@ -10,10 +10,6 @@ import {
 } from '@nestjs/common';
 
 import { ServicesService } from '@app/services';
-import {
-  IBasataProviders,
-  IBasataTransactionInquiry,
-} from '@app/helpers/basata.service';
 import { TransactionInquiryDto } from './TransactionInquiry.dto';
 
 @Controller('/bills')

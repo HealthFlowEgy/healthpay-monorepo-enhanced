@@ -102,13 +102,14 @@ export class FenceBillsAPISResolver {
       Number(serviceId),
     );
 
-    const { userAmount } =
+    const { userAmount, amount } =
       await this.services.sharedBillsService._caluculateUserPayingAmount(
         service,
         transactionInquery.amount,
         input_parameter_list,
       );
 
+    transactionInquery.min_amount = amount;
     transactionInquery.amount = userAmount;
 
     return {

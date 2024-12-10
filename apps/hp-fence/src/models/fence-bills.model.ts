@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import 'reflect-metadata';
 
-import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsNotEmpty, MinLength } from 'class-validator';
 
 import { Response } from './fence-response.model';
@@ -206,6 +206,21 @@ export class IGQLBasataTransactionPayment {
 
   @Field(() => String, { nullable: true })
   date_time: string;
+
+  @Field(() => Float, { nullable: true })
+  amount: number;
+
+  @Field(() => Float, { nullable: true })
+  serviceCharge: number;
+
+  @Field(() => Float, { nullable: true })
+  userAmount: number;
+
+  @Field(() => IGQLBasataServices, { nullable: true })
+  service: IGQLBasataServices;
+
+  @Field(() => IGQLBasataProviders, { nullable: true })
+  provider: IGQLBasataProviders;
 
   @Field(() => [[IGQLBasataDetailsList]], { nullable: true })
   details_list: IGQLBasataDetailsList[][];

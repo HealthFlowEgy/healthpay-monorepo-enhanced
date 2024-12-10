@@ -12,7 +12,8 @@ import { SharedBalanceService } from '../shared-balance/shared-balance.service';
 
 import {
   BasataService,
-  IBasataProviders,
+  IBasataProvider,
+  IBasataProvidersList,
   IBasataService,
   IBasataServiceInputParams,
   IBasataServices,
@@ -45,15 +46,21 @@ export class ShardBillsService {
     private configService: ConfigService,
   ) {}
 
-  public async getBillsProviders(): Promise<IBasataProviders> {
-    const serviceList = await this._syncAction<IBasataProviders>(
+  public async getBillsProviders(): Promise<IBasataProvidersList> {
+    const providerList = await this._syncAction<IBasataProvidersList>(
       'GetProviderList',
       {
         service_version: 0,
       },
     );
 
-    return serviceList;
+    return providerList;
+  }
+
+  public async getProviderById(providerId: number): Promise<IBasataProvider> {
+    const providerListt = await this.getBillsProviders();
+
+    return providerListt.provider_list.find((item) => item.id === providerId);
   }
 
   public async getBillsServices(providerId: number): Promise<IBasataServices> {
@@ -198,9 +205,16 @@ export class ShardBillsService {
       uid,
       userAmount,
     );
-
+    const _providers = await this.getBillsProviders();
     return {
-      data,
+      data: {
+        ...data,
+        service,
+        provider: await this.getProviderById(service.provider_id),
+        amount,
+        serviceCharge,
+        userAmount,
+      },
       isPaymentProcessed,
     };
   }
@@ -350,7 +364,9 @@ export class ShardBillsService {
     const systemFees =
       Number(this.configService.get<number>('SYSTEM_FEES', 0.02)) ?? 0.02;
 
+    this.logger.verbose('[systemFees] ' + systemFees);
     const systemCharge = Math.ceil((amount + serviceCharge) * systemFees);
+
     this.logger.verbose(
       '[_caluculateUserPayingAmount] systemCharge' + systemCharge,
     );
@@ -388,10 +404,6 @@ export class ShardBillsService {
       throw new BadRequestException('7902', 'service list is empty');
     }
 
-    this.logger.verbose(
-      '[getServiceById] serviceList ' + JSON.stringify(serviceList),
-      serviceId,
-    );
     const service = serviceList.service_list.find(
       (item) => item.id === serviceId,
     );
@@ -468,8 +480,10 @@ export class ShardBillsService {
     data: any,
     allowCache = true,
   ): Promise<T> {
+    const actionCacheName = action + JSON.stringify(data);
+
     if (allowCache) {
-      const cachedAction = await this._getCachedAction(action);
+      const cachedAction = await this._getCachedAction(actionCacheName);
       // this.logger.verbose(
       //   '[_syncAction] cachedAction ' + JSON.stringify(cachedAction),
       // );
@@ -493,13 +507,13 @@ export class ShardBillsService {
       if (allowCache) {
         await this.prisma.billPaymentService.deleteMany({
           where: {
-            name: action,
+            name: actionCacheName,
           },
         });
 
         await this.prisma.billPaymentService.create({
           data: {
-            name: action,
+            name: actionCacheName,
             data: actionData.data as any,
           },
         });

@@ -2,8 +2,6 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 import { ConfigService } from '@nestjs/config';
-import { MessagingContract } from './messaging.contract';
-import Twilio from 'twilio';
 
 export type BasataResponse<T> = {
   success: boolean;
@@ -14,13 +12,14 @@ export type BasataResponse<T> = {
   error_code?: string;
   data?: T | null;
 };
+export type IBasataProvider = {
+  id: number;
+  name: string;
+  name_ar: string;
+};
 
-export type IBasataProviders = {
-  provider_list: {
-    id: number;
-    name: string;
-    name_ar: string;
-  }[];
+export type IBasataProvidersList = {
+  provider_list: IBasataProvider[];
   service_version: number;
 };
 
@@ -117,6 +116,12 @@ export type IBasataTransactionPayment = {
   status: string;
   status_text: string;
   date_time: string;
+  service: IBasataService;
+  provider: IBasataProvider;
+  amount: number;
+  serviceCharge: number;
+  userAmount: number;
+
   details_list: Array<Array<{ key: string; value: string }>>;
 };
 
@@ -132,7 +137,7 @@ export class BasataService {
       baseURL:
         this.configService.get<string>('BASATA_BASEURL') ??
         'https://nx-staging.bee.com.eg:6443/restgw/api',
-      timeout: 50000,
+      timeout: 5000,
       headers: {
         'Content-Type': 'application/json;charset=UTF-8',
         Accept: 'application/json',
@@ -146,10 +151,6 @@ export class BasataService {
     });
 
     this.instance.interceptors.response.use((response) => {
-      this.logger
-        .verbose
-        // `[basata_api_responses] ${JSON.stringify(response?.data)}`,
-        ();
       return response;
     });
   }

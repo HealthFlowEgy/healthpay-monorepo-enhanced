@@ -49,9 +49,7 @@ export class ShardBillsService {
     const serviceList = await this._syncAction<IBasataProviders>(
       'GetProviderList',
       {
-        service_version:
-          parseInt(this.configService.get<string>('BASATA_SERVICE_VERSION')) ??
-          0,
+        service_version: 0,
       },
     );
 
@@ -383,12 +381,17 @@ export class ShardBillsService {
     const serviceList = await this._syncAction<IBasataServices>(
       'GetServiceList',
       {},
+      true,
     );
 
     if (serviceList == null || serviceList.service_list.length <= 0) {
       throw new BadRequestException('7902', 'service list is empty');
     }
 
+    this.logger.verbose(
+      '[getServiceById] serviceList ' + JSON.stringify(serviceList),
+      serviceId,
+    );
     const service = serviceList.service_list.find(
       (item) => item.id === serviceId,
     );
@@ -470,11 +473,12 @@ export class ShardBillsService {
       // this.logger.verbose(
       //   '[_syncAction] cachedAction ' + JSON.stringify(cachedAction),
       // );
-
-      if (cachedAction) {
+      let yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+      if (cachedAction && cachedAction.updatedAt > yesterday) {
         return cachedAction.data as T;
       }
     }
+    this.logger.verbose('[_syncAction] cache miss');
 
     const actionData = await this.basataService.getByActionName<T>(
       action,
@@ -487,6 +491,12 @@ export class ShardBillsService {
 
     if (actionData.data) {
       if (allowCache) {
+        await this.prisma.billPaymentService.deleteMany({
+          where: {
+            name: action,
+          },
+        });
+
         await this.prisma.billPaymentService.create({
           data: {
             name: action,

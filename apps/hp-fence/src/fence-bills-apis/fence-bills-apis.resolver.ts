@@ -36,6 +36,7 @@ export class FenceBillsAPISResolver {
   async getServicesByProviderId(
     @Args('providerId') providerId: string,
   ): Promise<IGQLBasataServicesList | null> {
+    this.logger.log('[on getServicesByProviderId] providerId: ', providerId);
     const data = await this.services.sharedBillsService.getBillsServices(
       Number(providerId),
     );

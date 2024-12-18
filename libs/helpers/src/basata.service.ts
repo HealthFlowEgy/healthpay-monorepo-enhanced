@@ -137,7 +137,7 @@ export class BasataService {
       baseURL:
         this.configService.get<string>('BASATA_BASEURL') ??
         'https://nx-staging.bee.com.eg:6443/restgw/api',
-      timeout: 5000,
+      timeout: 505000,
       headers: {
         'Content-Type': 'application/json;charset=UTF-8',
         Accept: 'application/json',

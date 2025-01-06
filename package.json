@@ -60,6 +60,8 @@
     "uuid": "^8.3.2",
     "websocket": "^1.0.34",
     "whatsapp": "^0.0.5-Alpha",
+    "ts-loader": "^9.2.3",
+    "ts-node": "^10.0.0",
     "yup": "^0.32.11"
   },
   "devDependencies": {
@@ -80,8 +82,6 @@
     "prisma": "^5.12.1",
     "supertest": "^6.1.3",
     "ts-jest": "^27.0.3",
-    "ts-loader": "^9.2.3",
-    "ts-node": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
     "typescript": "^4.3.5"
   },

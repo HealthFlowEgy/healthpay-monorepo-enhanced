@@ -6,7 +6,7 @@ RUN apk add --no-cache openssl
 
 WORKDIR /usr/src/app
 COPY . ./
-RUN npm install --ignore-scripts
+RUN npm install  --omit=dev --ignore-scripts --ignore-optional --no-audit --no-fund
 RUN npm install -g @nestjs/cli@10.4.9
 RUN npx prisma generate --schema=./libs/prisma/src/prisma/schema.prisma 
 RUN nest build hp-fence

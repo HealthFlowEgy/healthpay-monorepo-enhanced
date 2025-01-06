@@ -10,7 +10,10 @@
     "postinstall": "npx prisma migrate deploy --schema=./libs/prisma/src/prisma/schema.prisma && npx prisma generate --schema=./libs/prisma/src/prisma/schema.prisma && nest build hp-fence",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "DEBUG=false node dist/apps/hp-fence/main.js",
-    "start:dev-hp-fence": "export $(cat .env | xargs) && nest start hp-fence --watch"
+    "start:dev-hp-fence": "export $(cat .env | xargs) && nest start hp-fence --watch",
+    "ci:hp-fence": "docker build -f ./apps/hp-fence/Dockerfile -t regsitry.digitalocean.com/healthpay-monorepo/hp-fence-prod:latest .",
+    "ci:hp-sword": "docker build -f ./apps/hp-sword/Dockerfile -t regsitry.digitalocean.com/healthpay-monorepo/hp-sword-prod:latest .",
+    "ci:hp-nodejs": "docker build -f ./apps/hp-nodejs/Dockerfile -t regsitry.digitalocean.com/healthpay-monorepo/hp-nodejs-prod:latest ."
   },
   "dependencies": {
     "@nestjs/apollo": "^10.1.3",

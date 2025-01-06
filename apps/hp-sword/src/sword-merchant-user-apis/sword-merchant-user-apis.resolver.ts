@@ -55,6 +55,7 @@ export class SwordMerchantUserApisResolver {
         email,
       },
       false,
+      'DEFAULT',
     );
   }
 

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 // import NestjsGraphqlValidator from 'nestjs-graphql-validator';
+import { NestjsGraphqlValidator } from '@app/helpers';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../decorators/user.decorator';
@@ -16,7 +17,6 @@ import { GqlThrottlerGuard } from '../guards/throttle.gaurd';
 import { User } from '../models/fence-user.model';
 import { IAM } from '../models/fence.iam.model';
 import { MedCard } from '../models/fence.med-card.model';
-import { NestjsGraphqlValidator } from '@app/helpers';
 
 @Resolver()
 export class FenceUserMedCardsResolver {

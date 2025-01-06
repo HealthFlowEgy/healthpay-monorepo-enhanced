@@ -8,9 +8,4 @@ import { User } from '../models/fence-user.model';
 @Resolver(User)
 export class FenceUserResolver {
   constructor(@Inject(ServicesService) private services: ServicesService) {}
-
-  // @ResolveField()
-  // async wallet(@Parent() user: User): Promise<Wallet> {
-  //   return this.services.sharedWallet.getWalletByUserUID(user.uid);
-  // }
 }

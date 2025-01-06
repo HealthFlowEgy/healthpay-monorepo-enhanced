@@ -9,6 +9,6 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(HpSwordModule);
 
   app.set('trust proxy', 'loopback');
-  await app.listen(3001);
+  await app.listen(3000);
 }
 bootstrap();

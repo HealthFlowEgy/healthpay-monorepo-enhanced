@@ -35,6 +35,6 @@ async function bootstrap() {
   app.engine('hbs', hbs.engine);
   app.setViewEngine('hbs');
 
-  await app.listen(3002);
+  await app.listen(3000);
 }
 bootstrap();

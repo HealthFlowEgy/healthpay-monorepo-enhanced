@@ -11,8 +11,8 @@
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "DEBUG=false node dist/apps/hp-fence/main.js",
     "start:dev-hp-fence": "export $(cat .env | xargs) && nest start hp-fence --watch",
-    "ci:prod": "docker build --tag=registry.digitalocean.com/healthpay-monorepo/monorepo-prod:latest && docker push registry.digitalocean.com/healthpay-monorepo/monorepo-prod:latest",
-    "ci:staging": "docker build --tag=registry.digitalocean.com/healthpay-monorepo/monorepo-staging:latest && docker push registry.digitalocean.com/healthpay-monorepo/monorepo-staging:latest"
+    "ci:prod": "docker build --tag=registry.digitalocean.com/healthpay-monorepo/monorepo-prod:latest . && docker push registry.digitalocean.com/healthpay-monorepo/monorepo-prod:latest",
+    "ci:staging": "docker build --tag=registry.digitalocean.com/healthpay-monorepo/monorepo-staging:latest . && docker push registry.digitalocean.com/healthpay-monorepo/monorepo-staging:latest"
   },
   "dependencies": {
     "@nestjs/apollo": "^10.1.3",

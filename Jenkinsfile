@@ -21,6 +21,9 @@ pipeline {
                         // echo current branch
                         sh "echo 'Current branch is: ${env.BRANCH_NAME}'"
                         sh "docker build --tag=registry.digitalocean.com/healthpay-monorepo/monorepo-prod:latest . && docker push registry.digitalocean.com/healthpay-monorepo/monorepo-prod:latest"
+                        sh "docker service update monorepo-stack_sword"
+                        sh "docker service update monorepo-stack_fence"
+                        sh "docker service update monorepo-stack_nodejs"
                     }
                 }
            }

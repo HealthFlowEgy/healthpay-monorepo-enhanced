@@ -64,8 +64,8 @@ export class SmsService implements MessagingContract {
       params: {
         user: 'HealthPay',
         pwd: '91ujmb_e',
-        // senderid: 'Health%20Pay',
-        senderid: 'HealthPay',
+        senderid: 'Health%20Pay',
+        // senderid: 'HealthPay',
         mobileno: mobileno,
         msgtext: messageText,
         priority: 'High',

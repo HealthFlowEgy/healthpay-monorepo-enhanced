@@ -81,14 +81,8 @@ export class FenceUserMedCardsResolver {
 
     const currentUser = await this.services.sharedUser.getUserById(user.id);
     const hpMerchant = await this.services.sharedMerchant.cashInMerchant();
-    await this.services.sharedBalance.doTransFromUserToMerchant(
-      hpMerchant.id,
-      user.id,
-      amount,
-      'deducted due medical card creation',
-    );
 
-    return this.services.sharedUser.createMedCard(
+    const medCard = this.services.sharedUser.createMedCard(
       {
         mobile: currentUser.mobile,
         nationalId,
@@ -100,5 +94,14 @@ export class FenceUserMedCardsResolver {
       },
       currentUser,
     );
+
+    await this.services.sharedBalance.doTransFromUserToMerchant(
+      hpMerchant.id,
+      user.id,
+      amount,
+      'deducted due medical card creation',
+    );
+
+    return medCard;
   }
 }

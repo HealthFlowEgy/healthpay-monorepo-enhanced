@@ -1,5 +1,7 @@
-import { Field, ObjectType } from '@nestjs/graphql';
 import 'reflect-metadata';
+
+import { Field, Float, ObjectType } from '@nestjs/graphql';
+
 import { CashOutUserSettings } from './fence-cashout-user-settings.model';
 
 @ObjectType()
@@ -13,15 +15,13 @@ export class CashOutRequest {
   @Field(() => String)
   status: string;
 
-
   @Field(() => String, { nullable: true })
   comment?: string;
 
-
-  @Field(() => Date)
+  @Field(() => Number)
   createdAt: Date | null;
 
-  @Field(() => Date)
+  @Field(() => Number)
   updatedAt: Date | null;
 
   // @Field(() => CashOutUserSettings, { nullable: true })

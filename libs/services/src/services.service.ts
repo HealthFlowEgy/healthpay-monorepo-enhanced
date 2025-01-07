@@ -15,6 +15,7 @@ import { SharedWalletService } from './shared-wallet/shared-wallet.service';
 import { SharedKhadamatyService } from './shared-khadamaty/shared-khadamaty.service';
 import { SharedWalletSubscriptionService } from './shared-wallet-subscription/shared-wallet-subscription.service';
 import { SharedAuctionService } from './shared-auction/shared-auction.service';
+import { ShardBillsService } from './shared-bills/shared-bills.service';
 
 @Injectable()
 export class ServicesService {
@@ -46,8 +47,10 @@ export class ServicesService {
     @Inject(SharedKhadamatyService)
     public sharedKhadamatyService: SharedKhadamatyService,
 
-
     @Inject(SharedAuctionService)
     public sharedAuctionService: SharedAuctionService,
+
+    @Inject(ShardBillsService)
+    public sharedBillsService: ShardBillsService,
   ) {}
 }

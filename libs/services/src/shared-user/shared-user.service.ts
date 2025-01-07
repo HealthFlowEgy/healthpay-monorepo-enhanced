@@ -7,7 +7,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { MedCard, Prisma, User } from '@prisma/client';
 import moment from 'moment';
 import { SharedNotifyService } from '../shared-notify/shared-notify.service';
@@ -33,9 +32,7 @@ export class SharedUserService {
     @Inject(HelpersService) private helpers: HelpersService,
     @Inject(SharedNotifyService) private sharedNotify: SharedNotifyService,
     @Inject(SharedWalletService) private sharedWallet: SharedWalletService,
-
-    @Inject(ConfigService) private configService: ConfigService,
-  ) {}
+  ) { }
 
   public getUserById(id: number): Promise<User> {
     return this.prisma.user.findFirst({ where: { id } });
@@ -235,7 +232,7 @@ export class SharedUserService {
 
   public async deactivateUser(userId: number): Promise<boolean> {
     try {
-      const updateUser = await this.prisma.user.update({
+      await this.prisma.user.update({
         where: { id: userId },
         data: { isDeactivated: true },
       });
@@ -274,7 +271,7 @@ export class SharedUserService {
   }
 
   public parseRelationshipId(relationId: number): string {
-    switch (relationId) {
+    switch (Number(relationId)) {
       case 1:
         return 'Father';
       case 2:
@@ -327,6 +324,7 @@ export class SharedUserService {
         ],
       },
     });
+
     if (existingMedCard) {
       throw new BadRequestException('2003', 'card already exists');
     }

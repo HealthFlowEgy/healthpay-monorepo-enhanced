@@ -1,0 +1,45 @@
+{{> page/nav param=service.ServiceName}}
+
+
+{{#if error}}
+
+<div class="alert alert-danger" role="alert">
+    {{error}}
+</div>
+
+{{/if}}
+{{#unless error}}
+
+<div class="container">
+    <center>
+        <img src="https://cdn.khadamaty.com.eg/Production/logo/b/{{service.BillerId}}.png" class="img-fluid "
+            height="200px" onerror="this.remove()" />
+    </center>
+    <br />
+    <div class="alert alert-success">
+        <h2>
+            <b>
+                <center>تم الدفع بنجاح</center>
+            </b>
+        </h2>
+        <p>
+            <b>
+                <center>رقم العملية: {{ service.TransactionId }}</center>
+            </b>
+            <b>
+                <center>الاجمالي: {{ payable }} EGP</center>
+            </b>
+            <br>
+           
+            <hr>
+            <center>
+                <small>
+                    شكرا لاستخدامك الخدمه
+                </small>
+            </center>
+        </p>
+    </div>
+</div>
+
+
+{{/unless}}

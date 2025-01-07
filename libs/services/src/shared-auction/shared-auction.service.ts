@@ -1,4 +1,4 @@
-import { AuctionOffers, Merchant } from '.prisma/client';
+import { AuctionOffers, Merchant } from '@prisma/client';
 import { HelpersService } from '@app/helpers';
 import { PrismaService, } from '@app/prisma';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';

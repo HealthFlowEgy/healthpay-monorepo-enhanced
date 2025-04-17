@@ -1,0 +1,180 @@
+
+x-deploy: &default-deploy
+    endpoint_mode: dnsrr
+    replicas: 1
+
+x-logging: &default-logging
+   driver: loki:latest
+   options:
+     loki-url: "https://loki.nyc.dreamcare.ai/loki/api/v1/push"
+     loki-retries: "5"
+     loki-batch-size: "400"
+
+services:
+  loki:
+    image: grafana/loki:latest
+    command:
+     - -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - loki_data:/loki
+    configs:
+     - source: loki_config
+       target: /etc/loki/loki-config.yaml
+    networks:
+        - traefik-public
+    logging: *default-logging
+    deploy:
+      <<: *default-deploy
+      labels:
+         - traefik.enable=true
+         - traefik.http.routers.loki.rule=Host(`loki.${DOMAIN?Variable not set}`)
+         - traefik.http.routers.loki.entrypoints=https
+         - traefik.http.routers.loki.tls=true
+         - traefik.http.routers.loki.tls.certresolver=le
+         - traefik.http.services.loki.loadbalancer.server.port=3100
+         - traefik.docker.network=traefik-public
+         - traefik.constraint-label=traefik-public
+
+
+  system-prune:
+    image: alpinelinux/docker-cli
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    command: docker system prune --all --force
+    logging: *default-logging
+    deploy:
+      mode: global
+      restart_policy:
+        delay: 24h
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: ingress
+    logging: *default-logging
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.monitoring == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.constraint-label=traefik-public"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.graph.rule=Host(`graph.nyc.dreamcare.ai`)"
+        - "traefik.http.routers.graph.entrypoints=http"
+        - "traefik.http.routers.graph.middlewares=https-redirect"
+        - "traefik.http.routers.graph-https.rule=Host(`graph.nyc.dreamcare.ai`)"
+        - "traefik.http.routers.graph-https.entrypoints=https"
+        - "traefik.http.routers.graph-https.tls=true"
+        - "traefik.http.routers.graph-https.tls.certresolver=le"
+        - "traefik.http.services.graph-https.loadbalancer.server.port=3000"
+        - "traefik.http.middlewares.graph.buffering.memRequestBodyBytes=2000000"
+
+    volumes:
+      - type: volume
+        source: grafana-data
+        target: /var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - net
+      - traefik-public
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--log.level=error'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
+    logging: *default-logging
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.monitoring == true
+    volumes:
+      - "/root/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - type: volume
+        source: prometheus-data2
+        target: /prometheus
+    networks:
+      - net
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    networks:
+      - net
+
+    volumes:
+      - "/:/rootfs"
+      - "/var/run:/var/run"
+      - "/sys:/sys"
+      - "/var/lib/docker/:/var/lib/docker"
+      - "/dev/disk/:/dev/disk"
+    privileged: true
+    devices:
+      - "/dev/kmsg"
+    logging: *default-logging
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  node-exporter:
+    image: prom/node-exporter
+    networks:
+      - net
+    environment:
+      - NODE_ID={{.Node.ID}}
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /etc/hostname:/etc/nodename
+    command:
+      - '--path.sysfs=/host/sys'
+      - '--path.procfs=/host/proc'
+      - '--collector.textfile.directory=/etc/node-exporter/'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--no-collector.ipvs'
+    logging: *default-logging
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+
+
+configs:
+  loki_config:
+    external: true
+
+volumes:
+  loki_data:
+  grafana-data:
+  prometheus-data2:
+
+networks:
+  net:
+    driver: overlay
+  traefik-public:
+    external: true

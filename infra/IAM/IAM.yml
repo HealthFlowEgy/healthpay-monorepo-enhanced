@@ -1,0 +1,73 @@
+
+# Supabase Docker Compose Configuration
+version: "3.8"
+
+x-deploy: &default-deploy
+    endpoint_mode: dnsrr
+    replicas: 2
+
+x-logging: &default-logging
+   driver: loki:latest
+   options:
+     loki-url: "https://loki.nyc.dreamcare.ai/loki/api/v1/push"
+     loki-retries: "5"
+     loki-batch-size: "400"
+
+
+x-network: &default-network
+    - traefik-public
+    - supabase-net
+
+
+
+services:
+
+  keycloak:
+    image: dopavecompany/dreamcare:keycloak-plain
+    networks: *default-network
+    logging: *default-logging
+    deploy:
+      <<: *default-deploy
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.constraint-label=traefik-public"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.sso.rule=Host(`sso.${DOMAIN?Variable not set}`)"
+        - "traefik.http.routers.sso.entrypoints=http"
+        - "traefik.http.routers.sso.middlewares=https-redirect"
+        - "traefik.http.routers.sso-https.rule=Host(`sso.${DOMAIN?Variable not set}`)"
+        - "traefik.http.routers.sso-https.entrypoints=https"
+        - "traefik.http.routers.sso-https.tls=true"
+        - "traefik.http.routers.sso-https.tls.certresolver=le"
+        - "traefik.http.services.sso-https.loadbalancer.server.port=8080"
+
+    env_file: ".env"
+    environment:
+      - KC_DB_URL=jdbc:postgresql://${KC_DB_HOST}:5432/kc
+      - KC_DB_USERNAME=${KC_DB_USER}
+      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
+
+    volumes:
+      - kc-vol:/opt/keycloak/data
+
+    command:
+      - start
+      - --hostname-strict=false
+      - --proxy-headers=xforwarded
+      - --hostname-debug=true
+      - --http-enabled=true
+      # - --spi-events-listener-kafka-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+      # - --spi-events-listener-kafka-sasl.mechanism=PLAIN
+      # - --spi-events-listener-kafka-sasl.enabled.mechanisms=PLAIN
+      - --optimized
+
+volumes:
+  kc-vol:
+
+networks:
+  supabase-net:
+    external: true
+  traefik-public:
+    external: true
+

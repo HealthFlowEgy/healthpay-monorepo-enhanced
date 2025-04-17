@@ -1,0 +1,86 @@
+x-deploy: &default-deploy
+  resources:
+    limits:
+      cpus: '0.50'
+
+      memory: 250M
+  endpoint_mode: dnsrr
+  replicas: 2
+
+x-network: &default-network
+  - traefik-public
+
+x-healthchecks: &health-checks
+  test:
+    [
+      'CMD-SHELL',
+      "node -e 'fetch(`http://localhost:3000/`+ process.env[`app.globalPrefix`]+`/health`).then(()=>process.exitCode = 0).catch(()=>process.exitCode = 1)'",
+    ]
+  interval: 15s
+  timeout: 1m
+  retries: 5
+  start_period: 1m
+  start_interval: 10s
+
+x-envs: &default-envs
+  NODE_ENV: production
+  KEYCLOAK_HOST: https://sso.${DOMAIN}
+  KEYCLOAK_ADMIN_PASSWORD: FXU3UWVGpJejXaU
+  ACCESS_TOKEN_SECRET: 7fkocuc8cAHuCLoHZY4ywI6Kni0ZCGgW
+  REFRESH_TOKEN_SECRET:
+  KEYCLOAK_CLIENT_SECRET: 7fkocuc8cAHuCLoHZY4ywI6Kni0ZCGgW
+  GATEWAY_PORT: 3000
+  OTEL_EXPORTER_OTLP_SPAN_SERVICE_NAME: monorepo.gateway
+  app.http.port: 3000
+  BUCKET_URL: https://kharahapp.fra1.digitaloceanspaces.com
+  S3_ACCESS_KEY: DO00VKFV4YK997CU6UFU
+  S3_SECRET_ACCESS_KEY: VUzNDWNzGE+dZM6+VO/Lm8vg6PDIgu9echx3OQ6yKuE
+  S3_REGION: fra1
+  S3_BUCKET_NAME: kharahapp
+  DATABUNKER_HOST: https://databunker-ui.${DOMAIN}
+  DATABUNKER_ROOTTOKEN: DEMO
+  DATABUNKER_MASTERKEY: 2ffafc2bcd31ee801c09f0194996a6372ec93bc4ca631d24
+  MONGO_URL: mongodb+srv://doadmin:uq5nJx4N1A8276a3@private-db-mongodb-fra1-88598e0b.mongo.ondigitalocean.com/admin?tls=true&authSource=admin
+
+x-logging: &default-logging
+  driver: loki:latest
+  options:
+    loki-url: 'https://loki.nyc.dreamcare.ai/loki/api/v1/push'
+    loki-retries: '5'
+    loki-batch-size: '400'
+
+services:
+  email:
+    image: dopavecompany/dreamcare:email
+    deploy:
+      <<: *default-deploy
+      replicas: 2
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.email.rule=(HostRegexp(`(?i)monorepo-api`) && PathPrefix(`/email`))
+        - traefik.http.routers.email.entrypoints=http
+        - traefik.http.routers.email.middlewares=https-redirect
+        - traefik.http.routers.emails.rule=Host(`monorepo-api.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.emails.entrypoints=https
+        - traefik.http.routers.emails.tls=true
+        - traefik.http.routers.emails.tls.certresolver=le
+        - traefik.http.services.email.loadbalancer.server.port=3000
+
+    env_file: '.env'
+    networks: *default-network
+    logging: *default-logging
+    healthcheck: *health-checks
+    environment:
+      <<: *default-envs
+      MONGO_URI: mongodb://root:meshp4ssw0rd@databases_mongo:27017/
+      MONGO_DB_NAME: email
+      KAFKA_GROUP_ID: email
+      app.globalPrefix: email
+
+networks:
+  supabase-net:
+    external: true
+  traefik-public:
+    external: true

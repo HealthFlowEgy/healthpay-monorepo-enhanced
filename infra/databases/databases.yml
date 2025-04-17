@@ -1,0 +1,162 @@
+x-deploy: &default-deploy
+  endpoint_mode: dnsrr
+  replicas: 1
+
+x-logging: &default-logging
+  driver: loki:latest
+  options:
+    loki-url: 'https://loki.nyc.dreamcare.ai/loki/api/v1/push'
+    loki-retries: '5'
+    loki-batch-size: '400'
+
+services:
+
+  postgres-keycloak:
+    image: postgres:17
+    networks:
+      - supabase-net
+
+    logging: *default-logging
+    deploy:
+      <<: *default-deploy
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres', '-h', 'localhost']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command: [
+        'postgres',
+        '-c',
+        'log_min_messages=fatal', # prevents Realtime polling queries from appearing in logs
+      ]
+    environment:
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      POSTGRES_USER: ${KEYCLOAK_DB_USER}
+      POSTGRES_DB: ${KEYCLOAK_DB_DATABASE}
+    volumes:
+      - kc_db:/var/lib/postgresql/data
+      - kc_db_adata:/var/lib/pgsql/data
+
+  postgres-gitlab:
+    image: postgres:17
+    networks:
+      - supabase-net
+      - traefik-public
+    logging: *default-logging
+    deploy:
+      <<: *default-deploy
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres', '-h', 'localhost']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command: [
+        'postgres',
+        '-c',
+        'log_min_messages=fatal', # prevents Realtime polling queries from appearing in logs
+      ]
+    environment:
+      POSTGRES_PASSWORD: ${GITLAB_DB_PASSWORD}
+      POSTGRES_USER: ${GITLAB_DB_USER}
+      POSTGRES_DB: ${GITLAB_DB_DATABASE}
+    volumes:
+      - gitlab_db:/var/lib/postgresql/data
+      - gitlab_db2:/var/lib/pgsql/data
+
+  redis-gitlab:
+    image: redis/redis:latest
+    networks:
+      - supabase-net
+      - traefik-public
+    logging: *default-logging
+    deploy:
+      <<: *default-deploy
+    volumes:
+      - redis_data:/var/lib/redis
+    command: ['--loglevel warning']
+
+  pgbackweb:
+    image: eduardolat/pgbackweb:latest
+    networks:
+      - supabase-net
+      - traefik-public
+    logging: *default-logging
+    deploy:
+      <<: *default-deploy
+      replicas: 1
+      labels:
+        - 'traefik.enable=true'
+        - 'traefik.constraint-label=traefik-public'
+        - 'traefik.docker.network=traefik-public'
+        - 'traefik.http.routers.pgbackweb.rule=Host(`pgbackweb.${DOMAIN?Variable not set}`)'
+        - 'traefik.http.routers.pgbackweb.entrypoints=http'
+        - 'traefik.http.routers.pgbackweb.middlewares=https-redirect'
+        - 'traefik.http.routers.pgbackweb-https.rule=Host(`pgbackweb.${DOMAIN?Variable not set}`)'
+        - 'traefik.http.routers.pgbackweb-https.entrypoints=https'
+        - 'traefik.http.routers.pgbackweb-https.tls=true'
+        - 'traefik.http.routers.pgbackweb-https.tls.certresolver=le'
+        - 'traefik.http.services.pgbackweb-https.loadbalancer.server.port=8085'
+
+    environment:
+      PBW_ENCRYPTION_KEY: '4Dw-gKtg0W-_' # Change this to a strong key
+      PBW_POSTGRES_CONN_STRING: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/pgbackweb?sslmode=disable
+      TZ: 'America/Guatemala' # Set your timezone, optional
+
+  adminer:
+    image: adminer
+    networks:
+      - supabase-net
+      - traefik-public
+    logging: *default-logging
+    deploy:
+      <<: *default-deploy
+      replicas: 1
+      labels:
+        - 'traefik.enable=true'
+        - 'traefik.constraint-label=traefik-public'
+        - 'traefik.docker.network=traefik-public'
+        - 'traefik.http.routers.pgadmin.rule=Host(`pgadmin.${DOMAIN?Variable not set}`)'
+        - 'traefik.http.routers.pgadmin.entrypoints=http'
+        - 'traefik.http.routers.pgadmin.middlewares=https-redirect'
+        - 'traefik.http.routers.pgadmin-https.rule=Host(`pgadmin.${DOMAIN?Variable not set}`)'
+        - 'traefik.http.routers.pgadmin-https.entrypoints=https'
+        - 'traefik.http.routers.pgadmin-https.tls=true'
+        - 'traefik.http.routers.pgadmin-https.tls.certresolver=le'
+        - 'traefik.http.services.pgadmin-https.loadbalancer.server.port=8080'
+
+  mongo:
+    image: mongo:latest
+    logging: *default-logging
+    networks:
+      - supabase-net
+      - traefik-public
+    deploy:
+      <<: *default-deploy
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-meshp4ssw0rd}
+    volumes:
+      - mongodb:/data/db
+      - mongodbconf:/data/configdb
+
+networks:
+  supabase-net:
+    external: true
+  traefik-public:
+    external: true
+
+volumes:
+  db-config:
+  mongodb:
+  mongodbconf:
+  db-data:
+  pgdata2:
+  pgdata2d:
+  kc_db:
+  kc_db_adata:
+  gitlab_db:
+  gitlab_db2:
+  redis_data:
+  langgraph_redis_data:
+  langgraph_db1:
+  langgraph_db_data1:

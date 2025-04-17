@@ -1,0 +1,205 @@
+
+x-deploy: &default-deploy
+    endpoint_mode: dnsrr
+    replicas: 1
+
+x-logging: &default-logging
+   driver: loki:latest
+   options:
+     loki-url: "https://loki.nyc.dreamcare.ai/loki/api/v1/push"
+     loki-retries: "5"
+     loki-batch-size: "400"
+
+services:
+   # nexus:
+   #    image: sonatype/nexus3:latest
+   #    hostname: nexus
+   #    user: root
+   #    environment:
+   #       - NEXUS_CONTEXT=nexus
+   #    networks:
+   #       - traefik-public
+   #       - attachable
+   #    volumes:
+   #       - nexus_data:/nexus-data
+   #    deploy:
+   #       labels:
+   #       - traefik.enable=true
+   #       - traefik.http.routers.nexus.rule=Host(`nexus.${DOMAIN?Variable not set}`)
+   #       - traefik.http.routers.nexus.entrypoints=https
+   #       - traefik.http.routers.nexus.tls=true
+   #       - traefik.http.routers.nexus.tls.certresolver=le
+   #       - traefik.http.services.nexus.loadbalancer.server.port=8081
+   #       - traefik.docker.network=traefik-public
+   #       - traefik.constraint-label=traefik-public
+
+
+   # sonarDB:
+   #    image: postgres:latest
+   #    hostname: sonarDB
+   #    environment:
+   #       - POSTGRES_USER=sonar
+   #       - POSTGRES_PASSWORD=sonar
+   #    networks:
+   #       - sonarqube
+   #    volumes:
+   #       - postgresql:/var/lib/postgresql
+   #       - postgresql_data:/var/lib/postgresql/data
+
+
+   # sonarqube:
+   #    image: sonarqube:latest
+   #    hostname: sonarqube
+   #    environment:
+   #       - SONARQUBE_JDBC_URL=jdbc:postgresql://sonarDB:5432/sonar
+   #       - SONARQUBE_JDBC_USERNAME=${SONARQUBE_JDBC_USERNAME?Variable not set}
+   #       - SONARQUBE_JDBC_PASSWORD=${SONARQUBE_JDBC_PASSWORD?Variable not set}
+   #    networks:
+   #       - sonarqube
+   #       - traefik-public
+   #       - attachable
+   #    volumes:
+   #       - sonarqube_conf:/opt/sonarqube/conf
+   #       - sonarqube_data:/opt/sonarqube/data
+   #       - sonarqube_extensions:/opt/sonarqube/extensions
+   #       - sonarqube_bundled_plugins:/opt/sonarqube/lib/bundled-plugins
+   #    command: ["-Dsonar.web.context=/sonar"]
+   #    deploy:
+   #       labels:
+   #       - traefik.enable=true
+   #       - traefik.http.routers.sonarqube.rule=Host(`sonarqube.${DOMAIN?Variable not set}`)
+   #       - traefik.http.routers.sonarqube.entrypoints=https
+   #       - traefik.http.routers.sonarqube.tls=true
+   #       - traefik.http.routers.sonarqube.tls.certresolver=le
+   #       - traefik.http.services.sonarqube.loadbalancer.server.port=9000
+   #       - traefik.docker.network=traefik-public
+   #       - traefik.constraint-label=traefik-public
+
+
+   # jenkins:
+   #    image: shazchaudhry/docker-jenkins:latest
+   #    user: root
+   #    hostname: jenkins
+   #    environment:
+   #       - JENKINS_OPTS='--prefix=/jenkins'
+   #    networks:
+   #       - traefik-public
+   #       - attachable
+   #    volumes:
+   #       - /var/run/docker.sock:/var/run/docker.sock
+   #       - jenkins_home:/var/jenkins_home
+   #       - $PWD/infra/ci/maven:/maven
+   #    secrets: # See how secrets are used in this jenkins image at: https://github.com/shazChaudhry/docker-jenkins/blob/master/config/security.groovy
+   #       - jenkins-user
+   #       - jenkins-pass
+   #    # logging:
+   #    #    driver: gelf
+   #    #    options:
+   #    #       gelf-address: udp://127.0.0.1:12201
+   #    deploy:
+   #       placement:
+   #          constraints: [node.role == manager]
+   #       labels:
+   #       - traefik.enable=true
+   #       - traefik.http.routers.jenkins.rule=Host(`jenkins.${DOMAIN?Variable not set}`)
+   #       - traefik.http.routers.jenkins.entrypoints=https
+   #       - traefik.http.routers.jenkins.tls=true
+   #       - traefik.http.routers.jenkins.tls.certresolver=le
+   #       - traefik.http.services.jenkins.loadbalancer.server.port=8080
+   #       - traefik.docker.network=traefik-public
+   #       - traefik.constraint-label=traefik-public
+
+
+   gitlab:
+      image: gitlab/gitlab-ce:latest
+      hostname: gitlab.${DOMAIN}
+      networks:
+        - traefik-public
+      logging: *default-logging
+      deploy:
+        <<: *default-deploy
+      volumes:
+        - GITLAB_HOME_data:/var/opt/gitlab
+        - GITLAB_HOME_logs:/var/log/gitlab
+        - GITLAB_HOME_config:/etc/gitlab
+      env_file:
+        - .gitlab.env
+      environment:
+        - DOMAIN=${DOMAIN}
+        - GITLAB_OMNIBUS_CONFIG:" external_url 'http://gitlab.${DOMAIN}'"
+        - GITLAB_HOST=gitlab.${DOMAIN}
+        - DB_HOST=databases_gitlab-postgres
+        - DB_PORT=5432
+        - DB_NAME=postgres
+        - DB_USER=postgres
+        - DB_PASS=${GITLAB_DB_PASSWORD}
+        - DB_POOL=10
+        - REDIS_HOST=databases_gitlab-redis
+        - REDIS_PORT=6379
+        - REDIS_PASSWORD=
+
+      deploy:
+         labels:
+         - traefik.enable=true
+         - traefik.http.routers.gitlab.rule=Host(`gitlab.${DOMAIN?Variable not set}`)
+         - traefik.http.routers.gitlab.entrypoints=https
+         - traefik.http.routers.gitlab.tls=true
+         - traefik.http.routers.gitlab.tls.certresolver=le
+         - traefik.http.services.gitlab.loadbalancer.server.port=80
+         - traefik.docker.network=traefik-public
+         - traefik.constraint-label=traefik-public
+
+
+   gitlab-runner:
+      image: gitlab/gitlab-runner:alpine
+      privileged: true  # Required for Docker-in-Docker (DinD)
+      networks:
+        - traefik-public
+      logging: *default-logging
+      deploy:
+        <<: *default-deploy
+        mode: replicated
+        replicas: 1
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock  # Mount host Docker socket
+        - /usr/bin/docker:/usr/bin/docker              # Mount host Docker CLI
+        - gitlab-runner-conf:/etc/gitlab-runner      # Persist runner config
+      environment:
+        - CI_SERVER_URL=https://gitlab.${DOMAIN}
+        - REGISTRATION_TOKEN=
+
+networks:
+   attachable:
+      attachable: true
+   traefik-public:
+      external: true
+   sonarqube:
+   gitlab:
+
+volumes:
+   nexus_data:
+   postgresql:
+   postgresql_data:
+   gitlab-runner-config:
+   sonarqube_bundled_plugins:
+   sonarqube_conf:
+   sonarqube_data:
+   sonarqube_extensions:
+   gitlab-runner-conf:
+
+   jenkins_home:
+   runner_config:
+
+   GITLAB_HOME_data:
+   GITLAB_HOME_logs:
+   GITLAB_HOME_config:
+
+
+secrets:
+   jenkins-pass:
+      file: $PWD/infra/ci/secrets/jenkins-pass.txt
+   jenkins-user:
+      file: $PWD/infra/ci/secrets/jenkins-user.txt
+   # cert-xip.io.pem:
+   #    # This certificate is local testing
+   #    file: $PWD/infra/ci/certs/xip.io.pem

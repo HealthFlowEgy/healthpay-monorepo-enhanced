@@ -13,12 +13,12 @@ export class OnelinkService {
   private instance: AxiosInstance | null = null;
   private access_token: string | null = null;
   private readonly logger = new Logger(OnelinkService.name);
-  private readonly _secert = 'b3179c45-d110-477d-90d8-27c9046c9fe0';
-  private readonly _key = '32b5f364-4f0f-45bd-965c-0830f7dc24f3';
+  private _secert = 'b3179c45-d110-477d-90d8-27c9046c9fe0';
+  private _key = '32b5f364-4f0f-45bd-965c-0830f7dc24f3';
 
   constructor(private configService: ConfigService) {
-    this._key = this.configService.get<string>('ONLINK_API_KEY');
-    this._secert = this.configService.get<string>('ONLINK_API_SECRET');
+    this._key = this.configService.get('ONLINK_API_KEY');
+    this._secert = this.configService.get('ONLINK_API_SECRET');
 
     this.instance = axios.create({
       baseURL: this.configService.get<string>('ONELINK_BASEURL'),

@@ -13,23 +13,28 @@ export class OnelinkService {
   private instance: AxiosInstance | null = null;
   private access_token: string | null = null;
   private readonly logger = new Logger(OnelinkService.name);
+  private readonly _secert = 'b3179c45-d110-477d-90d8-27c9046c9fe0';
+  private readonly _key = '32b5f364-4f0f-45bd-965c-0830f7dc24f3';
 
   constructor(private configService: ConfigService) {
+    this._key = this.configService.get<string>('ONLINK_API_KEY');
+    this._secert = this.configService.get<string>('ONLINK_API_SECRET');
+
     this.instance = axios.create({
       baseURL: this.configService.get<string>('ONELINK_BASEURL'),
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'x-api-key': '32b5f364-4f0f-45bd-965c-0830f7dc24f3',
+        'x-api-key': this._key,
       },
     });
   }
 
   private async getAccessToken() {
     const response = await this.instance.post('/auth/login', {
-      api_key: '32b5f364-4f0f-45bd-965c-0830f7dc24f3',
-      api_secret: 'b3179c45-d110-477d-90d8-27c9046c9fe0',
+      api_key: this._key,
+      api_secret: this._secert,
     });
     console.log(response.data);
     this.access_token = response.data.token;

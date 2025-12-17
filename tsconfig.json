@@ -55,6 +55,18 @@
       ],
       "@app/websocket/*": [
         "libs/websocket/src/*"
+      ],
+      "@app/security": [
+        "libs/security/src"
+      ],
+      "@app/security/*": [
+        "libs/security/src/*"
+      ],
+      "@app/common": [
+        "libs/common/src"
+      ],
+      "@app/common/*": [
+        "libs/common/src/*"
       ]
     }
   }

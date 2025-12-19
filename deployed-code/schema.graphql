@@ -1,0 +1,524 @@
+# HealthPay Ledger V2 - Sprint 4
+# Complete GraphQL Schema
+# Unified API for Wallet, Payment, and MedCard operations
+
+scalar DateTime
+scalar JSON
+
+# =============================================================================
+# COMMON TYPES
+# =============================================================================
+
+enum Status {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CLOSED
+  FAILED
+}
+
+interface Timestamped {
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+# =============================================================================
+# USER TYPES
+# =============================================================================
+
+type User implements Timestamped {
+  id: ID!
+  nationalId: String!
+  phoneNumber: String!
+  email: String
+  name: String!
+  kycStatus: KYCStatus!
+  wallets: [Wallet!]!
+  medCards: [MedCard!]!
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+enum KYCStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+# =============================================================================
+# WALLET TYPES
+# =============================================================================
+
+type Wallet implements Timestamped {
+  id: ID!
+  userId: ID!
+  accountNumber: String!
+  currency: String!
+  balance: Float!
+  status: WalletStatus!
+  dailyLimit: Float!
+  monthlyLimit: Float!
+  user: User!
+  transactions: [Transaction!]!
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+enum WalletStatus {
+  PENDING_ACTIVATION
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+type Transaction implements Timestamped {
+  id: ID!
+  walletId: ID!
+  type: TransactionType!
+  amount: Float!
+  currency: String!
+  description: String
+  status: TransactionStatus!
+  balanceBefore: Float!
+  balanceAfter: Float!
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+  TRANSFER
+  REFUND
+  FEE
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+# =============================================================================
+# PAYMENT TYPES
+# =============================================================================
+
+type Payment implements Timestamped {
+  id: ID!
+  walletId: ID!
+  gateway: PaymentGateway!
+  gatewayTransactionId: String
+  amount: Float!
+  currency: String!
+  status: PaymentStatus!
+  method: PaymentMethod!
+  description: String
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+enum PaymentGateway {
+  FAWRY
+  PAYMOB
+  INTERNAL
+}
+
+enum PaymentStatus {
+  INITIATED
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  WALLET
+  BANK_TRANSFER
+  CASH
+  FAWRY_REF
+}
+
+# =============================================================================
+# MEDCARD TYPES
+# =============================================================================
+
+type MedCard implements Timestamped {
+  id: ID!
+  userId: ID!
+  cardNumber: String!
+  cardType: MedCardTier!
+  status: MedCardStatus!
+  insuranceProvider: String
+  policyNumber: String
+  monthlyLimit: Float!
+  currentMonthSpent: Float!
+  copaymentPercentage: Float!
+  primaryHolder: PrimaryHolder!
+  beneficiaries: [Beneficiary!]!
+  prescriptionClaims: [PrescriptionClaim!]!
+  insuranceClaims: [InsuranceClaim!]!
+  expiryDate: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+enum MedCardTier {
+  BASIC
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum MedCardStatus {
+  PENDING_ACTIVATION
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+type PrimaryHolder {
+  nationalId: String!
+  name: String!
+  dateOfBirth: DateTime!
+  phoneNumber: String!
+}
+
+type Beneficiary {
+  id: ID!
+  relationship: BeneficiaryRelationship!
+  nationalId: String!
+  name: String!
+  dateOfBirth: DateTime!
+  phoneNumber: String!
+  addedAt: DateTime!
+}
+
+enum BeneficiaryRelationship {
+  SPOUSE
+  CHILD
+  PARENT
+  SIBLING
+  DEPENDENT
+}
+
+type PrescriptionClaim {
+  id: ID!
+  pharmacyId: String!
+  beneficiaryId: ID!
+  totalAmount: Float!
+  coveredAmount: Float!
+  copaymentAmount: Float!
+  items: [PrescriptionItem!]!
+  claimedAt: DateTime!
+}
+
+type PrescriptionItem {
+  drugCode: String!
+  drugName: String!
+  quantity: Int!
+  unitPrice: Float!
+  totalPrice: Float!
+}
+
+type InsuranceClaim {
+  id: ID!
+  providerId: String!
+  providerType: ProviderType!
+  beneficiaryId: ID!
+  claimType: ClaimType!
+  totalAmount: Float!
+  requestedCoverage: Float!
+  status: ClaimStatus!
+  documents: [Document!]!
+  filedAt: DateTime!
+}
+
+enum ProviderType {
+  PHARMACY
+  CLINIC
+  HOSPITAL
+  LAB
+  DIAGNOSTIC_CENTER
+}
+
+enum ClaimType {
+  PRESCRIPTION
+  CONSULTATION
+  PROCEDURE
+  HOSPITALIZATION
+  DIAGNOSTIC
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+type Document {
+  documentType: String!
+  documentUrl: String!
+}
+
+# =============================================================================
+# INPUT TYPES
+# =============================================================================
+
+input CreateWalletInput {
+  userId: ID!
+  currency: String!
+  dailyLimit: Float
+  monthlyLimit: Float
+}
+
+input CreateMedCardInput {
+  userId: ID!
+  cardType: MedCardTier!
+  insuranceProvider: String
+  policyNumber: String
+  monthlyLimit: Float!
+  copaymentPercentage: Float!
+  primaryHolder: PrimaryHolderInput!
+  expiryDate: DateTime!
+}
+
+input PrimaryHolderInput {
+  nationalId: String!
+  name: String!
+  dateOfBirth: DateTime!
+  phoneNumber: String!
+}
+
+input AddBeneficiaryInput {
+  medCardId: ID!
+  relationship: BeneficiaryRelationship!
+  nationalId: String!
+  name: String!
+  dateOfBirth: DateTime!
+  phoneNumber: String!
+}
+
+input ClaimPrescriptionInput {
+  medCardId: ID!
+  prescriptionId: ID!
+  pharmacyId: String!
+  beneficiaryId: ID!
+  totalAmount: Float!
+  items: [PrescriptionItemInput!]!
+  pharmacyLocation: String
+}
+
+input PrescriptionItemInput {
+  drugCode: String!
+  drugName: String!
+  quantity: Int!
+  unitPrice: Float!
+  totalPrice: Float!
+}
+
+input FileInsuranceClaimInput {
+  medCardId: ID!
+  providerId: String!
+  providerType: ProviderType!
+  beneficiaryId: ID!
+  claimType: ClaimType!
+  totalAmount: Float!
+  requestedCoverage: Float!
+  documents: [DocumentInput!]!
+}
+
+input DocumentInput {
+  documentType: String!
+  documentUrl: String!
+}
+
+input InitiatePaymentInput {
+  walletId: ID!
+  amount: Float!
+  gateway: PaymentGateway!
+  method: PaymentMethod!
+  description: String
+}
+
+# =============================================================================
+# RESPONSE TYPES
+# =============================================================================
+
+type CommandResult {
+  success: Boolean!
+  message: String
+  data: JSON
+}
+
+type WalletCommandResult {
+  success: Boolean!
+  walletId: ID
+  message: String
+}
+
+type MedCardCommandResult {
+  success: Boolean!
+  medCardId: ID
+  message: String
+}
+
+type PaymentCommandResult {
+  success: Boolean!
+  paymentId: ID
+  message: String
+  redirectUrl: String
+}
+
+# =============================================================================
+# QUERIES
+# =============================================================================
+
+type Query {
+  # User queries
+  user(id: ID!): User
+  userByNationalId(nationalId: String!): User
+  userByPhone(phoneNumber: String!): User
+
+  # Wallet queries
+  wallet(id: ID!): Wallet
+  walletsByUser(userId: ID!): [Wallet!]!
+  walletBalance(id: ID!): Float!
+
+  # Transaction queries
+  transaction(id: ID!): Transaction
+  transactionsByWallet(walletId: ID!, limit: Int, offset: Int): [Transaction!]!
+
+  # MedCard queries
+  medCard(id: ID!): MedCard
+  medCardByCardNumber(cardNumber: String!): MedCard
+  medCardsByUser(userId: ID!): [MedCard!]!
+
+  # Payment queries
+  payment(id: ID!): Payment
+  paymentsByWallet(walletId: ID!, limit: Int, offset: Int): [Payment!]!
+
+  # Analytics queries
+  walletAnalytics(walletId: ID!, startDate: DateTime, endDate: DateTime): WalletAnalytics!
+  medCardAnalytics(medCardId: ID!, startDate: DateTime, endDate: DateTime): MedCardAnalytics!
+}
+
+type WalletAnalytics {
+  totalCredits: Float!
+  totalDebits: Float!
+  transactionCount: Int!
+  averageTransaction: Float!
+  largestTransaction: Float!
+}
+
+type MedCardAnalytics {
+  totalClaims: Int!
+  totalSpent: Float!
+  totalCovered: Float!
+  totalCopayments: Float!
+  averageClaimAmount: Float!
+}
+
+# =============================================================================
+# MUTATIONS
+# =============================================================================
+
+type Mutation {
+  # Wallet mutations
+  createWallet(input: CreateWalletInput!): WalletCommandResult!
+  activateWallet(walletId: ID!): WalletCommandResult!
+  suspendWallet(walletId: ID!, reason: String!): WalletCommandResult!
+  closeWallet(walletId: ID!, reason: String!): WalletCommandResult!
+  creditWallet(walletId: ID!, amount: Float!, description: String): WalletCommandResult!
+  debitWallet(walletId: ID!, amount: Float!, description: String): WalletCommandResult!
+
+  # MedCard mutations
+  createMedCard(input: CreateMedCardInput!): MedCardCommandResult!
+  activateMedCard(medCardId: ID!): MedCardCommandResult!
+  suspendMedCard(medCardId: ID!, reason: String!, notes: String): MedCardCommandResult!
+  closeMedCard(medCardId: ID!, reason: String!, refundAmount: Float!, notes: String): MedCardCommandResult!
+  updateMedCardLimit(medCardId: ID!, newLimit: Float!, effectiveDate: DateTime!, reason: String!): MedCardCommandResult!
+  addBeneficiary(input: AddBeneficiaryInput!): MedCardCommandResult!
+  removeBeneficiary(medCardId: ID!, beneficiaryId: ID!, reason: String!): MedCardCommandResult!
+  claimPrescription(input: ClaimPrescriptionInput!): MedCardCommandResult!
+  fileInsuranceClaim(input: FileInsuranceClaimInput!): MedCardCommandResult!
+  upgradeMedCard(medCardId: ID!, newTier: MedCardTier!, newLimit: Float!, newCopayment: Float!, effectiveDate: DateTime!, reason: String!): MedCardCommandResult!
+
+  # Payment mutations
+  initiatePayment(input: InitiatePaymentInput!): PaymentCommandResult!
+  completePayment(paymentId: ID!, gatewayTransactionId: String!): PaymentCommandResult!
+  cancelPayment(paymentId: ID!, reason: String!): PaymentCommandResult!
+  refundPayment(paymentId: ID!, amount: Float, reason: String!): PaymentCommandResult!
+}
+
+# =============================================================================
+# SUBSCRIPTIONS
+# =============================================================================
+
+type Subscription {
+  # Wallet subscriptions
+  walletBalanceChanged(walletId: ID!): Wallet!
+  transactionCreated(walletId: ID!): Transaction!
+
+  # MedCard subscriptions
+  medCardStatusChanged(medCardId: ID!): MedCard!
+  prescriptionClaimCreated(medCardId: ID!): PrescriptionClaim!
+
+  # Payment subscriptions
+  paymentStatusChanged(paymentId: ID!): Payment!
+}
+
+# ============================================================================
+# HEALTHPAY WALLET - MONEY TRANSFER & PIN MANAGEMENT
+# ============================================================================
+
+input SendMoneyInput {
+  recipientPhone: String!
+  amount: Float!
+  pin: String!
+  description: String
+}
+
+input SetPinInput {
+  pin: String!
+  confirmPin: String!
+}
+
+input VerifyPinInput {
+  pin: String!
+}
+
+type SendMoneyResult {
+  success: Boolean!
+  transactionId: String
+  message: String
+  transaction: Transaction
+  newBalance: Float
+}
+
+type PinResult {
+  success: Boolean!
+  message: String
+}
+
+type VerifyPinResult {
+  success: Boolean!
+  message: String
+  hasPinSet: Boolean
+}
+
+extend type Query {
+  hasPinSet: Boolean!
+}
+
+extend type Mutation {
+  sendMoney(input: SendMoneyInput!): SendMoneyResult!
+  setPin(input: SetPinInput!): PinResult!
+  verifyPin(input: VerifyPinInput!): VerifyPinResult!
+}

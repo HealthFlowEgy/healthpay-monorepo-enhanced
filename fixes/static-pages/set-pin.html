@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>هيلث باي - إعداد رمز PIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .pin-input { 
+            width: 56px; height: 56px; 
+            text-align: center; font-size: 24px; font-weight: bold;
+            border: 2px solid #d1d5db; border-radius: 12px;
+        }
+        .pin-input:focus { border-color: #10b981; outline: none; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- Loading -->
+<div id="loading" class="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
+    <div class="text-center">
+        <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p class="mt-4 text-gray-600">جاري التحميل...</p>
+    </div>
+</div>
+
+<!-- Not Authenticated -->
+<div id="noAuth" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
+    <div class="text-center p-8">
+        <span class="text-6xl">🔒</span>
+        <h2 class="text-xl font-bold text-gray-800 mt-4">غير مصرح</h2>
+        <a href="login.html" class="inline-block mt-4 bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold">تسجيل الدخول</a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div id="main" class="hidden">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-6">
+        <div class="max-w-lg mx-auto flex items-center gap-4">
+            <a href="dashboard.html" class="text-2xl">→</a>
+            <h1 class="text-xl font-bold">إعداد رمز PIN</h1>
+        </div>
+    </header>
+
+    <main class="max-w-lg mx-auto px-4 py-8">
+        <!-- Error Message -->
+        <div id="error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-center"></div>
+
+        <!-- Success Message -->
+        <div id="success" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6 text-center">
+            <span class="text-4xl">✅</span>
+            <p class="text-lg font-bold mt-2">تم بنجاح!</p>
+            <p class="text-sm">جاري التحويل...</p>
+        </div>
+
+        <!-- Set PIN Form -->
+        <div id="setPinForm" class="bg-white rounded-2xl shadow-lg p-6">
+            <!-- Step 1: Enter PIN -->
+            <div id="step1" class="text-center">
+                <span class="text-6xl">🔐</span>
+                <h2 class="text-xl font-bold text-gray-800 mt-4">إنشاء رمز PIN</h2>
+                <p class="text-gray-500 mt-2 mb-6">أدخل رمزاً من 4 أرقام لتأمين معاملاتك</p>
+                
+                <div class="flex justify-center gap-3 mb-6" dir="ltr">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin1" autofocus>
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin2">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin3">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin4">
+                </div>
+                
+                <button id="nextBtn" class="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50" disabled>
+                    التالي
+                </button>
+            </div>
+
+            <!-- Step 2: Confirm PIN -->
+            <div id="step2" class="hidden text-center">
+                <span class="text-6xl">✅</span>
+                <h2 class="text-xl font-bold text-gray-800 mt-4">تأكيد الرمز</h2>
+                <p class="text-gray-500 mt-2 mb-6">أعد إدخال الرمز للتأكيد</p>
+                
+                <div class="flex justify-center gap-3 mb-6" dir="ltr">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="confirm1">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="confirm2">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="confirm3">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="confirm4">
+                </div>
+                
+                <button id="saveBtn" class="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 mb-3" disabled>
+                    حفظ الرمز
+                </button>
+                <button id="backBtn" class="w-full text-gray-600 py-2">← رجوع</button>
+            </div>
+        </div>
+
+        <!-- Change PIN Form (if already set) -->
+        <div id="changePinForm" class="hidden bg-white rounded-2xl shadow-lg p-6">
+            <div class="text-center">
+                <span class="text-6xl">🔑</span>
+                <h2 class="text-xl font-bold text-gray-800 mt-4">تغيير رمز PIN</h2>
+                <p class="text-gray-500 mt-2 mb-6">رمز PIN مفعل بالفعل</p>
+                
+                <a href="dashboard.html" class="block w-full bg-emerald-500 text-white py-4 rounded-xl font-bold text-lg text-center mb-3">
+                    العودة للرئيسية
+                </a>
+                <button id="changeBtn" class="w-full text-emerald-600 py-2 font-medium">
+                    تغيير الرمز
+                </button>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="mt-6 bg-blue-50 rounded-xl p-4">
+            <h3 class="font-bold text-blue-800 mb-2">💡 نصائح أمان</h3>
+            <ul class="text-blue-700 text-sm space-y-1">
+                <li>• لا تشارك رمز PIN مع أي شخص</li>
+                <li>• لا تستخدم أرقام سهلة مثل 1234 أو 0000</li>
+                <li>• غير الرمز بشكل دوري</li>
+            </ul>
+        </div>
+    </main>
+</div>
+
+<script>
+// =============================================================================
+// CONFIGURATION
+// =============================================================================
+const API_URL = 'http://165.227.137.127:4000/graphql';
+
+// =============================================================================
+// STATE
+// =============================================================================
+let token = null;
+let enteredPin = '';
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+function showError(msg) {
+    const el = document.getElementById('error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+async function gql(query, variables = {}) {
+    const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ query, variables }),
+    });
+    return res.json();
+}
+
+// =============================================================================
+// PIN INPUT HANDLING
+// =============================================================================
+function setupPinInputs(prefix, onComplete) {
+    const inputs = [1, 2, 3, 4].map(i => document.getElementById(`${prefix}${i}`));
+    
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            const val = e.target.value.replace(/\D/g, '');
+            e.target.value = val.substring(0, 1);
+            
+            if (val && index < 3) {
+                inputs[index + 1].focus();
+            }
+            
+            // Check if all filled
+            const pin = inputs.map(i => i.value).join('');
+            if (pin.length === 4) {
+                onComplete(pin);
+            }
+        });
+        
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                inputs[index - 1].focus();
+            }
+        });
+    });
+}
+
+// =============================================================================
+// CHECK AUTH & PIN STATUS
+// =============================================================================
+async function init() {
+    token = localStorage.getItem('healthpay_token');
+    
+    if (!token) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('noAuth').classList.remove('hidden');
+        return;
+    }
+    
+    try {
+        const result = await gql('query { hasPinSet }');
+        
+        if (result.errors) {
+            if (result.errors[0].message.includes('Not authenticated')) {
+                localStorage.removeItem('healthpay_token');
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+        
+        const hasPinSet = result.data?.hasPinSet;
+        
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('main').classList.remove('hidden');
+        
+        if (hasPinSet) {
+            document.getElementById('setPinForm').classList.add('hidden');
+            document.getElementById('changePinForm').classList.remove('hidden');
+        } else {
+            setupSetPin();
+        }
+        
+    } catch (e) {
+        console.error('Init error:', e);
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('main').classList.remove('hidden');
+        setupSetPin();
+    }
+}
+
+// =============================================================================
+// SET PIN FLOW
+// =============================================================================
+function setupSetPin() {
+    const nextBtn = document.getElementById('nextBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const backBtn = document.getElementById('backBtn');
+    
+    // Step 1: Enter PIN
+    setupPinInputs('pin', (pin) => {
+        enteredPin = pin;
+        nextBtn.disabled = false;
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        if (enteredPin.length !== 4) {
+            showError('الرجاء إدخال 4 أرقام');
+            return;
+        }
+        
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+        document.getElementById('confirm1').focus();
+    });
+    
+    // Step 2: Confirm PIN
+    setupPinInputs('confirm', (confirmPin) => {
+        saveBtn.disabled = false;
+        
+        saveBtn.onclick = async () => {
+            if (confirmPin !== enteredPin) {
+                showError('الرمز غير متطابق');
+                // Clear confirm inputs
+                [1, 2, 3, 4].forEach(i => document.getElementById(`confirm${i}`).value = '');
+                document.getElementById('confirm1').focus();
+                saveBtn.disabled = true;
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'جاري الحفظ...';
+            
+            try {
+                const result = await gql(`
+                    mutation SetPin($input: SetPinInput!) {
+                        setPin(input: $input) {
+                            success
+                            message
+                        }
+                    }
+                `, { input: { pin: enteredPin, confirmPin } });
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
+                }
+                
+                if (result.data?.setPin?.success) {
+                    document.getElementById('setPinForm').classList.add('hidden');
+                    document.getElementById('success').classList.remove('hidden');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                } else {
+                    throw new Error(result.data?.setPin?.message || 'فشل في حفظ الرمز');
+                }
+                
+            } catch (e) {
+                showError(e.message);
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'حفظ الرمز';
+            }
+        };
+    });
+    
+    // Back button
+    backBtn.addEventListener('click', () => {
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+        [1, 2, 3, 4].forEach(i => document.getElementById(`confirm${i}`).value = '');
+        saveBtn.disabled = true;
+        document.getElementById('pin1').focus();
+    });
+}
+
+// =============================================================================
+// INITIALIZE
+// =============================================================================
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

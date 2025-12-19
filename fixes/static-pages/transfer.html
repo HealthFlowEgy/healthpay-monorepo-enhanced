@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>هيلث باي - تحويل أموال</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .pin-input { 
+            width: 56px; height: 56px; 
+            text-align: center; font-size: 24px; font-weight: bold;
+            border: 2px solid #d1d5db; border-radius: 12px;
+        }
+        .pin-input:focus { border-color: #10b981; outline: none; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #10b981; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- Loading -->
+<div id="loading" class="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
+    <div class="text-center">
+        <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p class="mt-4 text-gray-600">جاري التحميل...</p>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div id="main" class="hidden">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-6">
+        <div class="max-w-lg mx-auto flex items-center gap-4">
+            <a href="dashboard.html" class="text-2xl">→</a>
+            <h1 class="text-xl font-bold">تحويل أموال</h1>
+        </div>
+    </header>
+
+    <main class="max-w-lg mx-auto px-4 py-6">
+        <!-- Balance Card -->
+        <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+            <p class="text-gray-500 text-sm">الرصيد المتاح</p>
+            <p id="balanceDisplay" class="text-2xl font-bold text-emerald-600">0 ج.م</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div id="progressSteps" class="flex justify-between mb-6">
+            <div class="flex items-center">
+                <div id="step1Indicator" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-emerald-500 text-white">1</div>
+                <div class="w-12 h-1 bg-gray-200 mx-1"></div>
+            </div>
+            <div class="flex items-center">
+                <div id="step2Indicator" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-gray-200 text-gray-500">2</div>
+                <div class="w-12 h-1 bg-gray-200 mx-1"></div>
+            </div>
+            <div class="flex items-center">
+                <div id="step3Indicator" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-gray-200 text-gray-500">3</div>
+                <div class="w-12 h-1 bg-gray-200 mx-1"></div>
+            </div>
+            <div>
+                <div id="step4Indicator" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-gray-200 text-gray-500">4</div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-center"></div>
+
+        <!-- Step 1: Phone -->
+        <div id="phoneStep" class="bg-white rounded-2xl p-6 shadow-lg">
+            <div class="text-center mb-6">
+                <span class="text-5xl">📱</span>
+                <h2 class="text-xl font-bold text-gray-800 mt-4">رقم المستلم</h2>
+                <p class="text-gray-500">أدخل رقم هاتف المستلم</p>
+            </div>
+            <div class="space-y-4">
+                <input type="tel" id="phoneInput" placeholder="01012345678" 
+                    class="w-full px-4 py-4 border border-gray-300 rounded-xl text-lg text-left" dir="ltr" autofocus>
+                <button id="phoneNextBtn" class="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50" disabled>
+                    التالي
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Amount -->
+        <div id="amountStep" class="hidden bg-white rounded-2xl p-6 shadow-lg">
+            <div class="text-center mb-6">
+                <span class="text-5xl">💰</span>
+                <h2 class="text-xl font-bold text-gray-800 mt-4">المبلغ</h2>
+                <p class="text-gray-500">أدخل المبلغ المراد تحويله</p>
+            </div>
+            <div class="space-y-4">
+                <div class="relative">
+                    <input type="number" id="amountInput" placeholder="0" 
+                        class="w-full px-4 py-4 border border-gray-300 rounded-xl text-3xl text-center font-bold" dir="ltr">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">ج.م</span>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button class="quick-amount py-2 bg-gray-100 rounded-lg text-gray-700 font-medium hover:bg-emerald-100" data-amount="50">50</button>
+                    <button class="quick-amount py-2 bg-gray-100 rounded-lg text-gray-700 font-medium hover:bg-emerald-100" data-amount="100">100</button>
+                    <button class="quick-amount py-2 bg-gray-100 rounded-lg text-gray-700 font-medium hover:bg-emerald-100" data-amount="200">200</button>
+                    <button class="quick-amount py-2 bg-gray-100 rounded-lg text-gray-700 font-medium hover:bg-emerald-100" data-amount="500">500</button>
+                </div>
+                <input type="text" id="descriptionInput" placeholder="ملاحظة (اختياري)" 
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+                <div class="flex gap-3">
+                    <button id="amountBackBtn" class="flex-1 py-4 border border-gray-300 rounded-xl font-bold text-gray-700">رجوع</button>
+                    <button id="amountNextBtn" class="flex-1 bg-emerald-500 text-white py-4 rounded-xl font-bold disabled:opacity-50" disabled>التالي</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: PIN -->
+        <div id="pinStep" class="hidden bg-white rounded-2xl p-6 shadow-lg">
+            <div class="text-center mb-6">
+                <span class="text-5xl">🔐</span>
+                <h2 class="text-xl font-bold text-gray-800 mt-4">رمز PIN</h2>
+                <p class="text-gray-500">أدخل رمز PIN للتأكيد</p>
+            </div>
+            <div class="space-y-6">
+                <div class="flex justify-center gap-3" dir="ltr">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin1">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin2">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin3">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin4">
+                </div>
+                <div class="flex gap-3">
+                    <button id="pinBackBtn" class="flex-1 py-4 border border-gray-300 rounded-xl font-bold text-gray-700">رجوع</button>
+                    <button id="pinNextBtn" class="flex-1 bg-emerald-500 text-white py-4 rounded-xl font-bold disabled:opacity-50" disabled>التالي</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Confirm -->
+        <div id="confirmStep" class="hidden bg-white rounded-2xl p-6 shadow-lg">
+            <div class="text-center mb-6">
+                <span class="text-5xl">📋</span>
+                <h2 class="text-xl font-bold text-gray-800 mt-4">تأكيد التحويل</h2>
+            </div>
+            <div class="space-y-4 mb-6">
+                <div class="flex justify-between py-3 border-b">
+                    <span class="text-gray-600">إلى</span>
+                    <span id="confirmPhone" class="font-bold" dir="ltr"></span>
+                </div>
+                <div class="flex justify-between py-3 border-b">
+                    <span class="text-gray-600">المبلغ</span>
+                    <span id="confirmAmount" class="font-bold text-emerald-600"></span>
+                </div>
+                <div id="confirmDescRow" class="hidden flex justify-between py-3 border-b">
+                    <span class="text-gray-600">ملاحظة</span>
+                    <span id="confirmDesc"></span>
+                </div>
+                <div class="flex justify-between py-3">
+                    <span class="text-gray-600">الرسوم</span>
+                    <span class="text-emerald-600">مجاناً</span>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button id="confirmBackBtn" class="flex-1 py-4 border border-gray-300 rounded-xl font-bold text-gray-700">رجوع</button>
+                <button id="confirmBtn" class="flex-1 bg-emerald-500 text-white py-4 rounded-xl font-bold">تأكيد</button>
+            </div>
+        </div>
+
+        <!-- Success -->
+        <div id="successStep" class="hidden bg-white rounded-2xl p-6 shadow-lg text-center">
+            <span class="text-6xl">✅</span>
+            <h2 class="text-2xl font-bold text-emerald-600 mt-4">تم التحويل بنجاح!</h2>
+            <div class="my-6 py-6 border-y">
+                <p id="successAmount" class="text-4xl font-bold text-gray-800"></p>
+                <p id="successRecipient" class="text-gray-500 mt-2"></p>
+            </div>
+            <div class="space-y-3">
+                <a href="dashboard.html" class="block w-full bg-emerald-500 text-white py-4 rounded-xl font-bold text-center">العودة للرئيسية</a>
+                <button id="newTransferBtn" class="w-full text-emerald-600 py-2 font-medium">تحويل آخر</button>
+            </div>
+        </div>
+
+        <!-- Error Result -->
+        <div id="errorStep" class="hidden bg-white rounded-2xl p-6 shadow-lg text-center">
+            <span class="text-6xl">❌</span>
+            <h2 class="text-2xl font-bold text-red-600 mt-4">فشل التحويل</h2>
+            <p id="errorMessage" class="text-gray-600 mt-2"></p>
+            <div class="mt-6 space-y-3">
+                <button id="retryBtn" class="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold">المحاولة مرة أخرى</button>
+                <a href="dashboard.html" class="block w-full text-gray-600 py-2 text-center">العودة للرئيسية</a>
+            </div>
+        </div>
+
+        <!-- No PIN Set Alert -->
+        <div id="noPinAlert" class="hidden bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+            <span class="text-5xl">🔐</span>
+            <h2 class="text-xl font-bold text-yellow-800 mt-4">لم يتم إعداد رمز PIN</h2>
+            <p class="text-yellow-700 mt-2">يجب إعداد رمز PIN أولاً لإجراء التحويلات</p>
+            <a href="set-pin.html" class="inline-block mt-4 bg-yellow-500 text-white px-6 py-3 rounded-xl font-bold">إعداد الرمز</a>
+        </div>
+    </main>
+</div>
+
+<script>
+// =============================================================================
+// CONFIGURATION
+// =============================================================================
+const API_URL = 'http://165.227.137.127:4000/graphql';
+
+// =============================================================================
+// STATE
+// =============================================================================
+let token = null;
+let balance = 0;
+let hasPinSet = false;
+let formData = { phone: '', amount: 0, pin: '', description: '' };
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+function fmt(n) { return (Number(n) || 0).toLocaleString('ar-EG'); }
+
+function showError(msg) {
+    const el = document.getElementById('error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+function updateProgress(step) {
+    for (let i = 1; i <= 4; i++) {
+        const indicator = document.getElementById(`step${i}Indicator`);
+        if (i < step) {
+            indicator.classList.remove('bg-gray-200', 'text-gray-500', 'bg-emerald-500', 'text-white');
+            indicator.classList.add('bg-emerald-200', 'text-emerald-700');
+        } else if (i === step) {
+            indicator.classList.remove('bg-gray-200', 'text-gray-500', 'bg-emerald-200', 'text-emerald-700');
+            indicator.classList.add('bg-emerald-500', 'text-white');
+        } else {
+            indicator.classList.remove('bg-emerald-500', 'text-white', 'bg-emerald-200', 'text-emerald-700');
+            indicator.classList.add('bg-gray-200', 'text-gray-500');
+        }
+    }
+}
+
+function showStep(stepId) {
+    ['phoneStep', 'amountStep', 'pinStep', 'confirmStep', 'successStep', 'errorStep', 'noPinAlert'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById(stepId).classList.remove('hidden');
+    document.getElementById('progressSteps').classList.toggle('hidden', stepId === 'successStep' || stepId === 'errorStep' || stepId === 'noPinAlert');
+}
+
+async function gql(query, variables = {}) {
+    const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ query, variables }),
+    });
+    return res.json();
+}
+
+// =============================================================================
+// INITIALIZE
+// =============================================================================
+async function init() {
+    token = localStorage.getItem('healthpay_token');
+    
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    try {
+        const result = await gql(`
+            query {
+                getWallet { availableBalance }
+                hasPinSet
+            }
+        `);
+        
+        if (result.errors) {
+            if (result.errors[0].message.includes('Not authenticated')) {
+                localStorage.removeItem('healthpay_token');
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+        
+        balance = result.data?.getWallet?.availableBalance || 0;
+        hasPinSet = result.data?.hasPinSet || false;
+        
+        document.getElementById('balanceDisplay').textContent = fmt(balance) + ' ج.م';
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('main').classList.remove('hidden');
+        
+        if (!hasPinSet) {
+            showStep('noPinAlert');
+        } else {
+            setupForms();
+        }
+        
+    } catch (e) {
+        console.error('Init error:', e);
+        showError(e.message);
+    }
+}
+
+// =============================================================================
+// FORM SETUP
+// =============================================================================
+function setupForms() {
+    // Phone step
+    const phoneInput = document.getElementById('phoneInput');
+    const phoneNextBtn = document.getElementById('phoneNextBtn');
+    
+    phoneInput.addEventListener('input', () => {
+        const cleaned = phoneInput.value.replace(/\D/g, '');
+        phoneNextBtn.disabled = cleaned.length < 10;
+    });
+    
+    phoneNextBtn.addEventListener('click', () => {
+        const cleaned = phoneInput.value.replace(/\D/g, '');
+        if (cleaned.length < 10) {
+            showError('رقم الهاتف غير صحيح');
+            return;
+        }
+        formData.phone = phoneInput.value;
+        showStep('amountStep');
+        updateProgress(2);
+        document.getElementById('amountInput').focus();
+    });
+    
+    // Amount step
+    const amountInput = document.getElementById('amountInput');
+    const amountNextBtn = document.getElementById('amountNextBtn');
+    const amountBackBtn = document.getElementById('amountBackBtn');
+    
+    amountInput.addEventListener('input', () => {
+        const val = parseFloat(amountInput.value) || 0;
+        amountNextBtn.disabled = val <= 0;
+    });
+    
+    document.querySelectorAll('.quick-amount').forEach(btn => {
+        btn.addEventListener('click', () => {
+            amountInput.value = btn.dataset.amount;
+            amountNextBtn.disabled = false;
+        });
+    });
+    
+    amountBackBtn.addEventListener('click', () => {
+        showStep('phoneStep');
+        updateProgress(1);
+    });
+    
+    amountNextBtn.addEventListener('click', () => {
+        const amount = parseFloat(amountInput.value);
+        if (amount <= 0) {
+            showError('الرجاء إدخال مبلغ صحيح');
+            return;
+        }
+        if (amount > balance) {
+            showError(`الرصيد غير كافي. المتاح: ${fmt(balance)} ج.م`);
+            return;
+        }
+        formData.amount = amount;
+        formData.description = document.getElementById('descriptionInput').value;
+        showStep('pinStep');
+        updateProgress(3);
+        document.getElementById('pin1').focus();
+    });
+    
+    // PIN step
+    setupPinInputs();
+    
+    document.getElementById('pinBackBtn').addEventListener('click', () => {
+        clearPinInputs();
+        showStep('amountStep');
+        updateProgress(2);
+    });
+    
+    document.getElementById('pinNextBtn').addEventListener('click', () => {
+        const pin = getPinValue();
+        if (pin.length !== 4) {
+            showError('الرجاء إدخال 4 أرقام');
+            return;
+        }
+        formData.pin = pin;
+        
+        // Populate confirm
+        document.getElementById('confirmPhone').textContent = formData.phone;
+        document.getElementById('confirmAmount').textContent = fmt(formData.amount) + ' ج.م';
+        if (formData.description) {
+            document.getElementById('confirmDesc').textContent = formData.description;
+            document.getElementById('confirmDescRow').classList.remove('hidden');
+        }
+        
+        showStep('confirmStep');
+        updateProgress(4);
+    });
+    
+    // Confirm step
+    document.getElementById('confirmBackBtn').addEventListener('click', () => {
+        clearPinInputs();
+        showStep('pinStep');
+        updateProgress(3);
+        document.getElementById('pin1').focus();
+    });
+    
+    document.getElementById('confirmBtn').addEventListener('click', executeTransfer);
+    
+    // Success/Error steps
+    document.getElementById('newTransferBtn').addEventListener('click', resetForm);
+    document.getElementById('retryBtn').addEventListener('click', resetForm);
+}
+
+function setupPinInputs() {
+    const inputs = [1, 2, 3, 4].map(i => document.getElementById(`pin${i}`));
+    const nextBtn = document.getElementById('pinNextBtn');
+    
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            const val = e.target.value.replace(/\D/g, '');
+            e.target.value = val.substring(0, 1);
+            
+            if (val && index < 3) {
+                inputs[index + 1].focus();
+            }
+            
+            nextBtn.disabled = getPinValue().length !== 4;
+        });
+        
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                inputs[index - 1].focus();
+            }
+        });
+    });
+}
+
+function getPinValue() {
+    return [1, 2, 3, 4].map(i => document.getElementById(`pin${i}`).value).join('');
+}
+
+function clearPinInputs() {
+    [1, 2, 3, 4].forEach(i => document.getElementById(`pin${i}`).value = '');
+    document.getElementById('pinNextBtn').disabled = true;
+}
+
+// =============================================================================
+// EXECUTE TRANSFER
+// =============================================================================
+async function executeTransfer() {
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> جاري التحويل...';
+    
+    try {
+        const result = await gql(`
+            mutation SendMoney($input: SendMoneyInput!) {
+                sendMoney(input: $input) {
+                    success
+                    message
+                    transaction {
+                        id
+                        amount
+                        recipientName
+                        recipientPhone
+                    }
+                    newBalance
+                }
+            }
+        `, {
+            input: {
+                recipientPhone: formData.phone,
+                amount: formData.amount,
+                pin: formData.pin,
+                description: formData.description || undefined,
+            }
+        });
+        
+        if (result.errors) {
+            throw new Error(result.errors[0].message);
+        }
+        
+        if (result.data?.sendMoney?.success) {
+            document.getElementById('successAmount').textContent = fmt(formData.amount) + ' ج.م';
+            document.getElementById('successRecipient').textContent = 
+                'إلى ' + (result.data.sendMoney.transaction?.recipientName || formData.phone);
+            
+            // Update balance
+            balance = result.data.sendMoney.newBalance || (balance - formData.amount);
+            document.getElementById('balanceDisplay').textContent = fmt(balance) + ' ج.م';
+            
+            showStep('successStep');
+        } else {
+            throw new Error(result.data?.sendMoney?.message || 'فشل التحويل');
+        }
+        
+    } catch (e) {
+        console.error('Transfer error:', e);
+        
+        if (e.message.toLowerCase().includes('pin')) {
+            showError(e.message);
+            clearPinInputs();
+            showStep('pinStep');
+            updateProgress(3);
+            document.getElementById('pin1').focus();
+        } else {
+            document.getElementById('errorMessage').textContent = e.message;
+            showStep('errorStep');
+        }
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'تأكيد';
+    }
+}
+
+function resetForm() {
+    formData = { phone: '', amount: 0, pin: '', description: '' };
+    document.getElementById('phoneInput').value = '';
+    document.getElementById('amountInput').value = '';
+    document.getElementById('descriptionInput').value = '';
+    clearPinInputs();
+    document.getElementById('phoneNextBtn').disabled = true;
+    document.getElementById('amountNextBtn').disabled = true;
+    document.getElementById('confirmDescRow').classList.add('hidden');
+    showStep('phoneStep');
+    updateProgress(1);
+    document.getElementById('phoneInput').focus();
+}
+
+// =============================================================================
+// START
+// =============================================================================
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

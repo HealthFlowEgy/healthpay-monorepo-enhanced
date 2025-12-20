@@ -1,0 +1,39 @@
+--- a/src/db.ts
++++ b/src/db.ts
+@@ -1,17 +1,31 @@
+     create: async (data: any) => {
+-      const { type, status, amount, currency, fee, sender_user_id, recipient_user_id, merchant_id, reference, description, metadata } = data;
++      const { 
++        type, status, amount, currency, fee, 
++        sender_user_id, recipient_user_id, merchant_id,
++        sender_wallet_id, recipient_wallet_id,
++        sender_balance_before, sender_balance_after,
++        recipient_balance_before, recipient_balance_after,
++        reference, description, note, metadata 
++      } = data;
++      
+       return queryOne(
+         `INSERT INTO transactions (
+           type, status, amount, currency, fee,
+           sender_user_id, recipient_user_id, merchant_id,
+-          reference, description, metadata
+-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
++          sender_wallet_id, recipient_wallet_id,
++          sender_balance_before, sender_balance_after,
++          recipient_balance_before, recipient_balance_after,
++          reference, description, note, metadata,
++          created_at, updated_at, completed_at
++        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW(), NOW())
+         RETURNING *`,
+         [
+-          type, status, amount, currency, fee || 0, sender_user_id, recipient_user_id, merchant_id, reference, description, metadata ? JSON.stringify(metadata) : null
++          type, status || 'pending', amount, currency || 'EGP', fee || 0,
++          sender_user_id, recipient_user_id, merchant_id,
++          sender_wallet_id, recipient_wallet_id,
++          sender_balance_before, sender_balance_after,
++          recipient_balance_before, recipient_balance_after,
++          reference, description, note,
++          metadata ? JSON.stringify(metadata) : null
+         ]
+       );
+     },

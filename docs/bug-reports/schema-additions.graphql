@@ -1,0 +1,120 @@
+# =============================================================================
+# HEALTHPAY - GraphQL Schema Additions/Fixes
+# 
+# Add these types and mutations to your existing schema.graphql file
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# PIN Management Types
+# -----------------------------------------------------------------------------
+
+input SetTransactionPINInput {
+  pin: String!
+  confirmPin: String!
+}
+
+input ChangeTransactionPINInput {
+  currentPin: String!
+  newPin: String!
+  confirmNewPin: String!
+}
+
+input VerifyTransactionPINInput {
+  pin: String!
+}
+
+# -----------------------------------------------------------------------------
+# Send Money Types
+# -----------------------------------------------------------------------------
+
+input SendMoneyInput {
+  recipientPhone: String!
+  amount: Float!
+  pin: String!
+  note: String
+  description: String
+}
+
+type SendMoneyResult {
+  success: Boolean!
+  message: String!
+  transaction: Transaction
+  newBalance: Float
+}
+
+# -----------------------------------------------------------------------------
+# Transaction Type (ensure all fields exist)
+# -----------------------------------------------------------------------------
+
+type Transaction {
+  id: ID!
+  reference: String!
+  type: String!
+  status: String!
+  amount: Float!
+  currency: String
+  fee: Float
+  
+  # Sender info
+  senderUserId: ID
+  senderWalletId: ID
+  senderPhone: String
+  senderName: String
+  senderBalanceBefore: Float
+  senderBalanceAfter: Float
+  
+  # Recipient info
+  recipientUserId: ID
+  recipientWalletId: ID
+  recipientPhone: String
+  recipientName: String
+  recipientBalanceBefore: Float
+  recipientBalanceAfter: Float
+  
+  # Additional fields
+  description: String
+  note: String
+  metadata: String
+  
+  # Timestamps
+  createdAt: String!
+  updatedAt: String
+  completedAt: String
+}
+
+# -----------------------------------------------------------------------------
+# Operation Result (generic success/failure)
+# -----------------------------------------------------------------------------
+
+type OperationResult {
+  success: Boolean!
+  message: String!
+}
+
+# -----------------------------------------------------------------------------
+# Add to existing Mutation type
+# -----------------------------------------------------------------------------
+
+type Mutation {
+  # PIN Management
+  setTransactionPIN(input: SetTransactionPINInput!): OperationResult!
+  changeTransactionPIN(input: ChangeTransactionPINInput!): OperationResult!
+  verifyTransactionPIN(input: VerifyTransactionPINInput!): OperationResult!
+  
+  # Alias for backwards compatibility (if needed)
+  setPin(input: SetTransactionPINInput!): OperationResult!
+  changePin(input: ChangeTransactionPINInput!): OperationResult!
+  verifyPin(input: VerifyTransactionPINInput!): OperationResult!
+  
+  # Money Transfer
+  sendMoney(input: SendMoneyInput!): SendMoneyResult!
+}
+
+# -----------------------------------------------------------------------------
+# Add to existing Query type
+# -----------------------------------------------------------------------------
+
+type Query {
+  # Check if user has PIN set
+  hasPinSet: Boolean!
+}
